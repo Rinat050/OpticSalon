@@ -8,7 +8,7 @@ namespace OpticSalon.Data
     {
         public static IServiceCollection AddData(this IServiceCollection services, IConfiguration configuration)
         {
-            var connectionString = configuration.GetConnectionString("Default");
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
 
             if (connectionString is null)
                 throw new Exception("No database connection string");

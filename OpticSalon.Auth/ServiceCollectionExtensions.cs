@@ -14,7 +14,7 @@ namespace OpticSalon.Auth
             services.AddDbContext<OpticSalonIdentityContext>(options =>
             {
                 options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-                options.UseNpgsql(configuration.GetConnectionString("Default")!,
+                options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")!,
                     npgsqlOptions =>
                     {
                         npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
