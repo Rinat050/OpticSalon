@@ -10,6 +10,23 @@ namespace OpticSalon.Data
         {
         }
 
+        public DbSet<BrandDb> Brands { get; set; } = null!;
+        public DbSet<ClientDb> Clients { get; set; } = null!;
+        public DbSet<ClientPreferencesDb> ClientPreferences { get; set; } = null!;
+        public DbSet<EyeDataDb> EyeData { get; set; } = null!;
+        public DbSet<ColorDb> Colors { get; set; } = null!;
+        public DbSet<FrameColorDb> FrameColors { get; set; } = null!;
+        public DbSet<FrameDb> Frames { get; set; } = null!;
+        public DbSet<FrameMaterialDb> FrameMaterials { get; set; } = null!;
+        public DbSet<FrameSizesDb> FrameSizes { get; set; } = null!;
+        public DbSet<FrameTypeDb> FrameTypes { get; set; } = null!;
+        public DbSet<LensPackageDb> LensPackages { get; set; } = null!;
+        public DbSet<GenderDb> Genders { get; set; } = null!;
+        public DbSet<OrderDb> Orders { get; set; } = null!;
+        public DbSet<PurposeDb> Purposes { get; set; } = null!;
+        public DbSet<RecipeDb> Recipes { get; set; } = null!;
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<BrandDb>(e => e.ToTable("brand"));
