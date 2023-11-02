@@ -5,7 +5,9 @@ VisualStudioVersion = 17.1.32407.343
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpticSalon.Auth", "OpticSalon.Auth\OpticSalon.Auth.csproj", "{89CB746A-638E-4415-8A8A-190F4D270F82}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpticSalon.Data", "OpticSalon.Data\OpticSalon.Data.csproj", "{1440533E-5AE9-4C9C-A071-8C84FE31E448}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpticSalon.Data", "OpticSalon.Data\OpticSalon.Data.csproj", "{1440533E-5AE9-4C9C-A071-8C84FE31E448}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpticSalon.Blazor", "OpticSalon.Blazor\OpticSalon.Blazor.csproj", "{D1D1E3EE-29FE-4AAD-A9BF-0E7CEE546B3F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{1440533E-5AE9-4C9C-A071-8C84FE31E448}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1440533E-5AE9-4C9C-A071-8C84FE31E448}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1440533E-5AE9-4C9C-A071-8C84FE31E448}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1D1E3EE-29FE-4AAD-A9BF-0E7CEE546B3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1D1E3EE-29FE-4AAD-A9BF-0E7CEE546B3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1D1E3EE-29FE-4AAD-A9BF-0E7CEE546B3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1D1E3EE-29FE-4AAD-A9BF-0E7CEE546B3F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
