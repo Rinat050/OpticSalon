@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
+using MudBlazor.Services;
 using OpticSalon.Auth;
 using OpticSalon.Blazor.Data;
 using OpticSalon.Data;
@@ -15,7 +16,8 @@ builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services
     .AddData(builder.Configuration)
     .AddAuth(builder.Configuration)
-    .AddScoped<AuthenticationStateProvider, OpticSalon.Blazor.AuthProvider.AuthenticationStateProvider>();
+    .AddScoped<AuthenticationStateProvider, OpticSalon.Blazor.AuthProvider.AuthenticationStateProvider>()
+    .AddMudServices();
 
 var app = builder.Build();
 

@@ -2,18 +2,33 @@
 
 <PageTitle>OpticSalon.Blazor</PageTitle>
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<MudThemeProvider Theme="_theme"/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
+    </MudAppBar>
+    <MudMainContent>
+        @*Body*@
+    </MudMainContent>
+</MudLayout>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+
+@code
+{
+    private MudTheme _theme = new MudTheme()
+        {
+            Palette = new PaletteLight()
+            {
+                Primary = "#48CAE4",
+                Secondary = "#023E8A",
+                AppbarBackground = "#48CAE4",
+                AppbarText = "#023E8A",
+                TableHover = "#CAF0F8"
+            }
+        };
+}

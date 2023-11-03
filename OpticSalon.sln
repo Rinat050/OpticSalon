@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpticSalon.Auth", "OpticSal
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpticSalon.Data", "OpticSalon.Data\OpticSalon.Data.csproj", "{1440533E-5AE9-4C9C-A071-8C84FE31E448}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpticSalon.Blazor", "OpticSalon.Blazor\OpticSalon.Blazor.csproj", "{D1D1E3EE-29FE-4AAD-A9BF-0E7CEE546B3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpticSalon.Blazor", "OpticSalon.Blazor\OpticSalon.Blazor.csproj", "{D1D1E3EE-29FE-4AAD-A9BF-0E7CEE546B3F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpticSalon.Domain", "OpticSalon.Domain\OpticSalon.Domain.csproj", "{12D2064C-4524-4377-A914-52D9608BF5DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpticSalon.Domain", "OpticSalon.Domain\OpticSalon.Domain.csproj", "{12D2064C-4524-4377-A914-52D9608BF5DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
