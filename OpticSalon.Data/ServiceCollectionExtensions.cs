@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OpticSalon.Data.Repositories;
+using OpticSalon.Domain.Repositories;
 
 namespace OpticSalon.Data
 {
@@ -20,6 +22,8 @@ namespace OpticSalon.Data
                 options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 options.UseSnakeCaseNamingConvention();
             });
+
+            services.AddScoped<IClientRepository, ClientRepository>();
 
             return services;
         }

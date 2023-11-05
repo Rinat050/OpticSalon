@@ -5,7 +5,7 @@ namespace OpticSalon.Data.Repositories
 {
     public class ClientRepository : BaseRepository, IClientRepository
     {
-        protected ClientRepository(ApplicationContext context) : base(context)
+        public ClientRepository(ApplicationContext context) : base(context)
         {
         }
 

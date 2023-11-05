@@ -72,10 +72,7 @@ namespace OpticSalon.Auth.Services.Impl
                     return new AuthResult() { Success = false, Description = AuthResults.InvalidRole };
                 }
 
-                var savedUser = await _userManager.FindByEmailAsync(login);
-
-                await _userManager.RemovePasswordAsync(savedUser);
-                await _userManager.AddPasswordAsync(savedUser, password);
+                await _userManager.AddPasswordAsync(user, password);
 
                 return new AuthResult() { Success = true, Description = AuthResults.SuccessRegister };
             }

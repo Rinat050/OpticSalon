@@ -1,13 +1,18 @@
 ﻿@page "/clientRegister"
+@using Microsoft.AspNetCore.Identity
+@using OpticSalon.Auth.Models
 @using OpticSalon.Blazor.Data.Credentials
 @using System.ComponentModel.DataAnnotations
+@using OpticSalon.Domain.Services.Impl
+
+@inject IClientService ClientService
+@inject ISnackbar Snackbar
 
 <PageTitle>Регистрация</PageTitle>
 
-<EditForm Model="@_model">
+<EditForm Model="@_model" OnValidSubmit="@Register">
     <DataAnnotationsValidator />
     <MudContainer Class="d-flex align-center justify-center mud-width-full" style="height:90vh;">
-
         <MudCard Class="p-4 w-75" Style="border-radius: 20px;"
                  Outlined="false" Elevation="5">
             <MudCardHeader>
@@ -59,7 +64,7 @@
                 <MudGrid Justify="Justify.FlexEnd">
                     <MudItem xs="3" Class="p-0 m-0">
                         <MudButton Disabled="@_isSubmitBtnDisabled" Variant="Variant.Filled"
-                                   Color="Color.Primary">Зарегистрироваться</MudButton>
+                            Color="Color.Primary" ButtonType="ButtonType.Submit">Зарегистрироваться</MudButton>
                     </MudItem>
                 </MudGrid>
             </MudCardActions>
@@ -88,5 +93,19 @@
             _passwordInputIcon = Icons.Material.Filled.Visibility;
             _passwordInput = InputType.Text;
         }
+    }
+
+    private async void Register()
+    {
+        var res = await ClientService.CreateClient(_model.Login, _model.Password, 
+            _model.Name, _model.Surname, _model.PhoneNumber, _model.Address);
+
+        if (res.Success)
+        {
+            Snackbar.Add(res.Description, Severity.Info);
+            return;
+        }
+
+        Snackbar.Add(res.Description, Severity.Warning);
     }
 }

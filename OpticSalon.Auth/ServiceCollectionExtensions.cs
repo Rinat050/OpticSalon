@@ -4,6 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpticSalon.Auth.Managers;
 using OpticSalon.Auth.Models;
+using OpticSalon.Auth.Services;
+using OpticSalon.Auth.Services.Impl;
 
 namespace OpticSalon.Auth
 {
@@ -36,6 +38,8 @@ namespace OpticSalon.Auth
                 .AddRoles<OpticSalonRole>()
                 .AddEntityFrameworkStores<OpticSalonIdentityContext>()
                 .AddSignInManager<OpticSalonSignInManager>();
+
+            services.AddScoped<IAuthService, AuthService>();
 
             return services;
         }

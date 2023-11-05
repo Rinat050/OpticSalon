@@ -6,6 +6,7 @@ using MudBlazor.Services;
 using OpticSalon.Auth;
 using OpticSalon.Blazor.Data;
 using OpticSalon.Data;
+using OpticSalon.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,7 @@ builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services
     .AddData(builder.Configuration)
     .AddAuth(builder.Configuration)
+    .AddDomain()
     .AddScoped<AuthenticationStateProvider, OpticSalon.Blazor.AuthProvider.AuthenticationStateProvider>()
     .AddMudServices();
 
