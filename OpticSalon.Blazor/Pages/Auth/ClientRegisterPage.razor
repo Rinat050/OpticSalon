@@ -1,7 +1,92 @@
 ﻿@page "/clientRegister"
+@using OpticSalon.Blazor.Data.Credentials
+@using System.ComponentModel.DataAnnotations
 
-<h3>ClientRegisterPage</h3>
+<PageTitle>Регистрация</PageTitle>
+
+<EditForm Model="@_model">
+    <DataAnnotationsValidator />
+    <MudContainer Class="d-flex align-center justify-center mud-width-full" style="height:90vh;">
+
+        <MudCard Class="p-4 w-75" Style="border-radius: 20px;"
+                 Outlined="false" Elevation="5">
+            <MudCardHeader>
+                <MudStack Row>
+                    <MudIcon Icon="@Icons.Material.Filled.AppRegistration" Size="Size.Large" Color="Color.Secondary"></MudIcon>
+                    <MudText Typo="Typo.h4" Color="Color.Secondary">Регистрация</MudText>
+                </MudStack>
+            </MudCardHeader>
+
+            <MudCardContent>
+                <MudGrid Justify="Justify.Center" Spacing="1">
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_model.Surname" For="@(() => _model.Surname)"
+                                      Variant="Variant.Outlined" Label="Фамилия"></MudTextField>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudTextField @bind-Value="_model.Name" For="@(() => _model.Name)"
+                                      Variant="Variant.Outlined" Label="Имя"></MudTextField>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudTextField @bind-Value="_model.PhoneNumber" For="@(() => _model.PhoneNumber)"
+                                      Variant="Variant.Outlined" InputType="InputType.Telephone" Label="Телефон"
+                                      Mask="@(new PatternMask("+0 (000) 000 00-00"))"></MudTextField>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudTextField @bind-Value="_model.Address" For="@(() => _model.Address)"
+                                      Variant="Variant.Outlined" Label="Адрес"></MudTextField>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudTextField @bind-Value="_model.Login" For="@(() => _model.Login)"
+                                      Variant="Variant.Outlined" Label="Почта"></MudTextField>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudTextField @bind-Value="_model.Password" For="@(() => _model.Password)"
+                                      Variant="Variant.Outlined" Label="Пароль" InputType="_passwordInput"
+                                      Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon"
+                                      OnAdornmentClick="PasswordVisibilityChange"></MudTextField>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudTextField @bind-Value="_model.PasswordRepeat" For="@(() => _model.PasswordRepeat)"
+                                      Variant="Variant.Outlined" Label="Повтор пароля" InputType="_passwordInput"
+                                      Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon"
+                                      OnAdornmentClick="PasswordVisibilityChange"></MudTextField>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+
+            <MudCardActions>
+                <MudGrid Justify="Justify.FlexEnd">
+                    <MudItem xs="3" Class="p-0 m-0">
+                        <MudButton Disabled="@_isSubmitBtnDisabled" Variant="Variant.Filled"
+                                   Color="Color.Primary">Зарегистрироваться</MudButton>
+                    </MudItem>
+                </MudGrid>
+            </MudCardActions>
+        </MudCard>
+    </MudContainer>
+</EditForm>
 
 @code {
+    private ClientRegisterCredentials _model = new ClientRegisterCredentials();
+    private bool _isSubmitBtnDisabled;
+    private bool _isShow;
+    private InputType _passwordInput = InputType.Password;
+    private string _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
 
+    private void PasswordVisibilityChange()
+    {
+        @if (_isShow)
+        {
+            _isShow = false;
+            _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+            _passwordInput = InputType.Password;
+        }
+        else
+        {
+            _isShow = true;
+            _passwordInputIcon = Icons.Material.Filled.Visibility;
+            _passwordInput = InputType.Text;
+        }
+    }
 }
