@@ -18,7 +18,7 @@ namespace OpticSalon.Auth
         {
             var optionsBuilder = new DbContextOptionsBuilder<OpticSalonIdentityContext>();
             optionsBuilder.UseNpgsql("");
-
+            optionsBuilder.UseSnakeCaseNamingConvention();
             return new OpticSalonIdentityContext(optionsBuilder.Options);
         }
     }   
