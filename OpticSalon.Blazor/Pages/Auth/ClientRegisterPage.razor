@@ -7,7 +7,6 @@
 
 @inject IClientService ClientService
 @inject ISnackbar Snackbar
-@inject RoleManager<OpticSalonRole> mn
 
 <PageTitle>Регистрация</PageTitle>
 
@@ -98,8 +97,6 @@
 
     private async void Register()
     {
-        await mn.CreateAsync(new OpticSalonRole() {Name="Клиент"});
-
         var res = await ClientService.CreateClient(_model.Login, _model.Password, 
             _model.Name, _model.Surname, _model.PhoneNumber, _model.Address);
 
