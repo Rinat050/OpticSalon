@@ -38,6 +38,7 @@ namespace OpticSalon.Domain.Services.Impl
 
                 if (!registerRes.Success)
                 {
+                    await _clientRepository.DeleteClient(createdClient);
                     return new BaseResult { Success = false, Description = registerRes.Description };
                 }
 

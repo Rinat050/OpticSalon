@@ -1,4 +1,5 @@
-﻿using OpticSalon.Domain.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using OpticSalon.Domain.Models;
 using OpticSalon.Domain.Repositories;
 
 namespace OpticSalon.Data.Repositories
@@ -14,8 +15,16 @@ namespace OpticSalon.Data.Repositories
             var clientDb = Mapper.Map(client);
             await Context.Clients.AddAsync(clientDb);
             await Context.SaveChangesAsync();
-            Context.ChangeTracker.Clear();
+            Context.Entry(clientDb).State = EntityState.Detached;
+
             return Mapper.Map(clientDb);
+        }
+
+        public async Task DeleteClient(Client client)
+        {
+            var clientDb = Mapper.Map(client);
+            Context.Clients.Remove(clientDb);
+            await Context.SaveChangesAsync();
         }
     }
 }
