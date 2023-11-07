@@ -9,6 +9,9 @@ namespace OpticSalon.Domain
         public static IServiceCollection AddDomain(this IServiceCollection services)
         {
             services.AddScoped<IClientService, ClientService>();
+            services.AddScoped<IFrameTypeService, FrameTypeService>();
+            services.AddScoped<IFrameColorService, FrameColorService>();
+            services.AddScoped<IFrameMaterialService, FrameMaterialService>();
 
             return services;
         }

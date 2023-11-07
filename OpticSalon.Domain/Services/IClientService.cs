@@ -1,4 +1,5 @@
-﻿using OpticSalon.Domain.ResultModels;
+﻿using OpticSalon.Domain.Models;
+using OpticSalon.Domain.ResultModels;
 
 namespace OpticSalon.Domain.Services
 {
@@ -6,5 +7,9 @@ namespace OpticSalon.Domain.Services
     {
         public Task<BaseResult> CreateClient(string login, string password, string name, 
                                     string surname, string phoneNumber, string address);
+
+        public Task<BaseResult> AddClientPreferences(ClientPreferences preferences);
+        public Task<ResultWithData<ClientPreferences>> GetClientPreferences(int clientId);
+        public Task<BaseResult> UpdateClientPreferences(ClientPreferences preferences);
     }
 }

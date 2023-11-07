@@ -19,7 +19,73 @@ namespace OpticSalon.Domain.Services.Impl
             _authService = authService;
         }
 
-        public async Task<BaseResult> CreateClient(string login, string password, string name, 
+        public async Task<BaseResult> AddClientPreferences(ClientPreferences preferences)
+        {
+            try
+            {
+                var existClient = await _clientRepository.GetClientById(preferences.ClientId);
+
+                if (existClient == null)
+                {
+                    return new BaseResult()
+                    {
+                        Success = false,
+                        Description = ClientServiceMessages.ClientNotFounded
+                    };
+                }
+
+                await _clientRepository.AddClientPreferences(preferences);
+
+                return new BaseResult()
+                {
+                    Success = true,
+                    Description = ClientServiceMessages.SuccessPreferencesSaving
+                };
+            }
+            catch
+            {
+                return new BaseResult()
+                {
+                    Success = false,
+                    Description = DefaultErrors.ServerError
+                };
+            }
+        }
+
+        public async Task<ResultWithData<ClientPreferences>> GetClientPreferences(int clientId)
+        {
+            try
+            {
+                var existClient = await _clientRepository.GetClientById(clientId);
+
+                if (existClient == null)
+                {
+                    return new ResultWithData<ClientPreferences>()
+                    {
+                        Success = false,
+                        Description = ClientServiceMessages.ClientNotFounded
+                    };
+                }
+
+                var result = await _clientRepository.GetClientPreferences(clientId);
+
+                return new ResultWithData<ClientPreferences>()
+                {
+                    Success = true,
+                    Data = result
+                };
+            }
+            catch
+            {
+                return new ResultWithData<ClientPreferences>()
+                {
+                    Success = false,
+                    Description = DefaultErrors.ServerError
+                };
+            }
+        }
+
+        public async Task<BaseResult> CreateClient(string login, string password, string name,
                                                 string surname, string phoneNumber, string address)
         {
             try
@@ -42,11 +108,44 @@ namespace OpticSalon.Domain.Services.Impl
                     return new BaseResult { Success = false, Description = registerRes.Description };
                 }
 
-                return new BaseResult() { Success = true, Description = ClientServiceMessages.SuccessCreated};
+                return new BaseResult() { Success = true, Description = ClientServiceMessages.SuccessCreated };
             }
             catch
             {
-                return new BaseResult() { Success = false, Description=DefaultErrors.ServerError };
+                return new BaseResult() { Success = false, Description = DefaultErrors.ServerError };
+            }
+        }
+
+        public async Task<BaseResult> UpdateClientPreferences(ClientPreferences preferences)
+        {
+            try
+            {
+                var existClient = await _clientRepository.GetClientById(preferences.ClientId);
+
+                if (existClient == null)
+                {
+                    return new BaseResult()
+                    {
+                        Success = false,
+                        Description = ClientServiceMessages.ClientNotFounded
+                    };
+                }
+
+                await _clientRepository.UpdateClientPreferences(preferences);
+
+                return new BaseResult()
+                {
+                    Success = true,
+                    Description = ClientServiceMessages.SuccessPreferencesSaving
+                };
+            }
+            catch
+            {
+                return new BaseResult()
+                {
+                    Success = false,
+                    Description = DefaultErrors.ServerError
+                };
             }
         }
     }

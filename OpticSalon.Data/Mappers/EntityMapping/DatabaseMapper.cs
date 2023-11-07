@@ -15,5 +15,7 @@ namespace OpticSalon.Data.Mappers.EntityMapping
         public partial FrameMaterialDb Map(FrameMaterial frameMaterial);
         public partial Color Map(ColorDb colorDb);
         public partial ColorDb Map(Color color);
+        public partial ClientPreferences Map(ClientPreferencesDb clientPreferencesDb);
+        public partial ClientPreferencesDb Map(ClientPreferences clientPreferences);
     }
 }
