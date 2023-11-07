@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using MudBlazor.Services;
 using OpticSalon.Auth;
 using OpticSalon.Blazor.Data;
+using OpticSalon.Blazor.Middleware;
 using OpticSalon.Data;
 using OpticSalon.Domain;
 

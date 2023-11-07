@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using OpticSalon.Auth.Models;
 using OpticSalon.Blazor.Data.Credentials;
 using System.Collections.Concurrent;
 
@@ -17,23 +18,26 @@ namespace OpticSalon.Blazor.Middleware
             _next = next;
         }
 
-        public async Task Invoke(HttpContext context, SignInManager<IdentityUser<int>> signInManager)
+        public async Task Invoke(HttpContext context, SignInManager<OpticSalonUser> signInManager)
         {
             if (context.Request.Path == "/login" && context.Request.Query.ContainsKey("key"))
             {
                 var key = Guid.Parse(context.Request.Query["key"]!);
                 var info = Logins[key];
+                Logins.Remove(key);
 
                 var result = await signInManager.PasswordSignInAsync(info.Email, info.Password,
                     info.RememberMe, lockoutOnFailure: false);
 
                 info.Password = string.Empty;
 
-                if (result.Succeeded)
+                if (!result.Succeeded)
                 {
-                    Logins.Remove(key);
-                    context.Response.Redirect("/");
+                    context.Response.Redirect("/login");
+                    return;
                 }
+
+                context.Response.Redirect("/");
             }
             else if (context.Request.Path == "/logout")
             {

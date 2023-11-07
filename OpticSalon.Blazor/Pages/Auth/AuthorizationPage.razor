@@ -1,0 +1,112 @@
+﻿@page "/login"
+
+@using Microsoft.AspNetCore.Identity
+@using OpticSalon.Auth.Managers
+@using OpticSalon.Auth.Models
+@using OpticSalon.Blazor.Data.Credentials
+@using OpticSalon.Blazor.Middleware
+
+@inject OpticSalonSignInManager SignInManager
+@inject UserManager<OpticSalonUser> UserManager
+@inject ISnackbar Snackbar
+@inject NavigationManager NavManager
+
+<PageTitle>Авторизация</PageTitle>
+
+<EditForm Model="@_model" OnValidSubmit="@Authorize">
+    <DataAnnotationsValidator />
+    <MudContainer Class="d-flex align-center justify-center mud-width-full" style="height:90vh;">
+        <MudCard Class="p-4 w-75" Style="border-radius: 20px;"
+                 Outlined="false" Elevation="5">
+            <MudCardHeader>
+                <MudStack Row>
+                    <MudIcon Icon="@Icons.Material.Outlined.LockPerson" Size="Size.Large" Color="Color.Secondary"></MudIcon>
+                    <MudText Typo="Typo.h4" Color="Color.Secondary">Авторизация</MudText>
+                </MudStack>
+            </MudCardHeader>
+
+            <MudCardContent>
+                <MudGrid Justify="Justify.Center" Spacing="1">
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_model.Email" For="@(() => _model.Email)"
+                                      Variant="Variant.Outlined" Label="Почта"></MudTextField>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_model.Password" For="@(() => _model.Password)"
+                                      Variant="Variant.Outlined" Label="Пароль" InputType="_passwordInput"
+                                      Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon"
+                                      OnAdornmentClick="PasswordVisibilityChange"></MudTextField>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudCheckBox @bind-Checked="@_model.RememberMe" Label="Запомнить меня" Color="Color.Primary"></MudCheckBox>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+
+            <MudGrid Justify="Justify.Center">
+                <MudItem xs="12" Class="ms-3 me-3">
+                    <MudButton Disabled="@_isSubmitBtnDisabled" FullWidth Variant="Variant.Filled"
+                        Color="Color.Primary" ButtonType="ButtonType.Submit">Войти</MudButton>
+                </MudItem>
+                <MudItem xs="3">
+                    Нет аккаунта? 
+                    <MudLink OnClick="@RegisterPageShow" Underline="Underline.Always" Class="mt-3 ms-1">
+                        Регистрация
+                    </MudLink>
+                </MudItem>
+            </MudGrid>
+        </MudCard>
+    </MudContainer>
+</EditForm>
+
+@code {
+    private LoginCredentials _model = new LoginCredentials();
+    private bool _isSubmitBtnDisabled;
+    private bool _isShow;
+    private InputType _passwordInput = InputType.Password;
+    private string _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    private void PasswordVisibilityChange()
+    {
+        @if (_isShow)
+        {
+            _isShow = false;
+            _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+            _passwordInput = InputType.Password;
+        }
+        else
+        {
+            _isShow = true;
+            _passwordInputIcon = Icons.Material.Filled.Visibility;
+            _passwordInput = InputType.Text;
+        }
+    }
+
+    private async void Authorize()
+    {
+        var user = await UserManager.FindByEmailAsync(_model.Email);
+
+        if (user is null)
+        {
+            Snackbar.Add("Пользователь не найден!", Severity.Warning);
+            return;
+        }
+
+        var result = await SignInManager.CheckPasswordSignInAsync(user, _model.Password, false);
+
+        if (!result.Succeeded)
+        {
+            Snackbar.Add("Неверный пароль!", Severity.Warning);
+            return;
+        }
+
+        var key = Guid.NewGuid();
+        AuthenticationMiddleware.Logins[key] = _model;
+        NavManager.NavigateTo($"/login?key={key}", true);
+    }
+
+    private void RegisterPageShow()
+    {
+        NavManager.NavigateTo("/clientRegister");
+    }
+}
