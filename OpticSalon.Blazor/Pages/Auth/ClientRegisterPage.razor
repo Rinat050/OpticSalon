@@ -7,8 +7,15 @@
 
 @inject IClientService ClientService
 @inject ISnackbar Snackbar
+@inject NavigationManager NavManager
 
 <PageTitle>Регистрация</PageTitle>
+
+@if (_isClientPrefencesShow)
+{
+    <ClientPreferencesComponent IsRegister ClientId="@_clientId"></ClientPreferencesComponent>
+    return;
+}
 
 <EditForm Model="@_model" OnValidSubmit="@Register">
     <DataAnnotationsValidator />
@@ -76,6 +83,8 @@
     private ClientRegisterCredentials _model = new ClientRegisterCredentials();
     private bool _isSubmitBtnDisabled;
     private bool _isShow;
+    private bool _isClientPrefencesShow;
+    private int _clientId;
     private InputType _passwordInput = InputType.Password;
     private string _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
 
@@ -102,7 +111,9 @@
 
         if (res.Success)
         {
-            Snackbar.Add(res.Description, Severity.Info);
+            _clientId = res.Data!.Id;
+            _isClientPrefencesShow = true;
+            StateHasChanged();
             return;
         }
 

@@ -1,12 +1,17 @@
 ﻿@using MudBlazor.Utilities
+@using OpticSalon.Auth.Models
 @using OpticSalon.Domain.FilterData
 @using OpticSalon.Domain.Models
+@using OpticSalon.Domain.ResultModels
 @inject NavigationManager NavManager
 @inject IFrameTypeService FrameTypeService
 @inject IFrameMaterialService FrameMaterialService
 @inject IFrameColorService FrameColorService
+@inject IClientService ClientService
+@inject ISnackbar Snackbar
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
 
-<EditForm Model="@ClientPreferences">
+<EditForm Model="@ClientPreferences" OnValidSubmit="@Save">
     <DataAnnotationsValidator />
     <MudContainer Class="d-flex align-center justify-center mud-width-full" style="height:90vh;">
         <MudCard Class="p-4 w-75" Style="border-radius: 15px;"
@@ -24,7 +29,7 @@
                 <MudGrid Justify="Justify.Center" Spacing="1">
                     <MudItem xs="6">
                        <MudSelect T="FrameType" @bind-Value="ClientPreferences.FrameType" Variant="Variant.Outlined" 
-                            Label="Тип оправы" For="@(() => ClientPreferences.FrameType)">
+                            Label="Тип оправы" ToStringFunc="@((x) => x?.Name)" For="@(() => ClientPreferences.FrameType)">
                            @foreach(var type in _frameTypes)
                            {
                                 <MudSelectItem Value="@(type)" />
@@ -33,7 +38,7 @@
                     </MudItem>
                     <MudItem xs="6">
                        <MudSelect T="FrameMaterial" @bind-Value="ClientPreferences.FrameMaterial" Variant="Variant.Outlined" 
-                            Label="Материал оправы" For="@(() => ClientPreferences.FrameMaterial)">
+                            Label="Материал оправы" ToStringFunc="@((x) => x?.Name)" For="@(() => ClientPreferences.FrameMaterial)">
                            @foreach(var material in _frameMaterials)
                            {
                                 <MudSelectItem Value="@(material)" />
@@ -113,21 +118,14 @@
     public OpticSalon.Domain.Models.ClientPreferences ClientPreferences { get; set; } = null!;
     [Parameter]
     public bool IsRegister { get; set; }
+    [Parameter]
+    public int ClientId { get; set; }
 
     private bool _isNew;
     private List<FrameType> _frameTypes = new();
     private List<FrameMaterial> _frameMaterials = new();
     private List<OpticSalon.Domain.Models.Color> _frameColors = new();
-    private List<MudColor> _pickerColors { get; set; } = new List<MudColor>()
-    {
-        "#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5",
-        "#FFEBEE", "#FCE4EC", "#F3E5F5", "#EDE7F6", "#E8EAF6",
-        "#FFCDD2", "#F8BBD0", "#E1BEE7", "#D1C4E9", "#C5CAE9",
-        "#EF9A9A", "#F48FB1", "#CE93D8", "#B39DDB", "#9FA8DA",
-        "#E57373", "#F06292", "#BA68C8", "#9575CD", "#7986CB",
-        "#EF5350", "#EC407A", "#AB47BC", "#7E57C2", "#5C6BC0",
-        "#E53935", "#D81B60", "#8E24AA", "#5E35B1", "#3949AB"
-    };
+    private List<MudColor> _pickerColors { get; set; } = new();
 
     protected override void OnInitialized()
     {
@@ -141,7 +139,13 @@
         base.OnInitialized();
     }
 
-    private async void FillData()
+    protected async override Task OnInitializedAsync()
+    {
+        await FillData();
+        StateHasChanged();
+    }
+
+    private async Task FillData()
     {
         var frameTypeResult = await FrameTypeService.GetAllFrameTypes();
 
@@ -164,12 +168,50 @@
             _frameColors = frameColorsResult.Data!;
             _frameColors.ForEach(x => _pickerColors.Add(new MudColor(x.Value)));
         }
+
+        SetDefaultData();
+    }
+
+    private void SetDefaultData()
+    {
+        ClientPreferences.FrameColor = _frameColors.FirstOrDefault()!;
+        ClientPreferences.FrameSizes.LensWidth = FrameSizesFilter.GetLensWidthRange().FirstOrDefault();
+        ClientPreferences.FrameSizes.DistanceBetweenLens = FrameSizesFilter.GetDistanceBetweenLensRange().FirstOrDefault();
+        ClientPreferences.FrameSizes.TempleLenght = FrameSizesFilter.GetTempleLenghtRange().FirstOrDefault();
     }
 
     private void ColorChanged(MudColor mudColor)
     {
-        //ClientPreferences.FrameColor = _frameColors.FirstOrDefault(x => x.Value == mudColor.Value)!;
-        ClientPreferences.FrameColor = new Domain.Models.Color() {Value = mudColor.Value};
+        var color = mudColor.Value.Substring(0, mudColor.Value.Length - 2);
+
+        ClientPreferences.FrameColor = _frameColors.FirstOrDefault(x => x.Value.ToLower() == color)!;
         StateHasChanged();
+    }
+
+    private async void Save()
+    {
+        if (_isNew)
+        {
+            ClientPreferences.ClientId = ClientId;
+        }
+
+        BaseResult result;
+
+        if (_isNew)
+        {
+            result = await ClientService.AddClientPreferences(ClientPreferences);
+        }
+        else
+        {
+            result = await ClientService.UpdateClientPreferences(ClientPreferences);
+        }
+
+        if (result.Success)
+        {
+            Snackbar.Add(result.Description, Severity.Info);
+            return;
+        }
+
+        Snackbar.Add(result.Description, Severity.Warning);
     }
 }

@@ -15,4 +15,8 @@
     <ProjectReference Include="..\OpticSalon.Data\OpticSalon.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Pages\Client\" />
+  </ItemGroup>
+
 </Project>

@@ -85,7 +85,7 @@ namespace OpticSalon.Domain.Services.Impl
             }
         }
 
-        public async Task<BaseResult> CreateClient(string login, string password, string name,
+        public async Task<ResultWithData<Client>> CreateClient(string login, string password, string name,
                                                 string surname, string phoneNumber, string address)
         {
             try
@@ -105,14 +105,23 @@ namespace OpticSalon.Domain.Services.Impl
                 if (!registerRes.Success)
                 {
                     await _clientRepository.DeleteClient(createdClient);
-                    return new BaseResult { Success = false, Description = registerRes.Description };
+                    return new ResultWithData<Client> 
+                    { 
+                        Success = false, 
+                        Description = registerRes.Description 
+                    };
                 }
 
-                return new BaseResult() { Success = true, Description = ClientServiceMessages.SuccessCreated };
+                return new ResultWithData<Client>() 
+                { 
+                    Success = true, 
+                    Description = ClientServiceMessages.SuccessCreated,
+                    Data = createdClient
+                };
             }
             catch
             {
-                return new BaseResult() { Success = false, Description = DefaultErrors.ServerError };
+                return new ResultWithData<Client>() { Success = false, Description = DefaultErrors.ServerError };
             }
         }
 
