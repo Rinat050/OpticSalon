@@ -7,6 +7,6 @@ namespace OpticSalon.Domain.Services
     {
         public Task<ResultWithData<List<FrameShort>>> GetAllFrames();
         public Task<ResultWithData<List<FrameShort>>> GetAllFrames(int? typeId, int? materialId, int? colorId, 
-                                                            int? genderId, ClientPreferences? clientPreferences);
+                                                    int? genderId, int? brandId, ClientPreferences? clientPreferences);
     }
 }

@@ -12,48 +12,42 @@ namespace OpticSalon.Data.Repositories
         }
 
         public async Task<List<FrameShort>> GetFrames(int? typeId, int? materialId, int? colorId, 
-                                            int? genderId, ClientPreferences? clientPreferences)
+                                            int? genderId, int? brandId, ClientPreferences? clientPreferences)
         {
             Predicate<FrameDb> _type = x => true;
             Predicate<FrameDb> _material = x => true;
             Predicate<FrameDb> _color = x => true;
             Predicate<FrameDb> _gender = x => true;
+            Predicate<FrameDb> _brand = x => true;
             Predicate<FrameDb> _preferences = x => true;
 
             if (typeId != null)
-            {
                 _type = x => x.TypeId == typeId;
-            }
 
             if (materialId != null)
-            {
                 _material = x => x.MaterialId == materialId;
-            }
 
             if (colorId != null)
-            {
                 _color = x => x.Colors.FirstOrDefault(c => c.ColorId == colorId) != null;
-            }
 
             if (genderId != null)
-            {
                 _gender = x => x.GenderId == genderId;
-            }
+
+            if (brandId != null)
+                _brand = x => x.BrandId == brandId;
 
             if (clientPreferences != null)
-            {
-                _color = x => x.MaterialId == clientPreferences.FrameMaterial.Id &&
+                _preferences = x => x.MaterialId == clientPreferences.FrameMaterial.Id &&
                                 x.TypeId == clientPreferences.FrameType.Id &&
                                 x.Colors.FirstOrDefault(c => c.ColorId == clientPreferences.FrameColor.Id) != null &&
                                 x.Sizes.LensWidth == clientPreferences.FrameSizes.LensWidth &&
                                 x.Sizes.DistanceBetweenLens == clientPreferences.FrameSizes.DistanceBetweenLens &&
                                 x.Sizes.TempleLenght == clientPreferences.FrameSizes.TempleLenght;
-            }
 
             var res = await Context.Frames
                                         .Include(x => x.Colors)
                                         .Include(x => x.Sizes)
-                                        .Where(x => _type(x) && _color(x) && 
+                                        .Where(x => _type(x) && _color(x) && _brand(x) &&
                                         _gender(x) && _material(x) && _preferences(x))
                                         .ToListAsync();
 
