@@ -12,6 +12,7 @@ namespace OpticSalon.Domain
             services.AddScoped<IFrameTypeService, FrameTypeService>();
             services.AddScoped<IFrameColorService, FrameColorService>();
             services.AddScoped<IFrameMaterialService, FrameMaterialService>();
+            services.AddScoped<IImageLoadingService, ImageLoadingService>();
 
             return services;
         }
