@@ -7,6 +7,7 @@ using OpticSalon.Blazor.Data;
 using OpticSalon.Blazor.Middleware;
 using OpticSalon.Data;
 using OpticSalon.Domain;
+using OpticSalon.MinIO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,7 @@ builder.Services
     .AddData(builder.Configuration)
     .AddAuth(builder.Configuration)
     .AddDomain()
+    .AddFileStorage(builder.Configuration)
     .AddScoped<AuthenticationStateProvider, OpticSalon.Blazor.AuthProvider.AuthenticationStateProvider>()
     .AddMudServices();
 

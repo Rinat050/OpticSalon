@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\OpticSalon.Auth\OpticSalon.Auth.csproj" />
     <ProjectReference Include="..\OpticSalon.Data\OpticSalon.Data.csproj" />
+	<ProjectReference Include="..\OpticSalon.MinIO\OpticSalon.MinIO.csproj" />
   </ItemGroup>
 
   <ItemGroup>
