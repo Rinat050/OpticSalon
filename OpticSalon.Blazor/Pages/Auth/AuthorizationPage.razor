@@ -84,10 +84,12 @@
 
     private async void Authorize()
     {
+        _isSubmitBtnDisabled = true;
         var user = await UserManager.FindByEmailAsync(_model.Email);
 
         if (user is null)
         {
+            _isSubmitBtnDisabled = false;
             Snackbar.Add("Пользователь не найден!", Severity.Warning);
             return;
         }
@@ -96,6 +98,7 @@
 
         if (!result.Succeeded)
         {
+            _isSubmitBtnDisabled = false;
             Snackbar.Add("Неверный пароль!", Severity.Warning);
             return;
         }

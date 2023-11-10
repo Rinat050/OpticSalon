@@ -106,8 +106,10 @@
 
     private async void Register()
     {
+        _isSubmitBtnDisabled = true;
         var res = await ClientService.CreateClient(_model.Login, _model.Password, 
             _model.Name, _model.Surname, _model.PhoneNumber, _model.Address);
+        _isSubmitBtnDisabled = false;
 
         if (res.Success)
         {

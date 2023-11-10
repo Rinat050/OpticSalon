@@ -9,7 +9,6 @@
 @inject IFrameColorService FrameColorService
 @inject IClientService ClientService
 @inject ISnackbar Snackbar
-@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
 
 <EditForm Model="@ClientPreferences" OnValidSubmit="@Save">
     <DataAnnotationsValidator />
@@ -105,7 +104,7 @@
                         </MudItem>
                     }
                     <MudItem xs="6">
-                        <MudButton FullWidth Variant="Variant.Filled"
+                        <MudButton Disabled="@_isLoading" FullWidth Variant="Variant.Filled"
                             Color="MudBlazor.Color.Primary" ButtonType="ButtonType.Submit">Сохранить</MudButton>
                     </MudItem>
                 </MudGrid>
@@ -122,6 +121,7 @@
     public int ClientId { get; set; }
 
     private bool _isNew;
+    private bool _isLoading;
     private List<FrameType> _frameTypes = new();
     private List<FrameMaterial> _frameMaterials = new();
     private List<OpticSalon.Domain.Models.Color> _frameColors = new();
@@ -197,6 +197,8 @@
 
         BaseResult result;
 
+        _isLoading = true;
+
         if (_isNew)
         {
             result = await ClientService.AddClientPreferences(ClientPreferences);
@@ -206,9 +208,16 @@
             result = await ClientService.UpdateClientPreferences(ClientPreferences);
         }
 
+        _isLoading = false;
+
         if (result.Success)
         {
             Snackbar.Add(result.Description, Severity.Info);
+
+            if (IsRegister)
+                NavManager.NavigateTo("/login");
+
+            NavManager.NavigateTo("/");
             return;
         }
 
