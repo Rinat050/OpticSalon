@@ -7,5 +7,6 @@
         public Brand Brand { get; set; } = null!;
         public string Article { get; set; } = null!;
         public FrameSizes Sizes { get; set; } = null!;
+        public string MainImageName { get; set; } = null!;
     }
 }

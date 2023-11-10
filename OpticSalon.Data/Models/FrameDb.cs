@@ -16,6 +16,7 @@
         public int TypeId { get; set; }
         public GenderDb Gender { get; set; } = null!;
         public int GenderId { get; set; }
+        public string MainImageName { get; set; } = null!;
         public ICollection<FrameColorDb> Colors { get; set; } = new List<FrameColorDb>();
     }
 }
