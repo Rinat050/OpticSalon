@@ -1,0 +1,67 @@
+﻿@page "/catalog"
+
+@using OpticSalon.Domain.Models
+@inject IFrameService FrameService
+
+<PageTitle>Каталог</PageTitle>
+    
+   <MudPaper Class="m-2 me-0 p-2" Elevation="2">
+        <MudStack Row>
+        <MudStack Row AlignItems="AlignItems.Center">
+            <MudIcon Icon="@Icons.Material.Filled.Menu" Size="Size.Large" Color="MudBlazor.Color.Secondary"></MudIcon>
+            <MudText Typo="Typo.h4" Color="MudBlazor.Color.Secondary">Каталог</MudText>
+        </MudStack>
+        <MudSpacer/>
+        <MudButton Style="min-width: 100px;" Variant="Variant.Filled" Color="MudBlazor.Color.Primary">Фильтр</MudButton>
+    </MudStack>
+   </MudPaper>
+
+    <MudGrid Class="m-0 pe-2" Justify="Justify.Center" Spacing="2">
+        @foreach (var frame in _frames)
+        {
+            <MudItem xs="12" sm="6" md="4" lg="3">
+                <MudCard Elevation="3">
+                    <MudCardMedia Image="images/NEOLOOK8057.jpg" Height="190" />
+                    <MudCardContent>
+                        <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">@($"{frame.Brand.Name} {frame.Model}")</MudText>
+                        <MudText Typo="Typo.body2">Размеры: @(GetSizeString(frame.Sizes))</MudText>
+                        <MudText Typo="Typo.body1">Стоимость: @($"{frame.Cost} руб.")</MudText>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton FullWidth Variant="Variant.Outlined" Color="MudBlazor.Color.Primary">Подробнее</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+
+
+@code {
+    private List<FrameShort> _frames = new();
+
+    protected async override Task OnInitializedAsync()
+    {
+        //var res = await FrameService.GetAllFrames();
+
+        //if (res.Success)
+        //{
+        //_frames = res.Data!;
+        //}
+
+        for (int i = 0; i < 10; ++i)
+        {
+            _frames.Add(new FrameShort()
+                {
+                    Model = "8055",
+                    Brand = new Brand() { Name = "NEW LOOK" },
+                    Cost = 7900,
+                    Sizes = new FrameSizes() { LensWidth = 53, DistanceBetweenLens = 18, TempleLenght = 140 }
+                });
+        }
+    }
+
+    private string GetSizeString(FrameSizes sizes)
+    {
+        return $"{sizes.LensWidth}-{sizes.DistanceBetweenLens}-{sizes.TempleLenght}";
+    }
+}

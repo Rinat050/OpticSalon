@@ -2,7 +2,7 @@
 
 <PageTitle>OpticSalon.Blazor</PageTitle>
 
-<MudThemeProvider Theme="_theme"/>
+<MudThemeProvider Theme="_theme" DefaultScrollbar="false"/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
@@ -11,7 +11,7 @@
         <MudSpacer />
         <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
     </MudAppBar>
-    <MudMainContent>
+    <MudMainContent Class="m-5 mt-0">
         @Body
     </MudMainContent>
 </MudLayout>

@@ -27,6 +27,7 @@ namespace OpticSalon.Data
             services.AddScoped<IFrameTypeRepository, FrameTypeRepository>();
             services.AddScoped<IFrameColorRepository, FrameColorRepository>();
             services.AddScoped<IFrameMaterialRepository, FrameMaterialRepository>();
+            services.AddScoped<IFrameRepository, FrameRepository>();
 
             return services;
         }

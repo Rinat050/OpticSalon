@@ -7,7 +7,7 @@ namespace OpticSalon.Data.Repositories
 {
     public class FrameRepository : BaseRepository, IFrameRepository
     {
-        protected FrameRepository(ApplicationContext context) : base(context)
+        public FrameRepository(ApplicationContext context) : base(context)
         {
         }
 

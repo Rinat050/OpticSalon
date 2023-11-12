@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpticSalon.Blazor", "OpticS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpticSalon.Domain", "OpticSalon.Domain\OpticSalon.Domain.csproj", "{12D2064C-4524-4377-A914-52D9608BF5DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpticSalon.MinIO", "OpticSalon.MinIO\OpticSalon.MinIO.csproj", "{473D1C89-0E38-4B18-A949-F3B5EB4E9910}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpticSalon.MinIO", "OpticSalon.MinIO\OpticSalon.MinIO.csproj", "{473D1C89-0E38-4B18-A949-F3B5EB4E9910}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
