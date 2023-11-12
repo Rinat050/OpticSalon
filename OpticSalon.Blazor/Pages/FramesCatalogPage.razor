@@ -1,9 +1,17 @@
 ﻿@page "/catalog"
 
 @using MudBlazor.Utilities
+@using OpticSalon.Auth.Models
 @using OpticSalon.Blazor.Data.Credentials
 @using OpticSalon.Domain.Models
 @inject IFrameService FrameService
+@inject IFrameTypeService FrameTypeService
+@inject IFrameMaterialService FrameMaterialService
+@inject IFrameColorService FrameColorService
+@inject IBrandService BrandService
+@inject IGenderService GenderService
+@inject IClientService ClientService
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 
 <PageTitle>Каталог</PageTitle>
 
@@ -14,9 +22,16 @@
             <MudText Typo="Typo.h4" Color="MudBlazor.Color.Secondary">Каталог</MudText>
         </MudStack>
         <MudSpacer />
-        <MudButton Style="min-width: 100px;" OnClick="ChangeDrawer" Variant="Variant.Filled" Color="MudBlazor.Color.Primary">Фильтр</MudButton>
+        <MudButton Disabled="_isLoading" Style="min-width: 100px;" OnClick="ChangeDrawer" 
+            Variant="Variant.Filled" Color="MudBlazor.Color.Primary">Фильтр</MudButton>
     </MudStack>
 </MudPaper>
+
+@if (_isLoading)
+{
+    <MudProgressLinear Color="MudBlazor.Color.Primary" Indeterminate="true" Class="my-7" />
+    return;
+}
 
 <MudGrid Class="m-0 pe-2" Justify="Justify.Center" Spacing="2">
     @foreach (var frame in _frames)
@@ -93,11 +108,13 @@
                         Palette="_pickerColors"></MudColorPicker>
                 </MudStack>
             </MudItem>
-            <MudItem>
-                <MudCheckBox T="bool" Label="По вашим предпочтениям" Size="Size.Medium" Color="MudBlazor.Color.Primary"></MudCheckBox>
+            <MudItem xs="12">
+                <MudCheckBox @bind-Checked="_filter.IsClientPrefencesSelected" Label="По вашим предпочтениям" 
+                    Size="Size.Medium" Color="MudBlazor.Color.Primary"></MudCheckBox>
             </MudItem>
             <MudItem xs="12">
-                <MudButton FullWidth Variant="Variant.Filled" Color="MudBlazor.Color.Primary">Применить</MudButton>
+                <MudButton FullWidth OnClick="@(async () => await FillFramesData())" Variant="Variant.Filled" 
+                    Color="MudBlazor.Color.Primary">Применить</MudButton>
             </MudItem>
         </MudGrid>
     </MudDrawerContainer>
@@ -111,27 +128,85 @@
     private List<OpticSalon.Domain.Models.Color> _frameColors = new();
     private List<Gender> _genders = new();
     private FramesFilterCredentials _filter = new();
+    private ClientPreferences _currentClientPreferences = null!;
+
     private bool _isDrawerOpen;
+    private bool _isLoading;
     private List<MudColor> _pickerColors { get; set; } = new();
 
     protected async override Task OnInitializedAsync()
     {
-        //var res = await FrameService.GetAllFrames();
+        await FillFramesData();
+        await FillFilterData();
+    }
 
-        //if (res.Success)
-        //{
-        //_frames = res.Data!;
-        //}
+    private async Task FillFilterData()
+    {
+        var frameTypeResult = await FrameTypeService.GetAllFrameTypes();
 
-        for (int i = 0; i < 10; ++i)
+        if (frameTypeResult.Success)
+            _frameTypes = frameTypeResult.Data!;
+
+
+        var frameMaterialResult = await FrameMaterialService.GetAllFrameMaterials();
+
+        if (frameMaterialResult.Success)
+            _frameMaterials = frameMaterialResult.Data!;
+
+        var brandResult = await BrandService.GetAllBrands();
+
+        if (brandResult.Success)
+            _frameBrands = brandResult.Data!;
+
+        var genderResult = await GenderService.GetAllGenders();
+
+        if (genderResult.Success)
+            _genders = genderResult.Data!;
+
+        var frameColorsResult = await FrameColorService.GetAllFrameColors();
+
+        if (frameColorsResult.Success)
         {
-            _frames.Add(new FrameShort()
-                {
-                    Model = "8055",
-                    Brand = new Brand() { Name = "NEW LOOK" },
-                    Cost = 7900,
-                    Sizes = new FrameSizes() { LensWidth = 53, DistanceBetweenLens = 18, TempleLenght = 140 }
-                });
+            _frameColors = frameColorsResult.Data!;
+            _frameColors.ForEach(x => _pickerColors.Add(new MudColor(x.Value)));
+        }
+
+        await LoadClientPreferences();
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task FillFramesData()
+    {
+        _isLoading = true;
+        var res = await FrameService.GetAllFrames(_filter.Type?.Id, _filter.Material?.Id, 
+                                _filter.Color?.Id, _filter.Gender?.Id, _filter.Brand?.Id, 
+                                _filter.IsClientPrefencesSelected ? _currentClientPreferences : null);
+
+        if (res.Success)
+        {
+            _frames = res.Data!;
+        }
+
+        _isLoading = false;
+    }
+
+    private async Task LoadClientPreferences()
+    {
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+
+        if (userIdentity is null)
+        {
+            return;
+        }
+
+        var clientId = int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.ClientId).Value);
+
+        var res = await ClientService.GetClientPreferences(clientId);
+
+        if(res.Success)
+        {
+            _currentClientPreferences = res.Data!;
         }
     }
 

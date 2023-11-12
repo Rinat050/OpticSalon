@@ -15,6 +15,10 @@ namespace OpticSalon.Data.Mappers.EntityMapping
         public partial FrameMaterialDb Map(FrameMaterial frameMaterial);
         public partial Color Map(ColorDb colorDb);
         public partial ColorDb Map(Color color);
+        public partial Brand Map(BrandDb brandDb);
+        public partial BrandDb Map(Brand brand);
+        public partial Gender Map(GenderDb genderDb);
+        public partial GenderDb Map(Gender gender);
         public partial ClientPreferences Map(ClientPreferencesDb clientPreferencesDb);
       
         [MapperIgnoreTarget(nameof(ClientPreferencesDb.FrameType))]
