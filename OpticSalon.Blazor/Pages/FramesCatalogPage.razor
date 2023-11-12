@@ -1,43 +1,118 @@
 ﻿@page "/catalog"
 
+@using MudBlazor.Utilities
+@using OpticSalon.Blazor.Data.Credentials
 @using OpticSalon.Domain.Models
 @inject IFrameService FrameService
 
 <PageTitle>Каталог</PageTitle>
-    
-   <MudPaper Class="m-2 me-0 p-2" Elevation="2">
-        <MudStack Row>
+
+<MudPaper Class="m-2 me-0 p-2" Elevation="2">
+    <MudStack Row>
         <MudStack Row AlignItems="AlignItems.Center">
             <MudIcon Icon="@Icons.Material.Filled.Menu" Size="Size.Large" Color="MudBlazor.Color.Secondary"></MudIcon>
             <MudText Typo="Typo.h4" Color="MudBlazor.Color.Secondary">Каталог</MudText>
         </MudStack>
-        <MudSpacer/>
-        <MudButton Style="min-width: 100px;" Variant="Variant.Filled" Color="MudBlazor.Color.Primary">Фильтр</MudButton>
+        <MudSpacer />
+        <MudButton Style="min-width: 100px;" OnClick="ChangeDrawer" Variant="Variant.Filled" Color="MudBlazor.Color.Primary">Фильтр</MudButton>
     </MudStack>
-   </MudPaper>
+</MudPaper>
 
-    <MudGrid Class="m-0 pe-2" Justify="Justify.Center" Spacing="2">
-        @foreach (var frame in _frames)
-        {
-            <MudItem xs="12" sm="6" md="4" lg="3">
-                <MudCard Elevation="3">
-                    <MudCardMedia Image="images/NEOLOOK8057.jpg" Height="190" />
-                    <MudCardContent>
-                        <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">@($"{frame.Brand.Name} {frame.Model}")</MudText>
-                        <MudText Typo="Typo.body2">Размеры: @(GetSizeString(frame.Sizes))</MudText>
-                        <MudText Typo="Typo.body1">Стоимость: @($"{frame.Cost} руб.")</MudText>
-                    </MudCardContent>
-                    <MudCardActions>
-                        <MudButton FullWidth Variant="Variant.Outlined" Color="MudBlazor.Color.Primary">Подробнее</MudButton>
-                    </MudCardActions>
-                </MudCard>
+<MudGrid Class="m-0 pe-2" Justify="Justify.Center" Spacing="2">
+    @foreach (var frame in _frames)
+    {
+        <MudItem xs="12" sm="6" md="4" lg="3">
+            <MudCard Elevation="3">
+                <MudCardMedia Image="images/NEOLOOK8057.jpg" Height="190" />
+                <MudCardContent>
+                    <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">@($"{frame.Brand.Name} {frame.Model}")</MudText>
+                    <MudText Typo="Typo.body2">Размеры: @(GetSizeString(frame.Sizes))</MudText>
+                    <MudText Typo="Typo.body1">Стоимость: @($"{frame.Cost} руб.")</MudText>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton FullWidth Variant="Variant.Outlined" Color="MudBlazor.Color.Primary">Подробнее</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    }
+</MudGrid>
+
+<MudDrawer @bind-Open="@_isDrawerOpen" Width="25%" Height="100%" 
+        Anchor="Anchor.Right" Elevation="1" Style="overflow-x: hidden;" Variant="@DrawerVariant.Temporary">
+    <MudDrawerHeader>
+        <MudStack Row AlignItems="AlignItems.Center">
+            <MudIcon Icon="@Icons.Material.Outlined.FilterAlt" Size="Size.Large" Color="MudBlazor.Color.Secondary"></MudIcon>
+            <MudText Color="MudBlazor.Color.Secondary" Typo="Typo.h6">Фильтр</MudText>
+        </MudStack>
+        <MudSpacer/>
+        <MudIconButton Icon="@Icons.Material.Outlined.Close" OnClick="ChangeDrawer"></MudIconButton>
+    </MudDrawerHeader>
+    <MudDrawerContainer>
+        <MudGrid Class="p-3" Spacing="1">
+            <MudItem xs="12">
+                <MudSelect T="FrameMaterial" @bind-Value="_filter.Material" Variant="Variant.Outlined" 
+                            Label="Материал оправы" ToStringFunc="@((x) => x?.Name)">
+                    @foreach(var material in _frameMaterials)
+                    {
+                        <MudSelectItem Value="@(material)" />
+                    }
+                </MudSelect>
             </MudItem>
-        }
-    </MudGrid>
-
+            <MudItem xs="12">
+                <MudSelect T="FrameType" @bind-Value="_filter.Type" Variant="Variant.Outlined" 
+                            Label="Тип оправы" ToStringFunc="@((x) => x?.Name)">
+                    @foreach(var type in _frameTypes)
+                    {
+                        <MudSelectItem Value="@(type)" />
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12">
+                <MudSelect T="Brand" @bind-Value="_filter.Brand" Variant="Variant.Outlined" 
+                            Label="Бренд" ToStringFunc="@((x) => x?.Name)">
+                    @foreach(var brand in _frameBrands)
+                    {
+                        <MudSelectItem Value="@(brand)" />
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12">
+                <MudSelect T="Gender" @bind-Value="_filter.Gender" Variant="Variant.Outlined" 
+                            Label="Пол" ToStringFunc="@((x) => x?.Name)">
+                    @foreach(var gender in _genders)
+                    {
+                        <MudSelectItem Value="@(gender)" />
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12">
+                <MudStack Row AlignItems="AlignItems.Center">
+                    <MudFab Size="Size.Medium" style="@($"background-color: {_filter.Color?.Value};")"></MudFab>
+                    <MudColorPicker ValueChanged="@(ColorChanged)" Variant="Variant.Outlined" Label="Цвет оправы" 
+                        TransformOrigin="Origin.CenterLeft" ColorPickerView="ColorPickerView.Palette" 
+                        Palette="_pickerColors"></MudColorPicker>
+                </MudStack>
+            </MudItem>
+            <MudItem>
+                <MudCheckBox T="bool" Label="По вашим предпочтениям" Size="Size.Medium" Color="MudBlazor.Color.Primary"></MudCheckBox>
+            </MudItem>
+            <MudItem xs="12">
+                <MudButton FullWidth Variant="Variant.Filled" Color="MudBlazor.Color.Primary">Применить</MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudDrawerContainer>
+</MudDrawer>
 
 @code {
     private List<FrameShort> _frames = new();
+    private List<FrameMaterial> _frameMaterials = new();
+    private List<FrameType> _frameTypes = new();
+    private List<Brand> _frameBrands = new();
+    private List<OpticSalon.Domain.Models.Color> _frameColors = new();
+    private List<Gender> _genders = new();
+    private FramesFilterCredentials _filter = new();
+    private bool _isDrawerOpen;
+    private List<MudColor> _pickerColors { get; set; } = new();
 
     protected async override Task OnInitializedAsync()
     {
@@ -63,5 +138,18 @@
     private string GetSizeString(FrameSizes sizes)
     {
         return $"{sizes.LensWidth}-{sizes.DistanceBetweenLens}-{sizes.TempleLenght}";
+    }
+
+    private void ChangeDrawer()
+    {
+        _isDrawerOpen = !_isDrawerOpen;
+    }
+
+    private void ColorChanged(MudColor mudColor)
+    {
+        var color = mudColor.Value.Substring(0, mudColor.Value.Length - 2);
+
+        _filter.Color= _frameColors.FirstOrDefault(x => x.Value.ToLower() == color)!;
+        StateHasChanged();
     }
 }
