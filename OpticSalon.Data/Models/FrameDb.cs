@@ -4,7 +4,6 @@
     {
         public int Id { get; set; }
         public string Model { get; set; } = null!;
-        public string Article { get; set; } = null!;
         public decimal Cost { get; set; }
         public BrandDb Brand { get; set; } = null!;
         public int BrandId { get; set; }

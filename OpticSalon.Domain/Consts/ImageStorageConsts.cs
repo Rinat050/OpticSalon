@@ -2,6 +2,6 @@
 {
     public static class ImageStorageConsts
     {
-        public const string FrameImagesBucket = "FrameImages";
+        public const string FrameImagesBucket = "frame-images";
     }
 }
