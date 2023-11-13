@@ -2,6 +2,7 @@
 {
     public class FrameShort
     {
+        public int Id { get; set; }
         public string Model { get; set; } = null!;
         public decimal Cost { get; set; }
         public Brand Brand { get; set; } = null!;

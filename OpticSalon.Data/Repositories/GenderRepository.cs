@@ -6,7 +6,7 @@ namespace OpticSalon.Data.Repositories
 {
     public class GenderRepository : BaseRepository, IGenderRepository
     {
-        protected GenderRepository(ApplicationContext context) : base(context)
+        public GenderRepository(ApplicationContext context) : base(context)
         {
         }
 

@@ -44,6 +44,11 @@ namespace OpticSalon.Data.Repositories
         public async Task<ClientPreferences?> GetClientPreferences(int clientId)
         {
             var result = await Context.ClientPreferences
+                        .Include(x => x.FrameColor)
+                        .Include(x => x.FrameMaterial)
+                        .Include(x => x.FrameType)
+                        .Include(x => x.FrameSizes)
+                        .Include(x => x.Client)
                         .FirstOrDefaultAsync(x => x.ClientId == clientId);
 
             return result == null ? null : Mapper.Map(result);

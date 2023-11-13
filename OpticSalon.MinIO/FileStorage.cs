@@ -21,14 +21,14 @@ namespace OpticSalon.MinIO
                 .WithBucket(bucketName)
                 .WithObject(fileName);
 
-            var res = await _client.StatObjectAsync(statArgs);
-
             var getArgs = new GetObjectArgs()
                 .WithBucket(bucketName)
                 .WithObject(fileName)
                 .WithCallbackStream(x => x.CopyTo(memoryStream));
 
-            var stream = await _client.GetObjectAsync(getArgs);
+
+            var res = await _client.StatObjectAsync(statArgs);
+            await _client.GetObjectAsync(getArgs);
 
             memoryStream.Position = 0;
 

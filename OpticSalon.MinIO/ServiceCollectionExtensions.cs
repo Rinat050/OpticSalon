@@ -12,7 +12,9 @@ namespace OpticSalon.MinIO
             services.AddMinio(configureClient => 
                 configureClient
                     .WithEndpoint(configuration["MinIO:EndPoint"])
-                    .WithCredentials(configuration["MinIO:AccessKey"], configuration["MinIO:SecretKey"]));
+                    .WithCredentials(configuration["MinIO:AccessKey"], configuration["MinIO:SecretKey"])
+                    .WithSSL(false)
+                    .Build());
 
             services.AddScoped<IFileStorage, FileStorage>();
 

@@ -11,7 +11,9 @@
 @inject IBrandService BrandService
 @inject IGenderService GenderService
 @inject IClientService ClientService
-@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
+@inject IImageLoadingService ImageLoadingService
+@inject IJSRuntime JS
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Каталог</PageTitle>
 
@@ -26,10 +28,9 @@
             Variant="Variant.Filled" Color="MudBlazor.Color.Primary">Фильтр</MudButton>
     </MudStack>
 </MudPaper>
-
 @if (_isLoading)
 {
-    <MudProgressLinear Color="MudBlazor.Color.Primary" Indeterminate="true" Class="my-7" />
+    <MudProgressLinear Color="MudBlazor.Color.Primary" Indeterminate="true" Class="m-1" />
     return;
 }
 
@@ -38,7 +39,16 @@
     {
         <MudItem xs="12" sm="6" md="4" lg="3">
             <MudCard Elevation="3">
-                <MudCardMedia Image="images/NEOLOOK8057.jpg" Height="190" />
+                @if (!_isImagesLoaded)
+                {
+                    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Animation="Animation.Wave" Height="270px"/>
+                }
+                else
+                {
+                     <div class="mud-card-media" style="min-height:150px;">
+                        <MudImage id="@(frame.Id)" Style="display: block; margin: auto;object-fit: contain; max-width: 95%; max-height: 30vh" Alt=""/>
+                    </div>
+                }
                 <MudCardContent>
                     <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">@($"{frame.Brand.Name} {frame.Model}")</MudText>
                     <MudText Typo="Typo.body2">Размеры: @(GetSizeString(frame.Sizes))</MudText>
@@ -132,6 +142,7 @@
 
     private bool _isDrawerOpen;
     private bool _isLoading;
+    private bool _isImagesLoaded;
     private List<MudColor> _pickerColors { get; set; } = new();
 
     protected async override Task OnInitializedAsync()
@@ -179,6 +190,7 @@
     private async Task FillFramesData()
     {
         _isLoading = true;
+        _isImagesLoaded = false;
         var res = await FrameService.GetAllFrames(_filter.Type?.Id, _filter.Material?.Id, 
                                 _filter.Color?.Id, _filter.Gender?.Id, _filter.Brand?.Id, 
                                 _filter.IsClientPrefencesSelected ? _currentClientPreferences : null);
@@ -189,6 +201,8 @@
         }
 
         _isLoading = false;
+
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task LoadClientPreferences()
@@ -225,6 +239,34 @@
         var color = mudColor.Value.Substring(0, mudColor.Value.Length - 2);
 
         _filter.Color= _frameColors.FirstOrDefault(x => x.Value.ToLower() == color)!;
+
         StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (_frames.Count == 0) return;
+
+            foreach(var frame in _frames)
+            {
+                var loadingRes = await ImageLoadingService.GetFrameImageAsync(frame.MainImageName);
+
+                if (!loadingRes.Success) return;
+
+                var dotnetImageStream = new DotNetStreamReference(loadingRes.Data!);
+                var res = await JS.InvokeAsync<bool>("getById", $"{frame.Id}");
+                if (res)
+                {
+                    await JS.InvokeVoidAsync("setImage", $"{frame.Id}", dotnetImageStream);
+                }
+            }
+
+            _isImagesLoaded = true;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception)
+        {}
     }
 }

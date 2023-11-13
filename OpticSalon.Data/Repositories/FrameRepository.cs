@@ -47,11 +47,13 @@ namespace OpticSalon.Data.Repositories
             var res = await Context.Frames
                                         .Include(x => x.Colors)
                                         .Include(x => x.Sizes)
-                                        .Where(x => _type(x) && _color(x) && _brand(x) &&
-                                        _gender(x) && _material(x) && _preferences(x))
+                                        .Include(x => x.Brand)
                                         .ToListAsync();
 
-            var frames = res.Select(x => Mapper.Map(x)).ToList();
+            var frames = res.Where(x => _type(x) && _color(x) && _brand(x) &&
+                                _gender(x) && _material(x) && _preferences(x))
+                            .Select(x => Mapper.Map(x))
+                            .ToList();
 
             return frames;
         }
