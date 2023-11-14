@@ -1,0 +1,111 @@
+﻿@page "/frameShow/{frameId:int}"
+@using OpticSalon.Domain.Models
+
+<PageTitle>@($"{_frame.Brand?.Name} {_frame.Model}")</PageTitle>
+
+<MudContainer Class="d-flex align-center justify-center mud-width-full" style="height:90vh;">
+    <MudCard Class="p-4 w-100" Style="border-radius: 15px;"
+             Outlined="false" Elevation="5">
+        <MudCardHeader>
+            <MudStack Row AlignItems="AlignItems.Center">
+                <MudIcon Icon="@Icons.Custom.Brands.Awesome" Size="Size.Large"
+                         Color="MudBlazor.Color.Secondary"></MudIcon>
+                <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">
+                    Оправа @($"{_frame.Brand?.Name} {_frame.Model}")
+                </MudText>
+            </MudStack>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid Justify="Justify.SpaceAround" Spacing="1">
+                <MudItem xs="12" sm="4">
+                    <div style="display:flex; justify-content:start;">
+                        @if (_isImageLoaded)
+                        {
+                            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Animation="Animation.Wave" Height="250px" Width="300px"/>
+                        }
+                        else
+                        {
+                            <MudImage Elevation="2" Style="min-width:150px; width: 85%;" id="frame-image" Src="images/NEOLOOK8057.jpg" Alt="" />
+                        }
+                    </div>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudGrid Spacing="1">
+                        <MudItem xs="12">
+                           <MudStack Row AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Бренд:</MudText>
+                                <MudText Typo="Typo.h6" Style="font-weight: 400">@(_frame.Brand?.Name)</MudText>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudStack Row AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Модель:</MudText>
+                                <MudText Typo="Typo.h6" Style="font-weight: 400">@(_frame.Model)</MudText>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudStack Row AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Тип:</MudText>
+                                <MudText Typo="Typo.h6" Style="font-weight: 400">Ободковый</MudText>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudStack Row AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Материал:</MudText>
+                                <MudText Typo="Typo.h6" Style="font-weight: 400">Металл</MudText>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudStack Row AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Пол:</MudText>
+                                <MudText Typo="Typo.h6" Style="font-weight: 400">Мужской</MudText>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudStack Row AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Размеры:</MudText>
+                                <MudText Typo="Typo.h6" Style="font-weight: 400">54-18-140</MudText>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudStack Row AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Стоимость:</MudText>
+                                <MudChip Size="Size.Large" Variant="Variant.Outlined" Color="MudBlazor.Color.Primary">5900 руб.</MudChip>
+                            </MudStack>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudGrid>
+                        <MudItem xs="12">
+                           <MudContainer Class="p-0">
+                                <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Доступные цвета:</MudText>
+                                <MudChipSet @bind-SelectedChip="_colorChip" Filter Mandatory>
+                                    @foreach(var val in Enumerable.Range(1,7))
+                                    {
+                                        <MudChip Style="width:40px;" Color="MudBlazor.Color.Primary"></MudChip>
+                                    }
+                                </MudChipSet>
+                            </MudContainer>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudButton FullWidth Variant="Variant.Filled"
+                            Color="MudBlazor.Color.Primary" Class="mt-2">Заказать</MudButton>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+</MudContainer>
+
+
+
+@code {
+    [Parameter]
+    public int FrameId { get; set; }
+    private FrameShort _frame = new() { Brand = new Brand() { Name = "NEOLOOK" }, Model = "6573M" };
+    private MudChip _colorChip = null!;
+
+    private bool _isImageLoaded = false;
+}
