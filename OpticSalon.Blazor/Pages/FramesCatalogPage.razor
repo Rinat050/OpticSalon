@@ -24,87 +24,95 @@
             <MudText Typo="Typo.h4" Color="MudBlazor.Color.Secondary">Каталог</MudText>
         </MudStack>
         <MudSpacer />
-        <MudButton Disabled="_isLoading" Style="min-width: 100px;" OnClick="ChangeDrawer" 
-            Variant="Variant.Filled" Color="MudBlazor.Color.Primary">Фильтр</MudButton>
+        <MudButton Disabled="_isLoading" Style="min-width: 100px;" OnClick="ChangeDrawer"
+                   Variant="Variant.Filled" Color="MudBlazor.Color.Primary">Фильтр</MudButton>
     </MudStack>
 </MudPaper>
+
 @if (_isLoading)
 {
     <MudProgressLinear Color="MudBlazor.Color.Primary" Indeterminate="true" Class="m-1" />
     return;
 }
 
-<MudGrid Class="m-0 pe-2" Justify="Justify.Center" Spacing="2">
-    @foreach (var frame in _frames)
-    {
-        <MudItem xs="12" sm="6" md="4" lg="3">
-            <MudCard Elevation="3">
-                @if (!_isImagesLoaded)
-                {
-                    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Animation="Animation.Wave" Height="270px"/>
-                }
-                else
-                {
-                     <div class="mud-card-media" style="min-height:150px;">
-                        <MudImage id="@(frame.Id)" Style="display: block; margin: auto;object-fit: contain; max-width: 95%; max-height: 30vh" Alt=""/>
-                    </div>
-                }
-                <MudCardContent>
-                    <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">@($"{frame.Brand.Name} {frame.Model}")</MudText>
-                    <MudText Typo="Typo.body2">Размеры: @(GetSizeString(frame.Sizes))</MudText>
-                    <MudText Typo="Typo.body1">Стоимость: @($"{frame.Cost} руб.")</MudText>
-                </MudCardContent>
-                <MudCardActions>
-                    <MudButton FullWidth Variant="Variant.Outlined" Color="MudBlazor.Color.Primary">Подробнее</MudButton>
-                </MudCardActions>
-            </MudCard>
-        </MudItem>
-    }
-</MudGrid>
+@if (_frames.Count == 0)
+{
+    <MudAlert Class="m-2" Severity="Severity.Normal">Ничего не найдено...</MudAlert>
+}
+else
+{
+    <MudGrid Class="m-0 pe-2" Justify="Justify.Center" Spacing="2">
+        @foreach (var frame in _frames)
+        {
+            <MudItem xs="12" sm="6" md="4" lg="3">
+                <MudCard Elevation="3">
+                    @if (!_isImagesLoaded)
+                    {
+                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Animation="Animation.Wave" Height="250px" />
+                    }
+                    else
+                    {
+                        <div class="mud-card-media" style="min-height:150px;">
+                            <MudImage id="@(frame.Id)" Style="display: block; margin: auto;object-fit: contain; max-width: 95%; max-height: 30vh" Alt="" />
+                        </div>
+                    }
+                    <MudCardContent>
+                        <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">@($"{frame.Brand.Name} {frame.Model}")</MudText>
+                        <MudText Typo="Typo.body2">Размеры: @(GetSizeString(frame.Sizes))</MudText>
+                        <MudText Typo="Typo.body1">Стоимость: @($"{frame.Cost} руб.")</MudText>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton FullWidth Variant="Variant.Outlined" Color="MudBlazor.Color.Primary">Подробнее</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+}
 
-<MudDrawer @bind-Open="@_isDrawerOpen" Width="25%" Height="100%" 
-        Anchor="Anchor.Right" Elevation="1" Style="overflow-x: hidden;" Variant="@DrawerVariant.Temporary">
+<MudDrawer @bind-Open="@_isDrawerOpen" Width="30%" Height="100%"
+           Anchor="Anchor.Right" Elevation="1" Style="overflow-x: hidden;" Variant="@DrawerVariant.Temporary">
     <MudDrawerHeader>
         <MudStack Row AlignItems="AlignItems.Center">
             <MudIcon Icon="@Icons.Material.Outlined.FilterAlt" Size="Size.Large" Color="MudBlazor.Color.Secondary"></MudIcon>
             <MudText Color="MudBlazor.Color.Secondary" Typo="Typo.h6">Фильтр</MudText>
         </MudStack>
-        <MudSpacer/>
+        <MudSpacer />
         <MudIconButton Icon="@Icons.Material.Outlined.Close" OnClick="ChangeDrawer"></MudIconButton>
     </MudDrawerHeader>
     <MudDrawerContainer>
         <MudGrid Class="p-3" Spacing="1">
             <MudItem xs="12">
-                <MudSelect T="FrameMaterial" @bind-Value="_filter.Material" Variant="Variant.Outlined" 
-                            Label="Материал оправы" ToStringFunc="@((x) => x?.Name)">
-                    @foreach(var material in _frameMaterials)
+                <MudSelect T="FrameMaterial" @bind-Value="_filter.Material" Clearable Variant="Variant.Outlined"
+                           Label="Материал оправы" ToStringFunc="@((x) => x?.Name)">
+                    @foreach (var material in _frameMaterials)
                     {
                         <MudSelectItem Value="@(material)" />
                     }
                 </MudSelect>
             </MudItem>
             <MudItem xs="12">
-                <MudSelect T="FrameType" @bind-Value="_filter.Type" Variant="Variant.Outlined" 
-                            Label="Тип оправы" ToStringFunc="@((x) => x?.Name)">
-                    @foreach(var type in _frameTypes)
+                <MudSelect T="FrameType" @bind-Value="_filter.Type" Clearable Variant="Variant.Outlined"
+                           Label="Тип оправы" ToStringFunc="@((x) => x?.Name)">
+                    @foreach (var type in _frameTypes)
                     {
                         <MudSelectItem Value="@(type)" />
                     }
                 </MudSelect>
             </MudItem>
             <MudItem xs="12">
-                <MudSelect T="Brand" @bind-Value="_filter.Brand" Variant="Variant.Outlined" 
-                            Label="Бренд" ToStringFunc="@((x) => x?.Name)">
-                    @foreach(var brand in _frameBrands)
+                <MudSelect T="Brand" @bind-Value="_filter.Brand" Clearable Variant="Variant.Outlined"
+                           Label="Бренд" ToStringFunc="@((x) => x?.Name)">
+                    @foreach (var brand in _frameBrands)
                     {
                         <MudSelectItem Value="@(brand)" />
                     }
                 </MudSelect>
             </MudItem>
             <MudItem xs="12">
-                <MudSelect T="Gender" @bind-Value="_filter.Gender" Variant="Variant.Outlined" 
-                            Label="Пол" ToStringFunc="@((x) => x?.Name)">
-                    @foreach(var gender in _genders)
+                <MudSelect T="Gender" @bind-Value="_filter.Gender" Clearable Variant="Variant.Outlined"
+                           Label="Пол" ToStringFunc="@((x) => x?.Name)">
+                    @foreach (var gender in _genders)
                     {
                         <MudSelectItem Value="@(gender)" />
                     }
@@ -113,18 +121,22 @@
             <MudItem xs="12">
                 <MudStack Row AlignItems="AlignItems.Center">
                     <MudFab Size="Size.Medium" style="@($"background-color: {_filter.Color?.Value};")"></MudFab>
-                    <MudColorPicker ValueChanged="@(ColorChanged)" Variant="Variant.Outlined" Label="Цвет оправы" 
-                        TransformOrigin="Origin.CenterLeft" ColorPickerView="ColorPickerView.Palette" 
-                        Palette="_pickerColors"></MudColorPicker>
+                    <MudColorPicker ValueChanged="@(ColorChanged)" Clearable Variant="Variant.Outlined" Label="Цвет оправы"
+                                    TransformOrigin="Origin.CenterLeft" ColorPickerView="ColorPickerView.Palette"
+                                    Palette="_pickerColors"></MudColorPicker>
                 </MudStack>
             </MudItem>
             <MudItem xs="12">
-                <MudCheckBox @bind-Checked="_filter.IsClientPrefencesSelected" Label="По вашим предпочтениям" 
-                    Size="Size.Medium" Color="MudBlazor.Color.Primary"></MudCheckBox>
+                <MudCheckBox @bind-Checked="_filter.IsClientPrefencesSelected" Label="По вашим предпочтениям"
+                             Size="Size.Medium" Color="MudBlazor.Color.Primary"></MudCheckBox>
             </MudItem>
             <MudItem xs="12">
-                <MudButton FullWidth OnClick="@(async () => await FillFramesData())" Variant="Variant.Filled" 
-                    Color="MudBlazor.Color.Primary">Применить</MudButton>
+                <MudButton FullWidth OnClick="@(async () => await FillFramesData())" Variant="Variant.Filled"
+                           Color="MudBlazor.Color.Primary">Применить</MudButton>
+            </MudItem>
+            <MudItem xs="12">
+                <MudButton FullWidth OnClick="@(ClearFilter)" Variant="Variant.Outlined"
+                           Color="MudBlazor.Color.Primary">Очистить</MudButton>
             </MudItem>
         </MudGrid>
     </MudDrawerContainer>
@@ -191,8 +203,8 @@
     {
         _isLoading = true;
         _isImagesLoaded = false;
-        var res = await FrameService.GetAllFrames(_filter.Type?.Id, _filter.Material?.Id, 
-                                _filter.Color?.Id, _filter.Gender?.Id, _filter.Brand?.Id, 
+        var res = await FrameService.GetAllFrames(_filter.Type?.Id, _filter.Material?.Id,
+                                _filter.Color?.Id, _filter.Gender?.Id, _filter.Brand?.Id,
                                 _filter.IsClientPrefencesSelected ? _currentClientPreferences : null);
 
         if (res.Success)
@@ -218,7 +230,7 @@
 
         var res = await ClientService.GetClientPreferences(clientId);
 
-        if(res.Success)
+        if (res.Success)
         {
             _currentClientPreferences = res.Data!;
         }
@@ -238,7 +250,7 @@
     {
         var color = mudColor.Value.Substring(0, mudColor.Value.Length - 2);
 
-        _filter.Color= _frameColors.FirstOrDefault(x => x.Value.ToLower() == color)!;
+        _filter.Color = _frameColors.FirstOrDefault(x => x.Value.ToLower() == color)!;
 
         StateHasChanged();
     }
@@ -249,7 +261,7 @@
         {
             if (_frames.Count == 0) return;
 
-            foreach(var frame in _frames)
+            foreach (var frame in _frames)
             {
                 var loadingRes = await ImageLoadingService.GetFrameImageAsync(frame.MainImageName);
 
@@ -267,6 +279,11 @@
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception)
-        {}
+        { }
+    }
+
+    private void ClearFilter()
+    {
+        _filter = new FramesFilterCredentials();
     }
 }
