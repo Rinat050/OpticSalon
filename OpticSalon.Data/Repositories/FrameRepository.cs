@@ -11,6 +11,18 @@ namespace OpticSalon.Data.Repositories
         {
         }
 
+        public async Task<Frame?> GetFrameById(int id)
+        {
+            var frame = await Context.Frames.Include(x => x.Gender)
+                                      .Include(x => x.Brand)
+                                      .Include(x => x.Material)
+                                      .Include(x => x.Colors)
+                                      .Include(x => x.Sizes)
+                                      .Include(x => x.Type)
+                                      .FirstOrDefaultAsync(x => x.Id == id);
+            return frame is null ? null : Mapper.MapFrame(frame);
+        }
+
         public async Task<List<FrameShort>> GetFrames(int? typeId, int? materialId, int? colorId, 
                                             int? genderId, int? brandId, ClientPreferences? clientPreferences)
         {
@@ -52,7 +64,7 @@ namespace OpticSalon.Data.Repositories
 
             var frames = res.Where(x => _type(x) && _color(x) && _brand(x) &&
                                 _gender(x) && _material(x) && _preferences(x))
-                            .Select(x => Mapper.Map(x))
+                            .Select(x => Mapper.MapFrameShort(x))
                             .ToList();
 
             return frames;

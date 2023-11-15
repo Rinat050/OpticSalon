@@ -31,7 +31,7 @@
 
 @if (_isLoading)
 {
-    <MudProgressLinear Color="MudBlazor.Color.Primary" Indeterminate="true" Class="m-1" />
+    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
     return;
 }
 
@@ -46,16 +46,11 @@ else
         {
             <MudItem xs="12" sm="6" md="4" lg="3">
                 <MudCard Elevation="3">
-                    @if (!_isImagesLoaded)
-                    {
-                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Animation="Animation.Wave" Height="250px" />
-                    }
-                    else
-                    {
+              
                         <div class="mud-card-media" style="min-height:150px;">
-                            <MudImage id="@(frame.Id)" Style="display: block; margin: auto;object-fit: contain; max-width: 95%; max-height: 30vh" Alt="" />
+                            <MudImage id="@(frame.Id)" Style="display: block; margin: auto;object-fit: contain; max-width: 95%; max-height: 30vh" Alt="Картинка" />
                         </div>
-                    }
+                    
                     <MudCardContent>
                         <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">@($"{frame.Brand.Name} {frame.Model}")</MudText>
                         <MudText Typo="Typo.body2">Размеры: @(GetSizeString(frame.Sizes))</MudText>
@@ -170,7 +165,6 @@ else
         if (frameTypeResult.Success)
             _frameTypes = frameTypeResult.Data!;
 
-
         var frameMaterialResult = await FrameMaterialService.GetAllFrameMaterials();
 
         if (frameMaterialResult.Success)
@@ -194,7 +188,7 @@ else
             _frameColors.ForEach(x => _pickerColors.Add(new MudColor(x.Value)));
         }
 
-        await LoadClientPreferences();
+        //await LoadClientPreferences();
 
         await InvokeAsync(StateHasChanged);
     }
@@ -259,22 +253,31 @@ else
     {
         try
         {
-            if (_frames.Count == 0) return;
+            if (_frames.Count == 0 || _isImagesLoaded) return;
+
+            List<Task> tasks = new List<Task>();
 
             foreach (var frame in _frames)
             {
-                var loadingRes = await ImageLoadingService.GetFrameImageAsync(frame.MainImageName);
-
-                if (!loadingRes.Success) return;
-
-                var dotnetImageStream = new DotNetStreamReference(loadingRes.Data!);
-                var res = await JS.InvokeAsync<bool>("getById", $"{frame.Id}");
-                if (res)
+                var task = new Task(async () =>
                 {
-                    await JS.InvokeVoidAsync("setImage", $"{frame.Id}", dotnetImageStream);
-                }
+                    var loadingRes = await ImageLoadingService.GetFrameImageAsync(frame.MainImageName);
+
+                    if (!loadingRes.Success) return;
+
+                    var dotnetImageStream = new DotNetStreamReference(loadingRes.Data!);
+                    var res = await JS.InvokeAsync<bool>("getById", $"{frame.Id}");
+                    if (res)
+                    {
+                        await JS.InvokeVoidAsync("setImage", $"{frame.Id}", dotnetImageStream);
+                    }
+                });
+
+                tasks.Add(task);
+                task.Start();
             }
 
+            Task.WaitAll(tasks.ToArray());
             _isImagesLoaded = true;
             await InvokeAsync(StateHasChanged);
         }

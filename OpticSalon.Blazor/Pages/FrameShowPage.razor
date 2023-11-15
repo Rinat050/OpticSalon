@@ -1,9 +1,26 @@
 ﻿@page "/frameShow/{frameId:int}"
+@using MudBlazor.Utilities
 @using OpticSalon.Domain.Models
+@inject IFrameService FrameService
+@inject IImageLoadingService ImageLoadingService
+@inject IJSRuntime JS
 
-<PageTitle>@($"{_frame.Brand?.Name} {_frame.Model}")</PageTitle>
+<PageTitle>@($"{_frame?.Brand?.Name} {_frame?.Model}")</PageTitle>
+
+@if (_isLoading)
+{
+    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
+    return;
+}
 
 <MudContainer Class="d-flex align-center justify-center mud-width-full" style="height:90vh;">
+
+    @if (_frame is null)
+    {
+        <MudAlert Class="m-2" Severity="Severity.Normal">Оправа не найдена...</MudAlert>
+        return;
+    }
+
     <MudCard Class="p-4 w-100" Style="border-radius: 15px;"
              Outlined="false" Elevation="5">
         <MudCardHeader>
@@ -19,14 +36,7 @@
             <MudGrid Justify="Justify.SpaceAround" Spacing="1">
                 <MudItem xs="12" sm="4">
                     <div style="display:flex; justify-content:start;">
-                        @if (_isImageLoaded)
-                        {
-                            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Animation="Animation.Wave" Height="250px" Width="300px"/>
-                        }
-                        else
-                        {
-                            <MudImage Elevation="2" Style="min-width:150px; width: 85%;" id="frame-image" Src="images/NEOLOOK8057.jpg" Alt="" />
-                        }
+                        <MudImage id="frame-image" Elevation="2" Style="min-width:150px; width: 85%;" Alt="" />
                     </div>
                 </MudItem>
                 <MudItem xs="12" sm="4">
@@ -46,31 +56,31 @@
                         <MudItem xs="12">
                             <MudStack Row AlignItems="AlignItems.Center">
                                 <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Тип:</MudText>
-                                <MudText Typo="Typo.h6" Style="font-weight: 400">Ободковый</MudText>
+                                <MudText Typo="Typo.h6" Style="font-weight: 400">@(_frame.Type?.Name)</MudText>
                             </MudStack>
                         </MudItem>
                         <MudItem xs="12">
                             <MudStack Row AlignItems="AlignItems.Center">
                                 <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Материал:</MudText>
-                                <MudText Typo="Typo.h6" Style="font-weight: 400">Металл</MudText>
+                                <MudText Typo="Typo.h6" Style="font-weight: 400">@(_frame.Material?.Name)</MudText>
                             </MudStack>
                         </MudItem>
                         <MudItem xs="12">
                             <MudStack Row AlignItems="AlignItems.Center">
                                 <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Пол:</MudText>
-                                <MudText Typo="Typo.h6" Style="font-weight: 400">Мужской</MudText>
+                                <MudText Typo="Typo.h6" Style="font-weight: 400">@(_frame.Gender?.Name)</MudText>
                             </MudStack>
                         </MudItem>
                         <MudItem xs="12">
                             <MudStack Row AlignItems="AlignItems.Center">
                                 <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Размеры:</MudText>
-                                <MudText Typo="Typo.h6" Style="font-weight: 400">54-18-140</MudText>
+                                <MudText Typo="Typo.h6" Style="font-weight: 400">@GetSizeString(_frame.Sizes)</MudText>
                             </MudStack>
                         </MudItem>
                         <MudItem xs="12">
                             <MudStack Row AlignItems="AlignItems.Center">
                                 <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Стоимость:</MudText>
-                                <MudChip Size="Size.Large" Variant="Variant.Outlined" Color="MudBlazor.Color.Primary">5900 руб.</MudChip>
+                                <MudChip Size="Size.Large" Variant="Variant.Outlined" Color="MudBlazor.Color.Primary">@(_frame.Cost) руб.</MudChip>
                             </MudStack>
                         </MudItem>
                     </MudGrid>
@@ -81,16 +91,16 @@
                            <MudContainer Class="p-0">
                                 <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Доступные цвета:</MudText>
                                 <MudChipSet @bind-SelectedChip="_colorChip" Filter Mandatory>
-                                    @foreach(var val in Enumerable.Range(1,7))
+                                    @foreach(var color in _frame.Colors)
                                     {
-                                        <MudChip Style="width:40px;" Color="MudBlazor.Color.Primary"></MudChip>
+                                        <MudChip text="@(color.Id)" style="@($"background-color: {color?.Value}; width:40px;")"></MudChip>
                                     }
                                 </MudChipSet>
                             </MudContainer>
                         </MudItem>
                         <MudItem xs="12">
                             <MudButton FullWidth Variant="Variant.Filled"
-                            Color="MudBlazor.Color.Primary" Class="mt-2">Заказать</MudButton>
+                                Color="MudBlazor.Color.Primary" Disabled="@(_colorChip == null)" Class="mt-2">Заказать</MudButton>
                         </MudItem>
                     </MudGrid>
                 </MudItem>
@@ -104,8 +114,55 @@
 @code {
     [Parameter]
     public int FrameId { get; set; }
-    private FrameShort _frame = new() { Brand = new Brand() { Name = "NEOLOOK" }, Model = "6573M" };
+    private Frame _frame = null!;
     private MudChip _colorChip = null!;
 
     private bool _isImageLoaded = false;
+    private bool _isLoading = false;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadFrame();
+    }
+
+    private string GetSizeString(FrameSizes sizes)
+    {
+        return $"{sizes.LensWidth}-{sizes.DistanceBetweenLens}-{sizes.TempleLenght}";
+    }
+
+    private async Task LoadFrame()
+    {
+        _isLoading = true;
+        var res = await FrameService.GetFrameById(FrameId); 
+        _isLoading = false;
+
+        if (res.Success)
+        {
+            _frame = res.Data!;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (_frame is null || _isImageLoaded) return;
+
+            var loadingRes = await ImageLoadingService.GetFrameImageAsync(_frame.MainImageName);
+
+            if (!loadingRes.Success) return;
+
+            var dotnetImageStream = new DotNetStreamReference(loadingRes.Data!);
+            var res = await JS.InvokeAsync<bool>("getById", "frame-image");
+            if (res)
+            {
+                await JS.InvokeVoidAsync("setImage", "frame-image", dotnetImageStream);
+            }
+
+            _isImageLoaded = true;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception)
+        { }
+    }
 }

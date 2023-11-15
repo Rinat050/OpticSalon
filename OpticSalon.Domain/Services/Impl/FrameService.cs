@@ -2,6 +2,7 @@
 using OpticSalon.Domain.Models;
 using OpticSalon.Domain.Repositories;
 using OpticSalon.Domain.ResultModels;
+using OpticSalon.Domain.SuccessMessages;
 
 namespace OpticSalon.Domain.Services.Impl
 {
@@ -54,6 +55,37 @@ namespace OpticSalon.Domain.Services.Impl
             catch
             {
                 return new ResultWithData<List<FrameShort>>()
+                {
+                    Success = false,
+                    Description = DefaultErrors.ServerError
+                };
+            }
+        }
+
+        public async Task<ResultWithData<Frame>> GetFrameById(int id)
+        {
+            try
+            {
+                var result = await _frameRepository.GetFrameById(id);
+
+                if (result == null)
+                {
+                    return new ResultWithData<Frame>()
+                    {
+                        Success = false,
+                        Description = FrameServiceMessages.NotFounded
+                    };
+                }
+
+                return new ResultWithData<Frame>()
+                {
+                    Success = true,
+                    Data = result
+                };
+            }
+            catch
+            {
+                return new ResultWithData<Frame>()
                 {
                     Success = false,
                     Description = DefaultErrors.ServerError
