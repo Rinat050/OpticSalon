@@ -90,17 +90,23 @@
                         <MudItem xs="12">
                            <MudContainer Class="p-0">
                                 <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Доступные цвета:</MudText>
-                                <MudChipSet @bind-SelectedChip="_colorChip" Filter Mandatory>
-                                    @foreach(var color in _frame.Colors)
-                                    {
-                                        <MudChip text="@(color.Id)" style="@($"background-color: {color?.Value}; width:40px;")"></MudChip>
-                                    }
-                                </MudChipSet>
+                                @foreach(var color in _frame.Colors)
+                                {
+                                    <MudFab Size="Size.Small" Class="m-1" style="@($"background-color: {color.Color.Value};")" 
+                                        OnClick="@(() => ColorSelect(color.Color))"></MudFab>
+                                }
                             </MudContainer>
                         </MudItem>
+                        @if (_selectedColor != null)
+                        {
+                            <MudItem xs="12">
+                                <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Выбранный цвет:</MudText>
+                                <MudFab Size="Size.Medium" style="@($"background-color: {_selectedColor.Value};")"></MudFab>
+                            </MudItem>
+                        }
                         <MudItem xs="12">
                             <MudButton FullWidth Variant="Variant.Filled"
-                                Color="MudBlazor.Color.Primary" Disabled="@(_colorChip == null)" Class="mt-2">Заказать</MudButton>
+                                Color="MudBlazor.Color.Primary" Disabled="@(_selectedColor == null)" Class="mt-2">Заказать</MudButton>
                         </MudItem>
                     </MudGrid>
                 </MudItem>
@@ -115,7 +121,7 @@
     [Parameter]
     public int FrameId { get; set; }
     private Frame _frame = null!;
-    private MudChip _colorChip = null!;
+    private OpticSalon.Domain.Models.Color _selectedColor = null!;
 
     private bool _isImageLoaded = false;
     private bool _isLoading = false;
@@ -127,6 +133,7 @@
 
     private string GetSizeString(FrameSizes sizes)
     {
+
         return $"{sizes.LensWidth}-{sizes.DistanceBetweenLens}-{sizes.TempleLenght}";
     }
 
@@ -164,5 +171,10 @@
         }
         catch (Exception)
         { }
+    }
+
+    private void ColorSelect(OpticSalon.Domain.Models.Color color)
+    {
+        _selectedColor = color;
     }
 }

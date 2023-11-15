@@ -48,7 +48,7 @@ else
                 <MudCard Elevation="3">
               
                         <div class="mud-card-media" style="min-height:150px;">
-                            <MudImage id="@(frame.Id)" Style="display: block; margin: auto;object-fit: contain; max-width: 95%; max-height: 30vh" Alt="Картинка" />
+                            <MudImage id="@(frame.Id)" Style="display: block; margin: auto;object-fit: contain; max-width: 95%; max-height: 30vh" />
                         </div>
                     
                     <MudCardContent>
@@ -266,11 +266,16 @@ else
                     if (!loadingRes.Success) return;
 
                     var dotnetImageStream = new DotNetStreamReference(loadingRes.Data!);
-                    var res = await JS.InvokeAsync<bool>("getById", $"{frame.Id}");
-                    if (res)
+                    try
                     {
-                        await JS.InvokeVoidAsync("setImage", $"{frame.Id}", dotnetImageStream);
+                        var res = await JS.InvokeAsync<bool>("getById", $"{frame.Id}");
+                        if (res)
+                        {
+                            await JS.InvokeVoidAsync("setImage", $"{frame.Id}", dotnetImageStream);
+                            await InvokeAsync(StateHasChanged);
+                        }
                     }
+                    catch {}
                 });
 
                 tasks.Add(task);
@@ -279,7 +284,6 @@ else
 
             Task.WaitAll(tasks.ToArray());
             _isImagesLoaded = true;
-            await InvokeAsync(StateHasChanged);
         }
         catch (Exception)
         { }

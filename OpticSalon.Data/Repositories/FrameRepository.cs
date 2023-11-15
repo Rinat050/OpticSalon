@@ -17,6 +17,7 @@ namespace OpticSalon.Data.Repositories
                                       .Include(x => x.Brand)
                                       .Include(x => x.Material)
                                       .Include(x => x.Colors)
+                                      .ThenInclude(x => x.Color)
                                       .Include(x => x.Sizes)
                                       .Include(x => x.Type)
                                       .FirstOrDefaultAsync(x => x.Id == id);

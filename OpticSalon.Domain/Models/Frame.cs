@@ -11,6 +11,6 @@
         public FrameType Type { get; set; } = null!;
         public Gender Gender { get; set; } = null!;
         public string MainImageName { get; set; } = null!;
-        public ICollection<Color> Colors { get; set; } = new List<Color>();
+        public ICollection<FrameColor> Colors { get; set; } = new List<FrameColor>();
     }
 }
