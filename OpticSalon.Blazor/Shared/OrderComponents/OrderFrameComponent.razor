@@ -1,0 +1,129 @@
+﻿@using MudBlazor.Utilities
+@using OpticSalon.Domain.Models
+@inject IFrameService FrameService
+@inject IImageLoadingService ImageLoadingService
+@inject IJSRuntime JS
+
+@if (_isLoading)
+{
+    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
+    return;
+}
+
+<MudContainer Class="d-flex align-center justify-center mud-width-full" style="height:90vh;">
+
+    @if (_frame is null)
+    {
+        <MudAlert Class="m-2" Severity="Severity.Normal">Оправа не найдена...</MudAlert>
+        return;
+    }
+
+    <MudCard Class="p-4 w-100" Style="border-radius: 15px;"
+             Outlined="false" Elevation="5">
+        <MudCardHeader>
+            <MudStack Row AlignItems="AlignItems.Center">
+                <MudIcon Icon="@Icons.Custom.Brands.Awesome" Size="Size.Large"
+                         Color="MudBlazor.Color.Secondary"></MudIcon>
+                <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">
+                    Оправа @($"{_frame.Brand?.Name} {_frame.Model}")
+                </MudText>
+            </MudStack>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid Justify="Justify.SpaceAround" Spacing="1">
+                <MudItem xs="12" sm="4">
+                    <div style="display:flex; justify-content:start;">
+                        <MudImage id="frame-image" Elevation="2" Style="min-width:150px; width: 85%;" Alt="" />
+                    </div>
+                </MudItem>
+                <MudItem xs="12" sm="8">
+                    <MudGrid Spacing="1">
+                        <MudItem xs="12">
+                           <MudStack Row AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Бренд:</MudText>
+                                <MudText Typo="Typo.h6" Style="font-weight: 400">@(_frame.Brand?.Name)</MudText>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudStack Row AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Модель:</MudText>
+                                <MudText Typo="Typo.h6" Style="font-weight: 400">@(_frame.Model)</MudText>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudStack Row AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Размеры:</MudText>
+                                <MudText Typo="Typo.h6" Style="font-weight: 400">@GetSizeString(_frame.Sizes)</MudText>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudStack Row AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Стоимость:</MudText>
+                                <MudChip Size="Size.Large" Variant="Variant.Outlined" Color="MudBlazor.Color.Primary">@(_frame.Cost) руб.</MudChip>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Выбранный цвет:</MudText>
+                            <MudFab Size="Size.Medium" Class="m-2 ms-0" style="@($"background-color: {_color.Value};")"></MudFab>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+</MudContainer>
+@code {
+    [Parameter]
+    public int FrameId { get; set; }
+
+    private Frame _frame = new Frame();
+    private OpticSalon.Domain.Models.Color _color = new OpticSalon.Domain.Models.Color();
+    private bool _isLoading;
+    private bool _isImageLoaded;
+
+    private string GetSizeString(FrameSizes sizes)
+    {
+        return $"{sizes.LensWidth}-{sizes.DistanceBetweenLens}-{sizes.TempleLenght}";
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadFrame();
+    }
+
+    private async Task LoadFrame()
+    {
+        _isLoading = true;
+        var res = await FrameService.GetFrameById(FrameId); 
+        _isLoading = false;
+
+        if (res.Success)
+        {
+            _frame = res.Data!;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (_frame is null || _isImageLoaded) return;
+
+            var loadingRes = await ImageLoadingService.GetFrameImageAsync(_frame.MainImageName);
+
+            if (!loadingRes.Success) return;
+
+            var dotnetImageStream = new DotNetStreamReference(loadingRes.Data!);
+            var res = await JS.InvokeAsync<bool>("getById", "frame-image");
+            if (res)
+            {
+                await JS.InvokeVoidAsync("setImage", "frame-image", dotnetImageStream);
+            }
+
+            _isImageLoaded = true;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception)
+        { }
+    }
+}

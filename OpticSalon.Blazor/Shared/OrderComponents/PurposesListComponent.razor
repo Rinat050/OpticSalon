@@ -1,0 +1,43 @@
+﻿@using MudBlazor.Utilities
+@using OpticSalon.Domain.Models
+
+
+@if (_isLoading)
+{
+    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
+    return;
+}
+
+<MudContainer Class="d-flex align-center justify-center mud-width-full" style="height:90vh;">
+    <MudCard Class="p-4 w-100" Style="border-radius: 15px;"
+             Outlined="false" Elevation="5">
+    <MudList Clickable="true">
+        <MudListSubheader>
+            <MudStack Row AlignItems="AlignItems.Center">
+                <MudIcon Icon="@Icons.Material.Filled.FormatListBulleted" Size="Size.Large"
+                         Color="MudBlazor.Color.Secondary"></MudIcon>
+                <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">
+                    Выбор назначения
+                </MudText>
+            </MudStack>
+        </MudListSubheader>
+        @foreach(var purpose in _purposes)
+        {
+            <MudListItem OnClick="(() => SelectPurpose(purpose))" Icon="@Icons.Material.Outlined.DragHandle">
+                @purpose.Name
+            </MudListItem>
+        }
+    </MudList>
+    </MudCard>
+</MudContainer>
+
+@code {
+    private bool _isLoading;
+    private Purpose _selected = null!;
+    private List<Purpose> _purposes = new List<Purpose>() { new Purpose() { Name = "Для дали" }, new Purpose() { Name = "Для близи" }, new Purpose() { Name = "Для постоянного ношения" } };
+
+    private void SelectPurpose(Purpose purpose)
+    {
+        _selected = purpose;
+    }
+}

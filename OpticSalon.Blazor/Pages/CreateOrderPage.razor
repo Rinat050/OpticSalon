@@ -1,0 +1,29 @@
+﻿@page "/createOrder/{frameId:int}/{colorId:int}"
+@using OpticSalon.Blazor.Data.Credentials
+@using OpticSalon.Blazor.Shared.OrderComponents
+
+<MudTabs Style="height: 100%" Outlined="true" MinimumTabWidth="20px" Position="Position.Left">
+    <MudIconButton Color="Color.Secondary" Size="Size.Medium" Icon="@Icons.Material.Outlined.ArrowLeft"/>
+        <MudTabPanel Text="Оправа" Icon="@Icons.Custom.Brands.Awesome">
+            <OrderFrameComponent FrameId="FrameId" />
+        </MudTabPanel>
+        <MudTabPanel Text="Назначение" Icon="@Icons.Material.Filled.FormatListBulleted">
+            <PurposesListComponent />
+        </MudTabPanel>
+        <MudTabPanel Text="Рецепт" Icon="@Icons.Material.Filled.Article" >
+        </MudTabPanel>
+        <MudTabPanel Text="Линзы" Icon="@Icons.Material.Outlined.Lens" >
+        </MudTabPanel>
+        <MudTabPanel Text="Доставка" Icon="@Icons.Material.Filled.CardTravel" >
+        </MudTabPanel>
+     <MudIconButton Color="Color.Secondary" Size="Size.Medium" Icon="@Icons.Material.Outlined.ArrowRight"/>
+</MudTabs>
+
+@code {
+    [Parameter]
+    public int FrameId { get; set; }
+    [Parameter]
+    public int ColorId { get; set; }
+
+    private OrderCreateCredentials _createCredentials = new();
+}
