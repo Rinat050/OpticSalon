@@ -1,4 +1,5 @@
-﻿@using OpticSalon.Domain.FilterData
+﻿@using OpticSalon.Blazor.Data.Credentials
+@using OpticSalon.Domain.FilterData
 @using OpticSalon.Domain.Models
 
 @if (_isLoading)
@@ -22,21 +23,26 @@
         <MudCardContent>
             <MudGrid Spacing="2">
                 <MudItem xs="12">
-                    <MudTextField T="string" Label="Адрес доставки" Variant="Variant.Outlined"></MudTextField>
+                    <MudTextField T="string" @bind-Value="OrderCredentials.DeliveryAddress" Label="Адрес доставки" Variant="Variant.Outlined"></MudTextField>
                 </MudItem>
                 <MudItem xs="12">
-                    <MudTextField T="string" Label="Номер телефона" Variant="Variant.Outlined"></MudTextField>
+                    <MudTextField T="string" @bind-Value="OrderCredentials.ContactPhoneNumber" Label="Номер телефона" Variant="Variant.Outlined"></MudTextField>
                 </MudItem>
                 <MudItem xs="12">
-                    <MudTextField T="string" Label="Комментарий" Lines="5" Variant="Variant.Outlined"></MudTextField>
+                    <MudTextField T="string" @bind-Value="OrderCredentials.Comment" Label="Комментарий" Lines="5" Variant="Variant.Outlined"></MudTextField>
                 </MudItem>
             </MudGrid>
         </MudCardContent>
+        <MudCardActions>
+            @ChildContent
+        </MudCardActions>
     </MudCard>
 </MudContainer>
 
 @code {
-    private bool _isLoading;
     [Parameter]
-    public Recipe Recipe { get; set; }
+    public OrderCreateCredentials OrderCredentials { get; set; } = new();
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    private bool _isLoading;
 }

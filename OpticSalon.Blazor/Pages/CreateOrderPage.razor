@@ -2,6 +2,16 @@
 @using OpticSalon.Blazor.Data.Credentials
 @using OpticSalon.Blazor.Shared.OrderComponents
 @using OpticSalon.Domain.Models
+@inject IFrameService FrameService
+@inject IFrameColorService FrameColorService
+@inject ILensPackageService LensPackageService
+@inject IPurposeService PurposeService
+
+@if (_isNotFound)
+{
+    <MudAlert Class="m-2" Severity="Severity.Normal">Не найдено...</MudAlert>
+    return;
+}
 
 <MudTabs @bind-ActivePanelIndex="_selectedTabIndex" Style="height: 100%" Outlined="true" MinimumTabWidth="20px" Position="Position.Left">
     <MudStack Style="height:100%" Row AlignItems="AlignItems.Center">
@@ -9,19 +19,22 @@
             Color="MudBlazor.Color.Secondary" Style="height:50px;" Size="Size.Medium" Icon="@Icons.Material.Outlined.ArrowLeft"/>
     </MudStack>
         <MudTabPanel Text="Оправа" Icon="@Icons.Custom.Brands.Awesome">
-            <OrderFrameComponent FrameId="FrameId" />
+            <OrderFrameComponent Frame="_createCredentials.Frame" />
         </MudTabPanel>
         <MudTabPanel Text="Назначение" Icon="@Icons.Material.Filled.FormatListBulleted">
-            <PurposesListComponent />
+            <PurposesListComponent Purposes="_recipePurposes" SelectedPurpose="_createCredentials.Recipe.Purpose" />
         </MudTabPanel>
         <MudTabPanel Text="Рецепт" Icon="@Icons.Material.Filled.Article" >
-            <OrderRecipeComponent Recipe="recipe"/>
+            <OrderRecipeComponent Recipe="_createCredentials.Recipe" />
         </MudTabPanel>
         <MudTabPanel Text="Линзы" Icon="@Icons.Material.Outlined.Lens" >
-            <OrderLensComponent></OrderLensComponent>
+            <OrderLensComponent Packages="_lensPackages" SelectedPackage="_createCredentials.LensPackage"></OrderLensComponent>
         </MudTabPanel>
         <MudTabPanel Text="Доставка" Icon="@Icons.Material.Filled.CardTravel" >
-            <OrderDeliveryComponent></OrderDeliveryComponent>
+            <OrderDeliveryComponent OrderCredentials="_createCredentials">
+                <MudButton Style="min-width: 100px;" Variant="Variant.Filled" 
+                Color="MudBlazor.Color.Primary">Оформить заказ</MudButton>
+            </OrderDeliveryComponent>
         </MudTabPanel>
     <MudStack Style="height:100%" Row AlignItems="AlignItems.Center">
         <MudIconButton Disabled="@(_selectedTabIndex == 4)" OnClick="@(() => ChangeTabIndex(_selectedTabIndex + 1))" 
@@ -35,16 +48,56 @@
     [Parameter]
     public int ColorId { get; set; }
 
-    private Recipe recipe = new Recipe() { RightEye = new EyeData() };
-
     private int _selectedTabIndex = 0;
+    private bool _isNotFound;
 
     private OrderCreateCredentials _createCredentials = new();
+    private List<LensPackage> _lensPackages = new();
+    private List<Purpose> _recipePurposes = new();
 
     private void ChangeTabIndex(int index)
     {
         if (index > 4 || index < 0) return;
 
         _selectedTabIndex = index;
+    }
+
+    private async Task LoadData()
+    {
+        var frameRes = await FrameService.GetFrameById(FrameId);
+
+        if (frameRes.Success)
+        {
+            _isNotFound = true;
+            return;
+        }
+
+        _createCredentials.Frame = frameRes.Data!;
+
+        var colorRes = await FrameColorService.GetColorById(ColorId);
+
+        if (colorRes.Success)
+        {
+            _isNotFound = true;
+            return;
+        }
+
+        _createCredentials.FrameColor = colorRes.Data!;
+
+        var lensRes = await LensPackageService.GetAllLensPackages();
+
+        if (lensRes.Success)
+        {
+            _lensPackages = lensRes.Data!;
+        }
+
+        var purposeRes = await PurposeService.GetAllPurposes();
+
+        if (purposeRes.Success)
+        {
+            _recipePurposes = purposeRes.Data!;
+        }
+
+        await InvokeAsync(StateHasChanged);
     }
 }

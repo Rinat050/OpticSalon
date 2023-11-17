@@ -21,7 +21,7 @@
                 </MudText>
             </MudStack>
         </MudListSubheader>
-        @foreach(var purpose in _purposes)
+        @foreach(var purpose in Purposes)
         {
             <MudListItem OnClick="(() => SelectPurpose(purpose))" Icon="@(GetListItemIcon(purpose))" 
                 IconColor="@(GetListItemIconColor(purpose))">
@@ -33,25 +33,28 @@
 </MudContainer>
 
 @code {
+    [Parameter]
+    public List<Purpose> Purposes { get; set; } = new();
+    [Parameter]
+    public Purpose SelectedPurpose { get; set; } = null!;
+
     private bool _isLoading;
-    private Purpose _selected = null!;
-    private List<Purpose> _purposes = new List<Purpose>() { new Purpose() { Name = "Для дали" }, new Purpose() { Name = "Для близи" }, new Purpose() { Name = "Для постоянного ношения" } };
 
     private void SelectPurpose(Purpose purpose)
     {
-        _selected = purpose;
+        SelectedPurpose = purpose;
     }
 
     private string GetListItemIcon(Purpose purpose)
     {
-        if (_selected == purpose) return Icons.Material.Outlined.Check;
+        if (SelectedPurpose == purpose) return Icons.Material.Outlined.Check;
 
         return Icons.Material.Outlined.DragHandle;
     }
 
     private MudBlazor.Color GetListItemIconColor(Purpose purpose)
     {
-        if (_selected == purpose) return MudBlazor.Color.Success;
+        if (SelectedPurpose == purpose) return MudBlazor.Color.Success;
 
         return MudBlazor.Color.Default;
     }

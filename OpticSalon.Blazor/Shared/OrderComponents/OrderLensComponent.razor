@@ -22,7 +22,7 @@
                     </MudText>
                 </MudStack>
             </MudListSubheader>
-            @foreach (var lens in _lens)
+            @foreach (var lens in Packages)
             {
                 <MudListItem OnClick="(() => SelectLens(lens))" Icon="@(GetListItemIcon(lens))"
                          IconColor="@(GetListItemIconColor(lens))">
@@ -47,25 +47,28 @@
 </MudContainer>
 
 @code {
+    [Parameter]
+    public LensPackage SelectedPackage { get; set; } = null!;
+    [Parameter]
+    public List<LensPackage> Packages { get; set; } = null!;
+
     private bool _isLoading;
-    private LensPackage _selected = null!;
-    private List<LensPackage> _lens = new List<LensPackage>() { new LensPackage() { Name = "Пакет \"Бронзовый\"" }, new LensPackage() { Name = "Пакет \"Серебряный\"" }, new LensPackage() { Name = "Пакет \"Золотой\"" } };
 
     private void SelectLens(LensPackage lens)
     {
-        _selected = lens;
+        SelectedPackage = lens;
     }
 
     private string GetListItemIcon(LensPackage lens)
     {
-        if (_selected == lens) return Icons.Material.Outlined.Check;
+        if (SelectedPackage == lens) return Icons.Material.Outlined.Check;
 
         return Icons.Material.Outlined.DragHandle;
     }
 
     private MudBlazor.Color GetListItemIconColor(LensPackage lens)
     {
-        if (_selected == lens) return MudBlazor.Color.Success;
+        if (SelectedPackage == lens) return MudBlazor.Color.Success;
 
         return MudBlazor.Color.Default;
     }

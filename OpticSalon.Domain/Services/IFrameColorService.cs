@@ -6,5 +6,6 @@ namespace OpticSalon.Domain.Services
     public interface IFrameColorService
     {
         public Task<ResultWithData<List<Color>>> GetAllFrameColors();
+        public Task<ResultWithData<Color>> GetColorById(int id);
     }
 }
