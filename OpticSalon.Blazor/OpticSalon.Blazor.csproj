@@ -16,8 +16,4 @@
 	<ProjectReference Include="..\OpticSalon.MinIO\OpticSalon.MinIO.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Pages\Client\" />
-  </ItemGroup>
-
 </Project>

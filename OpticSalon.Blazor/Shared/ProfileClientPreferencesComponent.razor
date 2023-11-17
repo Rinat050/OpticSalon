@@ -1,0 +1,224 @@
+﻿@using MudBlazor.Utilities
+@using OpticSalon.Auth.Models
+@using OpticSalon.Domain.FilterData
+@using OpticSalon.Domain.Models
+@using OpticSalon.Domain.ResultModels
+@inject NavigationManager NavManager
+@inject IFrameTypeService FrameTypeService
+@inject IFrameMaterialService FrameMaterialService
+@inject IFrameColorService FrameColorService
+@inject IClientService ClientService
+@inject ISnackbar Snackbar
+
+<EditForm Model="@ClientPreferences" OnValidSubmit="@Save">
+    <DataAnnotationsValidator />
+        <MudCard Class="p-4 w-75" Style="border-radius: 15px;"
+                 Outlined="false" Elevation="5">
+            <MudCardHeader>
+                <MudStack Row AlignItems="AlignItems.Center">
+                    <MudIcon Icon="@Icons.Material.Outlined.EditNote" Size="Size.Large" 
+                        Color="MudBlazor.Color.Secondary"></MudIcon>
+                    <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">
+                        Укажите ваши предпочтения</MudText>
+                </MudStack>
+            </MudCardHeader>
+
+            <MudCardContent>
+                <MudGrid Justify="Justify.Center" Spacing="1">
+                    <MudItem xs="6">
+                       <MudSelect T="FrameType" @bind-Value="ClientPreferences.FrameType" Variant="Variant.Outlined" 
+                            Label="Тип оправы" ToStringFunc="@((x) => x?.Name)" For="@(() => ClientPreferences.FrameType)">
+                           @foreach(var type in _frameTypes)
+                           {
+                                <MudSelectItem Value="@(type)" />
+                           }
+                       </MudSelect>
+                    </MudItem>
+                    <MudItem xs="6">
+                       <MudSelect T="FrameMaterial" @bind-Value="ClientPreferences.FrameMaterial" Variant="Variant.Outlined" 
+                            Label="Материал оправы" ToStringFunc="@((x) => x?.Name)" For="@(() => ClientPreferences.FrameMaterial)">
+                           @foreach(var material in _frameMaterials)
+                           {
+                                <MudSelectItem Value="@(material)" />
+                           }
+                       </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudStack Row AlignItems="AlignItems.Center">
+                            <MudFab Size="Size.Medium" style="@($"background-color: {ClientPreferences.FrameColor?.Value};")"></MudFab>
+                            <MudColorPicker ValueChanged="@(ColorChanged)" Variant="Variant.Outlined" Label="Цвет оправы" 
+                                TransformOrigin="Origin.CenterLeft" ColorPickerView="ColorPickerView.Palette" 
+                                Palette="_pickerColors"></MudColorPicker>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem>
+                        <MudGrid>
+                            <MudItem xs="12">
+                                <MudStack Row AlignItems="AlignItems.Center">
+                                    <MudIcon Icon="@Icons.Material.Outlined.DesignServices" Size="Size.Medium" 
+                                        Color="MudBlazor.Color.Secondary"></MudIcon>
+                                    <MudText Typo="Typo.h6" Color="MudBlazor.Color.Secondary">
+                                        Размеры оправы</MudText>
+                                </MudStack>
+                            </MudItem>
+                            <MudItem xs="4">
+                                <MudSelect T="int" @bind-Value="ClientPreferences.FrameSizes.LensWidth" Variant="Variant.Outlined" 
+                                    Label="Ширина линзы" For="@(() => ClientPreferences.FrameSizes.LensWidth)">
+                                   @foreach(var size in FrameSizesFilter.GetLensWidthRange())
+                                   {
+                                        <MudSelectItem Value="@(size)" />
+                                   }
+                               </MudSelect>
+                            </MudItem>
+                            <MudItem xs="4">
+                                <MudSelect T="int" @bind-Value="ClientPreferences.FrameSizes.DistanceBetweenLens" Variant="Variant.Outlined" 
+                                    Label="Ширина моста" For="@(() => ClientPreferences.FrameSizes.DistanceBetweenLens)">
+                                   @foreach(var size in FrameSizesFilter.GetDistanceBetweenLensRange())
+                                   {
+                                        <MudSelectItem Value="@(size)" />
+                                   }
+                               </MudSelect>
+                            </MudItem>
+                            <MudItem xs="4">
+                                <MudSelect T="int" @bind-Value="ClientPreferences.FrameSizes.TempleLenght" Variant="Variant.Outlined" 
+                                    Label="Длина заушника" For="@(() => ClientPreferences.FrameSizes.TempleLenght)">
+                                   @foreach(var size in FrameSizesFilter.GetTempleLenghtRange())
+                                   {
+                                        <MudSelectItem Value="@(size)" />
+                                   }
+                               </MudSelect>
+                            </MudItem>
+                        </MudGrid>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+            <MudGrid Justify="Justify.SpaceBetween">
+                    @if (IsRegister)
+                    {
+                        <MudItem xs="6" Class="d-flex justify-content-end">
+                            <MudLink OnClick="@(() => NavManager.NavigateTo("/login"))" 
+                                Underline="Underline.None" Class="mt-3 ms-1">
+                                Пропустить
+                            </MudLink>
+                        </MudItem>
+                    }
+                    <MudItem xs="6">
+                        <MudButton Disabled="@_isLoading" FullWidth Variant="Variant.Filled"
+                            Color="MudBlazor.Color.Primary" ButtonType="ButtonType.Submit">Сохранить</MudButton>
+                    </MudItem>
+                </MudGrid>
+        </MudCard>
+</EditForm>
+
+@code {
+    [Parameter]
+    public OpticSalon.Domain.Models.ClientPreferences ClientPreferences { get; set; } = null!;
+    [Parameter]
+    public bool IsRegister { get; set; }
+    [Parameter]
+    public int ClientId { get; set; }
+
+    private bool _isNew;
+    private bool _isLoading;
+    private List<FrameType> _frameTypes = new();
+    private List<FrameMaterial> _frameMaterials = new();
+    private List<OpticSalon.Domain.Models.Color> _frameColors = new();
+    private List<MudColor> _pickerColors { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        if (ClientPreferences == null)
+        {
+            ClientPreferences = new Domain.Models.ClientPreferences();
+            ClientPreferences.FrameSizes = new FrameSizes();
+            _isNew = true;
+        }
+
+        base.OnInitialized();
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await FillData();
+        StateHasChanged();
+    }
+
+    private async Task FillData()
+    {
+        var frameTypeResult = await FrameTypeService.GetAllFrameTypes();
+
+        if (frameTypeResult.Success)
+        {
+            _frameTypes = frameTypeResult.Data!;
+        }
+
+        var frameMaterialResult = await FrameMaterialService.GetAllFrameMaterials();
+
+        if (frameMaterialResult.Success)
+        {
+            _frameMaterials = frameMaterialResult.Data!;
+        }
+
+        var frameColorsResult = await FrameColorService.GetAllFrameColors();
+
+        if (frameColorsResult.Success)
+        {
+            _frameColors = frameColorsResult.Data!;
+            _frameColors.ForEach(x => _pickerColors.Add(new MudColor(x.Value)));
+        }
+
+        SetDefaultData();
+    }
+
+    private void SetDefaultData()
+    {
+        ClientPreferences.FrameColor = _frameColors.FirstOrDefault()!;
+        ClientPreferences.FrameSizes.LensWidth = FrameSizesFilter.GetLensWidthRange().FirstOrDefault();
+        ClientPreferences.FrameSizes.DistanceBetweenLens = FrameSizesFilter.GetDistanceBetweenLensRange().FirstOrDefault();
+        ClientPreferences.FrameSizes.TempleLenght = FrameSizesFilter.GetTempleLenghtRange().FirstOrDefault();
+    }
+
+    private void ColorChanged(MudColor mudColor)
+    {
+        var color = mudColor.Value.Substring(0, mudColor.Value.Length - 2);
+
+        ClientPreferences.FrameColor = _frameColors.FirstOrDefault(x => x.Value.ToLower() == color)!;
+        StateHasChanged();
+    }
+
+    private async void Save()
+    {
+        if (_isNew)
+        {
+            ClientPreferences.ClientId = ClientId;
+        }
+
+        BaseResult result;
+
+        _isLoading = true;
+
+        if (_isNew)
+        {
+            result = await ClientService.AddClientPreferences(ClientPreferences);
+        }
+        else
+        {
+            result = await ClientService.UpdateClientPreferences(ClientPreferences);
+        }
+
+        _isLoading = false;
+
+        if (result.Success)
+        {
+            Snackbar.Add(result.Description, Severity.Info);
+
+            if (IsRegister)
+                NavManager.NavigateTo("/login");
+
+            NavManager.NavigateTo("/");
+            return;
+        }
+
+        Snackbar.Add(result.Description, Severity.Warning);
+    }
+}
