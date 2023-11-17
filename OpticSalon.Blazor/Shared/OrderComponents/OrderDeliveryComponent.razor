@@ -35,6 +35,12 @@
                                       Label="Комментарий" Lines="5" Variant="Variant.Outlined"
                                         For="@(() => OrderCredentials.Comment)"></MudTextField>
                     </MudItem>
+                    <MudItem xs="12">
+                           <MudStack Row AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Итоговая стоимость:</MudText>
+                                <MudText Typo="Typo.h6" Style="font-weight: 400">@(GetTotalCost()) руб.</MudText>
+                            </MudStack>
+                        </MudItem>
                 </MudGrid>
             </MudCardContent>
             <MudCardActions>
@@ -52,4 +58,9 @@
     public RenderFragment? ChildContent { get; set; }
     [Parameter]
     public Action OnValidSubmit { get; set; }
+
+    private decimal GetTotalCost()
+    {
+        return OrderCredentials.Frame.Cost + OrderCredentials.LensPackage.Cost;
+    }
 }
