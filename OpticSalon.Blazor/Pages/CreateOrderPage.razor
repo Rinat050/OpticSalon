@@ -146,7 +146,7 @@
 
     private async Task LoadClientInfo()
     {
-         var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
 
         if (userIdentity is null)
         {

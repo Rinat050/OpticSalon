@@ -5,6 +5,8 @@
         public int Id { get; set; }
         public RecipeDb Recipe { get; set; } = null!;
         public int RecipeId { get; set; }
+        public ColorDb FrameColor { get; set; } = null!;
+        public int FrameColorId { get; set; }
         public FrameDb Frame { get; set; } = null!;
         public int FrameId { get; set; }
         public LensPackageDb LensPackage { get; set; } = null!;
@@ -15,5 +17,6 @@
         public DateTime CreatedDate { get; set; }
         public ClientDb Client { get; set; } = null!;
         public int ClientId { get; set; }
+        public string? Comment { get; set; }
     }
 }
