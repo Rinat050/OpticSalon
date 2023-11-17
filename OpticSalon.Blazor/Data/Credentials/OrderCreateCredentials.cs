@@ -5,7 +5,6 @@ namespace OpticSalon.Blazor.Data.Credentials
 {
     public class OrderCreateCredentials
     {
-        public int Id { get; set; }
         public Recipe Recipe { get; set; } = null!;
         public Frame Frame { get; set; } = null!;
         public Color FrameColor { get; set; } = null!;

@@ -18,6 +18,7 @@ namespace OpticSalon.Domain
             services.AddScoped<IGenderService, GenderService>();
             services.AddScoped<ILensPackageService, LensPackageService>();
             services.AddScoped<IPurposeService, PurposeService>();
+            services.AddScoped<IOrderService, OrderService>();
 
             return services;
         }

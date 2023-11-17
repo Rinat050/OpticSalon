@@ -9,7 +9,9 @@
         public int LensTintingPercent { get; set; }
         public string ContactPhoneNumber { get; set; } = null!;
         public string DeliveryAddress { get; set; } = null!;
+        public string? Comment { get; set; }
         public DateTime CreatedDate { get; set; }
         public Client Client { get; set; } = null!;
+        public Color FrameColor { get; set; } = null!;
     }
 }
