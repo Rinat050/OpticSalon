@@ -36,9 +36,33 @@ namespace OpticSalon.Domain.Services.Impl
             }
         }
 
-        public Task<ResultWithData<Color>> GetColorById(int id)
+        public async Task<ResultWithData<Color>> GetColorById(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = await _frameColorRepository.GetColorById(id);
+
+                if (result == null)
+                    return new ResultWithData<Color>()
+                    {
+                        Success = false,
+                        Description = "Не найдено!"
+                    };
+
+                return new ResultWithData<Color>()
+                {
+                    Success = true,
+                    Data = result
+                };
+            }
+            catch
+            {
+                return new ResultWithData<Color>()
+                {
+                    Success = false,
+                    Description = DefaultErrors.ServerError
+                };
+            }
         }
     }
 }

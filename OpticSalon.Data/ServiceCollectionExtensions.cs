@@ -30,6 +30,8 @@ namespace OpticSalon.Data
             services.AddScoped<IFrameRepository, FrameRepository>();
             services.AddScoped<IBrandRepository, BrandRepository>();
             services.AddScoped<IGenderRepository, GenderRepository>();
+            services.AddScoped<ILensPackagesRepository, LensPackageRepository>();
+            services.AddScoped<IPurposeRepository, PurposeRepository>();
 
             return services;
         }

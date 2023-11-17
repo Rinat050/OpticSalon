@@ -19,6 +19,10 @@ namespace OpticSalon.Data.Mappers.EntityMapping
         public partial BrandDb Map(Brand brand);
         public partial Gender Map(GenderDb genderDb);
         public partial GenderDb Map(Gender gender);
+        public partial Purpose Map(PurposeDb purposeDb);
+        public partial PurposeDb Map(Purpose purpose);
+        public partial LensPackage Map(LensPackageDb lensPackageDb);
+        public partial LensPackageDb Map(LensPackage lensPackage);
         public partial ClientPreferences Map(ClientPreferencesDb clientPreferencesDb);
       
         [MapperIgnoreTarget(nameof(ClientPreferencesDb.FrameType))]
