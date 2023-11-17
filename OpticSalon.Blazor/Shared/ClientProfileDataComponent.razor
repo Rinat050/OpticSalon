@@ -1,0 +1,47 @@
+﻿@using OpticSalon.Domain.Models
+
+<EditForm Model="@_model" OnValidSubmit="@Save">
+    <DataAnnotationsValidator />
+    <MudCard Class="p-2 w-75" Style="border-radius: 15px;"
+             Outlined="false" Elevation="1">
+
+        <MudCardContent>
+            <MudGrid Justify="Justify.Center" Spacing="1">
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_model.Surname" For="@(() => _model.Surname)"
+                                  Variant="Variant.Outlined" Label="Фамилия"></MudTextField>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudTextField @bind-Value="_model.Name" For="@(() => _model.Name)"
+                                  Variant="Variant.Outlined" Label="Имя"></MudTextField>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudTextField @bind-Value="_model.PhoneNumber" For="@(() => _model.PhoneNumber)"
+                                  Variant="Variant.Outlined" InputType="InputType.Telephone" Label="Телефон"
+                                  Mask="@(new PatternMask("+0 (000) 000 00-00"))"></MudTextField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_model.Address" For="@(() => _model.Address)"
+                                  Variant="Variant.Outlined" Label="Адрес"></MudTextField>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+
+        <MudGrid Justify="Justify.FlexStart">
+            <MudItem xs="3">
+                <MudButton Class="m-2" Disabled="@_isLoading" FullWidth Variant="Variant.Filled"
+                           Color="MudBlazor.Color.Primary" ButtonType="ButtonType.Submit">Сохранить</MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudCard>
+</EditForm>
+
+@code {
+    private bool _isLoading;
+    private Client _model = new();
+
+    private void Save()
+    {
+
+    }
+}

@@ -10,109 +10,97 @@
 @inject IClientService ClientService
 @inject ISnackbar Snackbar
 
+@if (ClientPreferences is null)
+{
+    return;
+}
+
 <EditForm Model="@ClientPreferences" OnValidSubmit="@Save">
     <DataAnnotationsValidator />
-        <MudCard Class="p-4 w-75" Style="border-radius: 15px;"
-                 Outlined="false" Elevation="5">
-            <MudCardHeader>
-                <MudStack Row AlignItems="AlignItems.Center">
-                    <MudIcon Icon="@Icons.Material.Outlined.EditNote" Size="Size.Large" 
-                        Color="MudBlazor.Color.Secondary"></MudIcon>
-                    <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">
-                        Укажите ваши предпочтения</MudText>
-                </MudStack>
-            </MudCardHeader>
-
-            <MudCardContent>
-                <MudGrid Justify="Justify.Center" Spacing="1">
-                    <MudItem xs="6">
-                       <MudSelect T="FrameType" @bind-Value="ClientPreferences.FrameType" Variant="Variant.Outlined" 
-                            Label="Тип оправы" ToStringFunc="@((x) => x?.Name)" For="@(() => ClientPreferences.FrameType)">
-                           @foreach(var type in _frameTypes)
-                           {
-                                <MudSelectItem Value="@(type)" />
-                           }
-                       </MudSelect>
-                    </MudItem>
-                    <MudItem xs="6">
-                       <MudSelect T="FrameMaterial" @bind-Value="ClientPreferences.FrameMaterial" Variant="Variant.Outlined" 
-                            Label="Материал оправы" ToStringFunc="@((x) => x?.Name)" For="@(() => ClientPreferences.FrameMaterial)">
-                           @foreach(var material in _frameMaterials)
-                           {
-                                <MudSelectItem Value="@(material)" />
-                           }
-                       </MudSelect>
-                    </MudItem>
-                    <MudItem xs="12">
-                        <MudStack Row AlignItems="AlignItems.Center">
-                            <MudFab Size="Size.Medium" style="@($"background-color: {ClientPreferences.FrameColor?.Value};")"></MudFab>
-                            <MudColorPicker ValueChanged="@(ColorChanged)" Variant="Variant.Outlined" Label="Цвет оправы" 
-                                TransformOrigin="Origin.CenterLeft" ColorPickerView="ColorPickerView.Palette" 
-                                Palette="_pickerColors"></MudColorPicker>
-                        </MudStack>
-                    </MudItem>
-                    <MudItem>
-                        <MudGrid>
-                            <MudItem xs="12">
-                                <MudStack Row AlignItems="AlignItems.Center">
-                                    <MudIcon Icon="@Icons.Material.Outlined.DesignServices" Size="Size.Medium" 
-                                        Color="MudBlazor.Color.Secondary"></MudIcon>
-                                    <MudText Typo="Typo.h6" Color="MudBlazor.Color.Secondary">
-                                        Размеры оправы</MudText>
-                                </MudStack>
-                            </MudItem>
-                            <MudItem xs="4">
-                                <MudSelect T="int" @bind-Value="ClientPreferences.FrameSizes.LensWidth" Variant="Variant.Outlined" 
-                                    Label="Ширина линзы" For="@(() => ClientPreferences.FrameSizes.LensWidth)">
-                                   @foreach(var size in FrameSizesFilter.GetLensWidthRange())
-                                   {
-                                        <MudSelectItem Value="@(size)" />
-                                   }
-                               </MudSelect>
-                            </MudItem>
-                            <MudItem xs="4">
-                                <MudSelect T="int" @bind-Value="ClientPreferences.FrameSizes.DistanceBetweenLens" Variant="Variant.Outlined" 
-                                    Label="Ширина моста" For="@(() => ClientPreferences.FrameSizes.DistanceBetweenLens)">
-                                   @foreach(var size in FrameSizesFilter.GetDistanceBetweenLensRange())
-                                   {
-                                        <MudSelectItem Value="@(size)" />
-                                   }
-                               </MudSelect>
-                            </MudItem>
-                            <MudItem xs="4">
-                                <MudSelect T="int" @bind-Value="ClientPreferences.FrameSizes.TempleLenght" Variant="Variant.Outlined" 
-                                    Label="Длина заушника" For="@(() => ClientPreferences.FrameSizes.TempleLenght)">
-                                   @foreach(var size in FrameSizesFilter.GetTempleLenghtRange())
-                                   {
-                                        <MudSelectItem Value="@(size)" />
-                                   }
-                               </MudSelect>
-                            </MudItem>
-                        </MudGrid>
-                    </MudItem>
-                </MudGrid>
-            </MudCardContent>
-            <MudGrid Justify="Justify.SpaceBetween">
-                    @if (IsRegister)
-                    {
-                        <MudItem xs="6" Class="d-flex justify-content-end">
-                            <MudLink OnClick="@(() => NavManager.NavigateTo("/login"))" 
-                                Underline="Underline.None" Class="mt-3 ms-1">
-                                Пропустить
-                            </MudLink>
+    <MudCard Class="p-2 w-75" Style="border-radius: 15px;"
+             Outlined="false" Elevation="1">
+        <MudCardContent>
+            <MudGrid Justify="Justify.Center" Spacing="1">
+                <MudItem xs="6">
+                    <MudSelect T="FrameType" @bind-Value="ClientPreferences.FrameType" Variant="Variant.Outlined"
+                               Label="Тип оправы" ToStringFunc="@((x) => x?.Name)" For="@(() => ClientPreferences.FrameType)">
+                        @foreach (var type in _frameTypes)
+                        {
+                            <MudSelectItem Value="@(type)" />
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudSelect T="FrameMaterial" @bind-Value="ClientPreferences.FrameMaterial" Variant="Variant.Outlined"
+                               Label="Материал оправы" ToStringFunc="@((x) => x?.Name)" For="@(() => ClientPreferences.FrameMaterial)">
+                        @foreach (var material in _frameMaterials)
+                        {
+                            <MudSelectItem Value="@(material)" />
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudStack Row AlignItems="AlignItems.Center">
+                        <MudFab Size="Size.Medium" style="@($"background-color: {ClientPreferences.FrameColor?.Value};")"></MudFab>
+                        <MudColorPicker ValueChanged="@(ColorChanged)" Variant="Variant.Outlined" Label="Цвет оправы"
+                                        TransformOrigin="Origin.CenterLeft" ColorPickerView="ColorPickerView.Palette"
+                                        Palette="_pickerColors"></MudColorPicker>
+                    </MudStack>
+                </MudItem>
+                <MudItem>
+                    <MudGrid>
+                        <MudItem xs="12">
+                            <MudStack Row AlignItems="AlignItems.Center">
+                                <MudIcon Icon="@Icons.Material.Outlined.DesignServices" Size="Size.Medium"
+                                         Color="MudBlazor.Color.Secondary"></MudIcon>
+                                <MudText Typo="Typo.h6" Color="MudBlazor.Color.Secondary">
+                                    Размеры оправы
+                                </MudText>
+                            </MudStack>
                         </MudItem>
-                    }
-                    <MudItem xs="6">
-                        <MudButton Disabled="@_isLoading" FullWidth Variant="Variant.Filled"
-                            Color="MudBlazor.Color.Primary" ButtonType="ButtonType.Submit">Сохранить</MudButton>
-                    </MudItem>
-                </MudGrid>
-        </MudCard>
+                        <MudItem xs="4">
+                            <MudSelect T="int" @bind-Value="ClientPreferences.FrameSizes.LensWidth" Variant="Variant.Outlined"
+                                       Label="Ширина линзы" For="@(() => ClientPreferences.FrameSizes.LensWidth)">
+                                @foreach (var size in FrameSizesFilter.GetLensWidthRange())
+                                {
+                                    <MudSelectItem Value="@(size)" />
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="4">
+                            <MudSelect T="int" @bind-Value="ClientPreferences.FrameSizes.DistanceBetweenLens" Variant="Variant.Outlined"
+                                       Label="Ширина моста" For="@(() => ClientPreferences.FrameSizes.DistanceBetweenLens)">
+                                @foreach (var size in FrameSizesFilter.GetDistanceBetweenLensRange())
+                                {
+                                    <MudSelectItem Value="@(size)" />
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="4">
+                            <MudSelect T="int" @bind-Value="ClientPreferences.FrameSizes.TempleLenght" Variant="Variant.Outlined"
+                                       Label="Длина заушника" For="@(() => ClientPreferences.FrameSizes.TempleLenght)">
+                                @foreach (var size in FrameSizesFilter.GetTempleLenghtRange())
+                                {
+                                    <MudSelectItem Value="@(size)" />
+                                }
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+        <MudGrid Justify="Justify.FlexStart">
+            <MudItem xs="3">
+                <MudButton Class="m-2" Disabled="@_isLoading" FullWidth Variant="Variant.Filled"
+                           Color="MudBlazor.Color.Primary" ButtonType="ButtonType.Submit">Сохранить</MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudCard>
 </EditForm>
 
 @code {
     [Parameter]
-    public OpticSalon.Domain.Models.ClientPreferences ClientPreferences { get; set; } = null!;
+    public OpticSalon.Domain.Models.ClientPreferences ClientPreferences { get; set; } = new();
     [Parameter]
     public bool IsRegister { get; set; }
     [Parameter]

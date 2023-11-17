@@ -28,11 +28,17 @@
         </MudCardHeader>
         <MudCardContent>
             <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+                <MudTabPanel Text="Аккаунт">
+                    <ClientProfileDataComponent></ClientProfileDataComponent>
+                </MudTabPanel>
                 <MudTabPanel Text="Личные данные">
-                    <MudText>Content One</MudText>
+                    <ClientProfileDataComponent></ClientProfileDataComponent>
                 </MudTabPanel>
                 <MudTabPanel Text="Предпочтения">
                     <ProfileClientPreferencesComponent ClientId="1" ClientPreferences="_clientPreferences"></ProfileClientPreferencesComponent>
+                </MudTabPanel>
+                <MudTabPanel Text="Заказы">
+                    <ClientProfileDataComponent></ClientProfileDataComponent>
                 </MudTabPanel>
             </MudTabs>
         </MudCardContent>
