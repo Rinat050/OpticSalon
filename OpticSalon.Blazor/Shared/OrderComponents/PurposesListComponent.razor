@@ -58,4 +58,19 @@
 
         return MudBlazor.Color.Default;
     }
+
+    protected override void OnInitialized()
+    {
+        SetDefaultData();
+    }
+
+    private void SetDefaultData()
+    {
+        var purpose = Purposes.FirstOrDefault();
+
+        if (purpose is not null)
+        {
+            SelectedPurpose = purpose;
+        }
+    }
 }

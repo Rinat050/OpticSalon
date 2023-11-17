@@ -4,12 +4,6 @@
 @inject IImageLoadingService ImageLoadingService
 @inject IJSRuntime JS
 
-@if (_isLoading)
-{
-    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
-    return;
-}
-
 <MudContainer Class="d-flex align-center justify-center mud-width-full" style="height:90vh;">
 
     @if (Frame is null)
@@ -64,7 +58,7 @@
                         </MudItem>
                         <MudItem xs="12">
                             <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Выбранный цвет:</MudText>
-                            <MudFab Size="Size.Medium" Class="m-2 ms-0" style="@($"background-color: {_color.Value};")"></MudFab>
+                            <MudFab Size="Size.Medium" Class="m-2 ms-0" style="@($"background-color: {Color.Value};")"></MudFab>
                         </MudItem>
                     </MudGrid>
                 </MudItem>
@@ -75,8 +69,9 @@
 @code {
     [Parameter]
     public Frame Frame { get; set; } = null!;
+    [Parameter]
+    public OpticSalon.Domain.Models.Color Color { get; set; } = new();
 
-    private OpticSalon.Domain.Models.Color _color = new OpticSalon.Domain.Models.Color();
     private bool _isLoading;
     private bool _isImageLoaded;
 

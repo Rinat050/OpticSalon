@@ -1,13 +1,7 @@
 ﻿@using MudBlazor.Utilities
+@using OpticSalon.Blazor.Data.Credentials
 @using OpticSalon.Domain.FilterData
 @using OpticSalon.Domain.Models
-
-
-@if (_isLoading)
-{
-    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
-    return;
-}
 
 <MudContainer Class="d-flex align-center justify-center mud-width-full">
     <MudCard Class="p-4 m-2 w-100" Style="border-radius: 15px;"
@@ -24,22 +18,22 @@
             </MudListSubheader>
             @foreach (var lens in Packages)
             {
-                <MudListItem OnClick="(() => SelectLens(lens))" Icon="@(GetListItemIcon(lens))"
+                <MudListItem OnClick="@(() => SelectLens(lens))" Icon="@(GetListItemIcon(lens))"
                          IconColor="@(GetListItemIconColor(lens))">
                     <MudText Typo="Typo.subtitle1">@lens.Name</MudText>
-                    <MudText Class="m-1" Typo="Typo.body1">Традиционный сферический дизайн, самый бюджетный вариант немецких линз, рекомендованный диапазон: от + 3,0 до -3,0 D </MudText>
+                    <MudText Class="m-1" Typo="Typo.body1">@lens.Description</MudText>
                     <MudStack Row AlignItems="AlignItems.Center">
                         <MudText Typo="Typo.subtitle2" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Стоимость:</MudText>
-                        <MudChip Size="Size.Medium" Variant="Variant.Outlined" Color="MudBlazor.Color.Primary">500 руб.</MudChip>
+                        <MudChip Size="Size.Medium" Variant="Variant.Outlined" Color="MudBlazor.Color.Primary">@lens.Cost руб.</MudChip>
                     </MudStack>
                 </MudListItem>
             }
         </MudList>
         <MudStack Row AlignItems="AlignItems.Center">
-            <MudSelect Label="Процент тонировки линз" T="double" Variant="Variant.Outlined">
-                @foreach (var size in RecipeDataFilter.GetSphRange())
+            <MudSelect @bind-Value="OrderCredentials.LensTintingPercent" Label="Тонировки линз (%)" T="int" Variant="Variant.Outlined">
+                @foreach (var value in LensTintingFilter.GetLensTintingRange())
                 {
-                    <MudSelectItem Value="@(size)" />
+                    <MudSelectItem Value="@(value)"></MudSelectItem>
                 }
             </MudSelect>
         </MudStack>
@@ -48,28 +42,45 @@
 
 @code {
     [Parameter]
-    public LensPackage SelectedPackage { get; set; } = null!;
+    public OrderCreateCredentials OrderCredentials{ get; set; } = new();
     [Parameter]
-    public List<LensPackage> Packages { get; set; } = null!;
+    public List<LensPackage> Packages { get; set; } = new();
 
     private bool _isLoading;
 
     private void SelectLens(LensPackage lens)
     {
-        SelectedPackage = lens;
+        OrderCredentials.LensPackage = lens;
     }
 
     private string GetListItemIcon(LensPackage lens)
     {
-        if (SelectedPackage == lens) return Icons.Material.Outlined.Check;
+        if (OrderCredentials.LensPackage == lens) return Icons.Material.Outlined.Check;
 
         return Icons.Material.Outlined.DragHandle;
     }
 
     private MudBlazor.Color GetListItemIconColor(LensPackage lens)
     {
-        if (SelectedPackage == lens) return MudBlazor.Color.Success;
+        if (OrderCredentials.LensPackage == lens) return MudBlazor.Color.Success;
 
         return MudBlazor.Color.Default;
+    }
+
+    protected override void OnInitialized()
+    {
+        SetDefaultData();
+    }
+
+    private void SetDefaultData()
+    {
+        OrderCredentials.LensTintingPercent = 0;
+
+        var lens = Packages.FirstOrDefault();
+
+        if (lens is not null)
+        {
+            OrderCredentials.LensPackage = lens;
+        }
     }
 }

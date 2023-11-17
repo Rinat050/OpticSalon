@@ -19,7 +19,7 @@
             Color="MudBlazor.Color.Secondary" Style="height:50px;" Size="Size.Medium" Icon="@Icons.Material.Outlined.ArrowLeft"/>
     </MudStack>
         <MudTabPanel Text="Оправа" Icon="@Icons.Custom.Brands.Awesome">
-            <OrderFrameComponent Frame="_createCredentials.Frame" />
+            <OrderFrameComponent Frame="_createCredentials.Frame" Color="_createCredentials.FrameColor"/>
         </MudTabPanel>
         <MudTabPanel Text="Назначение" Icon="@Icons.Material.Filled.FormatListBulleted">
             <PurposesListComponent Purposes="_recipePurposes" SelectedPurpose="_createCredentials.Recipe.Purpose" />
@@ -28,12 +28,12 @@
             <OrderRecipeComponent Recipe="_createCredentials.Recipe" />
         </MudTabPanel>
         <MudTabPanel Text="Линзы" Icon="@Icons.Material.Outlined.Lens" >
-            <OrderLensComponent Packages="_lensPackages" SelectedPackage="_createCredentials.LensPackage"></OrderLensComponent>
+            <OrderLensComponent Packages="_lensPackages" OrderCredentials="_createCredentials"></OrderLensComponent>
         </MudTabPanel>
         <MudTabPanel Text="Доставка" Icon="@Icons.Material.Filled.CardTravel" >
-            <OrderDeliveryComponent OrderCredentials="_createCredentials">
+            <OrderDeliveryComponent OrderCredentials="_createCredentials" OnValidSubmit="@(CreateOrder)">
                 <MudButton Style="min-width: 100px;" Variant="Variant.Filled" 
-                Color="MudBlazor.Color.Primary">Оформить заказ</MudButton>
+                Color="MudBlazor.Color.Primary" ButtonType="ButtonType.Submit">Оформить заказ</MudButton>
             </OrderDeliveryComponent>
         </MudTabPanel>
     <MudStack Style="height:100%" Row AlignItems="AlignItems.Center">
@@ -99,5 +99,10 @@
         }
 
         await InvokeAsync(StateHasChanged);
+    }
+
+    private async void CreateOrder()
+    {
+        
     }
 }

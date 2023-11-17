@@ -1,11 +1,22 @@
 ﻿using OpticSalon.Domain.Consts;
+using OpticSalon.Domain.Models;
 
 namespace OpticSalon.Domain.FilterData
 {
     public static class RecipeDataFilter
     {
-        public static List<double> GetSphRange()
+        public static List<double> GetSphRange(string? purpose)
         {
+            if (purpose == PurposeExtension.ForNear)
+            {
+                return Range(RecipeDataConsts.AverageSph, RecipeDataConsts.MaxSph, 0.25).ToList();
+            }
+
+            if (purpose == PurposeExtension.ForDistance)
+            {
+                return Range(RecipeDataConsts.MinSph, RecipeDataConsts.AverageSph, 0.25).ToList();
+            }
+
             return Range(RecipeDataConsts.MinSph, RecipeDataConsts.MaxSph, 0.25).ToList();
         }
 

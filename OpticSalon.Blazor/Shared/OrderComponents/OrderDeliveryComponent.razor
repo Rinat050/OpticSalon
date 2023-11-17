@@ -2,47 +2,51 @@
 @using OpticSalon.Domain.FilterData
 @using OpticSalon.Domain.Models
 
-@if (_isLoading)
-{
-    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
-    return;
-}
-
-<MudContainer Class="d-flex align-center justify-center mud-width-full" style="height:90vh;">
-    <MudCard Class="p-4 w-100" Style="border-radius: 15px;"
-             Outlined="false" Elevation="5">
-        <MudCardHeader>
-            <MudStack Row AlignItems="AlignItems.Center">
-                <MudIcon Icon="@Icons.Material.Filled.CardTravel" Size="Size.Large"
-                         text-decoration Color="MudBlazor.Color.Secondary"></MudIcon>
-                <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">
-                    Данные доставки
-                </MudText>
-            </MudStack>
-        </MudCardHeader>
-        <MudCardContent>
-            <MudGrid Spacing="2">
-                <MudItem xs="12">
-                    <MudTextField T="string" @bind-Value="OrderCredentials.DeliveryAddress" Label="Адрес доставки" Variant="Variant.Outlined"></MudTextField>
-                </MudItem>
-                <MudItem xs="12">
-                    <MudTextField T="string" @bind-Value="OrderCredentials.ContactPhoneNumber" Label="Номер телефона" Variant="Variant.Outlined"></MudTextField>
-                </MudItem>
-                <MudItem xs="12">
-                    <MudTextField T="string" @bind-Value="OrderCredentials.Comment" Label="Комментарий" Lines="5" Variant="Variant.Outlined"></MudTextField>
-                </MudItem>
-            </MudGrid>
-        </MudCardContent>
-        <MudCardActions>
-            @ChildContent
-        </MudCardActions>
-    </MudCard>
-</MudContainer>
+<EditForm Model="@OrderCredentials" OnValidSubmit="@OnValidSubmit">
+    <DataAnnotationsValidator />
+    <MudContainer Class="d-flex align-center justify-center mud-width-full" style="height:90vh;">
+        <MudCard Class="p-4 w-100" Style="border-radius: 15px;"
+                 Outlined="false" Elevation="5">
+            <MudCardHeader>
+                <MudStack Row AlignItems="AlignItems.Center">
+                    <MudIcon Icon="@Icons.Material.Filled.CardTravel" Size="Size.Large"
+                             text-decoration Color="MudBlazor.Color.Secondary"></MudIcon>
+                    <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">
+                        Данные доставки
+                    </MudText>
+                </MudStack>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudGrid Spacing="2">
+                    <MudItem xs="12">
+                        <MudTextField T="string" @bind-Value="OrderCredentials.DeliveryAddress"
+                                      Label="Адрес доставки" Variant="Variant.Outlined"
+                                        For="@(() => OrderCredentials.DeliveryAddress)"></MudTextField>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField T="string" @bind-Value="OrderCredentials.ContactPhoneNumber"
+                                      Label="Номер телефона" Variant="Variant.Outlined" 
+                                      For="@(() => OrderCredentials.ContactPhoneNumber)"></MudTextField>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField T="string" @bind-Value="OrderCredentials.Comment"
+                                      Label="Комментарий" Lines="5" Variant="Variant.Outlined"
+                                        For="@(() => OrderCredentials.Comment)"></MudTextField>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+            <MudCardActions>
+                @ChildContent
+            </MudCardActions>
+        </MudCard>
+    </MudContainer>
+</EditForm>
 
 @code {
     [Parameter]
     public OrderCreateCredentials OrderCredentials { get; set; } = new();
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
-    private bool _isLoading;
+    [Parameter]
+    public Action OnValidSubmit { get; set; }
 }

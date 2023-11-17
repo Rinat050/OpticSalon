@@ -35,5 +35,10 @@ namespace OpticSalon.Domain.Services.Impl
                 };
             }
         }
+
+        public Task<ResultWithData<Color>> GetColorById(int id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

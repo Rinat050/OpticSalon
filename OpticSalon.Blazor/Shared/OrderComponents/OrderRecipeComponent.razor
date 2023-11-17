@@ -1,12 +1,6 @@
 ﻿@using OpticSalon.Domain.FilterData
 @using OpticSalon.Domain.Models
 
-@if (_isLoading)
-{
-    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
-    return;
-}
-
 <MudContainer Class="d-flex align-center justify-center mud-width-full" style="height:90vh;">
     <MudCard Class="p-4 w-100" Style="border-radius: 15px;"
              Outlined="false" Elevation="5">
@@ -29,9 +23,9 @@
                         <MudText Typo="Typo.h6" Style="font-weight: 400" Color="MudBlazor.Color.Secondary">Sph:</MudText>
                         <MudSelect T="double" @bind-Value="Recipe.RightEye.Sph" Variant="Variant.Outlined"
                                    ToStringFunc="((x) => GetNumber(x))">
-                            @foreach (var size in RecipeDataFilter.GetSphRange())
+                            @foreach (var value in RecipeDataFilter.GetSphRange(Recipe.Purpose?.Name))
                             {
-                                <MudSelectItem Value="@(size)" />
+                                <MudSelectItem Value="@(value)" />
                             }
                         </MudSelect>
                     </MudStack>
@@ -39,11 +33,11 @@
                 <MudItem xs="12" sm="8" md="4">
                     <MudStack Row AlignItems="AlignItems.Center">
                         <MudText Typo="Typo.h6" Style="font-weight: 400" Color="MudBlazor.Color.Secondary">Cyl:</MudText>
-                        <MudSelect T="double" @bind-Value="Recipe.RightEye.Sph" Variant="Variant.Outlined"
+                        <MudSelect T="double" @bind-Value="Recipe.RightEye.Cyl" Variant="Variant.Outlined"
                                    ToStringFunc="((x) => GetNumber(x))">
-                            @foreach (var size in RecipeDataFilter.GetSphRange())
+                            @foreach (var value in RecipeDataFilter.GetCylRange())
                             {
-                                <MudSelectItem Value="@(size)" />
+                                <MudSelectItem Value="@(value)" />
                             }
                         </MudSelect>
                     </MudStack>
@@ -51,11 +45,10 @@
                 <MudItem xs="12" sm="8" md="3">
                     <MudStack Row AlignItems="AlignItems.Center">
                         <MudText Typo="Typo.h6" Style="font-weight: 400" Color="MudBlazor.Color.Secondary">Ax:</MudText>
-                        <MudSelect T="double" @bind-Value="Recipe.RightEye.Sph" Variant="Variant.Outlined"
-                                   ToStringFunc="((x) => GetNumber(x))">
-                            @foreach (var size in RecipeDataFilter.GetSphRange())
+                        <MudSelect T="int" @bind-Value="Recipe.RightEye.Axis" Variant="Variant.Outlined">
+                            @foreach (var value in RecipeDataFilter.GetAxisRange())
                             {
-                                <MudSelectItem Value="@(size)" />
+                                <MudSelectItem Value="@(value)" />
                             }
                         </MudSelect>
                     </MudStack>
@@ -66,11 +59,11 @@
                 <MudItem xs="12" sm="8" md="4">
                     <MudStack Row AlignItems="AlignItems.Center">
                         <MudText Typo="Typo.h6" Style="font-weight: 400" Color="MudBlazor.Color.Secondary">Sph:</MudText>
-                        <MudSelect T="double" @bind-Value="Recipe.RightEye.Sph" Variant="Variant.Outlined"
+                        <MudSelect T="double" @bind-Value="Recipe.LeftEye.Sph" Variant="Variant.Outlined"
                                    ToStringFunc="((x) => GetNumber(x))">
-                            @foreach (var size in RecipeDataFilter.GetSphRange())
+                            @foreach (var value in RecipeDataFilter.GetSphRange(Recipe.Purpose?.Name))
                             {
-                                <MudSelectItem Value="@(size)" />
+                                <MudSelectItem Value="@(value)" />
                             }
                         </MudSelect>
                     </MudStack>
@@ -78,11 +71,11 @@
                 <MudItem xs="12" sm="8" md="4">
                     <MudStack Row AlignItems="AlignItems.Center">
                         <MudText Typo="Typo.h6" Style="font-weight: 400" Color="MudBlazor.Color.Secondary">Cyl:</MudText>
-                        <MudSelect T="double" @bind-Value="Recipe.RightEye.Sph" Variant="Variant.Outlined"
+                        <MudSelect T="double" @bind-Value="Recipe.LeftEye.Cyl" Variant="Variant.Outlined"
                                    ToStringFunc="((x) => GetNumber(x))">
-                            @foreach (var size in RecipeDataFilter.GetSphRange())
+                            @foreach (var value in RecipeDataFilter.GetCylRange())
                             {
-                                <MudSelectItem Value="@(size)" />
+                                <MudSelectItem Value="@(value)" />
                             }
                         </MudSelect>
                     </MudStack>
@@ -90,11 +83,10 @@
                 <MudItem xs="12" sm="8" md="3">
                     <MudStack Row AlignItems="AlignItems.Center">
                         <MudText Typo="Typo.h6" Style="font-weight: 400" Color="MudBlazor.Color.Secondary">Ax:</MudText>
-                        <MudSelect T="double" @bind-Value="Recipe.RightEye.Sph" Variant="Variant.Outlined"
-                                   ToStringFunc="((x) => GetNumber(x))">
-                            @foreach (var size in RecipeDataFilter.GetSphRange())
+                        <MudSelect T="int" @bind-Value="Recipe.LeftEye.Axis" Variant="Variant.Outlined">
+                            @foreach (var value in RecipeDataFilter.GetAxisRange())
                             {
-                                <MudSelectItem Value="@(size)" />
+                                <MudSelectItem Value="@(value)" />
                             }
                         </MudSelect>
                     </MudStack>
@@ -102,11 +94,10 @@
                 <MudItem xs="12">
                     <MudStack Row AlignItems="AlignItems.Center">
                         <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Dp (mm):</MudText>
-                        <MudSelect T="double" @bind-Value="Recipe.RightEye.Sph" Variant="Variant.Outlined"
-                                   ToStringFunc="((x) => GetNumber(x))">
-                            @foreach (var size in RecipeDataFilter.GetSphRange())
+                        <MudSelect T="int" @bind-Value="Recipe.Dp" Variant="Variant.Outlined">
+                            @foreach (var value in RecipeDataFilter.GetDpRange())
                             {
-                                <MudSelectItem Value="@(size)" />
+                                <MudSelectItem Value="@(value)" />
                             }
                         </MudSelect>
                     </MudStack>
@@ -117,9 +108,8 @@
 </MudContainer>
 
 @code {
-    private bool _isLoading;
     [Parameter]
-    public Recipe Recipe { get; set; }
+    public Recipe Recipe { get; set; } = new();
 
     private string GetNumber(double number)
     {
@@ -131,5 +121,15 @@
         {
             return number.ToString("0.00");
         }
+    }
+
+    protected override void OnInitialized()
+    {
+        SetDefaultData();
+    }
+
+    private void SetDefaultData()
+    {
+        Recipe.Dp = RecipeDataFilter.GetDpRange().First();
     }
 }
