@@ -10,14 +10,17 @@ namespace OpticSalon.Data.Repositories
         {
         }
 
-        public async Task<Order> AddOrder(Order order)
+        public async Task<int> AddOrder(Order order)
         {
             var orderDb = Mapper.Map(order);
+
+            orderDb.Recipe.Purpose = null!;
+            orderDb.CreatedDate = DateTime.SpecifyKind(orderDb.CreatedDate, DateTimeKind.Utc);
             await Context.Orders.AddAsync(orderDb);
             await Context.SaveChangesAsync();
             Context.Entry(orderDb).State = EntityState.Detached;
 
-            return Mapper.Map(orderDb);
+            return orderDb.Id;
         }
     }
 }

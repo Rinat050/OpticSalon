@@ -66,19 +66,4 @@
 
         return MudBlazor.Color.Default;
     }
-
-    protected override void OnInitialized()
-    {
-        SetDefaultData();
-    }
-
-    private void SetDefaultData()
-    {
-        var lens = Packages.FirstOrDefault();
-
-        if (lens is not null)
-        {
-            OrderCredentials.LensPackage = lens;
-        }
-    }
 }

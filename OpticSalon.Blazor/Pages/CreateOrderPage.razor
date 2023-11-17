@@ -9,6 +9,9 @@
 @inject ILensPackageService LensPackageService
 @inject IPurposeService PurposeService
 @inject IClientService ClientService
+@inject IOrderService OrderService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavManager
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
 
 @if (_isLoading)
@@ -32,7 +35,7 @@
             <OrderFrameComponent Frame="_createCredentials.Frame" Color="_createCredentials.FrameColor"/>
         </MudTabPanel>
         <MudTabPanel Text="Назначение" Icon="@Icons.Material.Filled.FormatListBulleted">
-            <PurposesListComponent Purposes="_recipePurposes" SelectedPurpose="_createCredentials.Recipe.Purpose" />
+            <PurposesListComponent Purposes="_recipePurposes" Order="@(_createCredentials)" />
         </MudTabPanel>
         <MudTabPanel Text="Рецепт" Icon="@Icons.Material.Filled.Article" >
             <OrderRecipeComponent Recipe="_createCredentials.Recipe" />
@@ -114,7 +117,19 @@
 
     private async void CreateOrder()
     {
+        var res = await OrderService.CreateOrder(_createCredentials.Recipe, _createCredentials.Frame, 
+            _createCredentials.FrameColor, _createCredentials.LensPackage, _createCredentials.LensTintingPercent, 
+            _createCredentials.ContactPhoneNumber, _createCredentials.DeliveryAddress, _createCredentials.Comment, 
+            _createCredentials.Client);
 
+        if (res.Success)
+        {
+            Snackbar.Add(res.Description, Severity.Success);
+            NavManager.NavigateTo("/catalog");
+            return;
+        }
+
+        Snackbar.Add(res.Description, Severity.Warning);
     }
 
     protected async override Task OnInitializedAsync()
@@ -122,9 +137,10 @@
         _isLoading = true;
         _createCredentials = new OrderCreateCredentials();
         await LoadClientInfo();
-        SetDefaultData();
 
         await LoadData();
+
+        SetDefaultData();
         _isLoading = false;
     }
 
@@ -136,6 +152,20 @@
             RightEye = new (),
             Dp = RecipeDataFilter.GetDpRange().First()
         };
+        
+        var purpose = _recipePurposes.FirstOrDefault();
+
+        if (purpose is not null)
+        {
+            _createCredentials.Recipe.Purpose = purpose;
+        }
+
+        var lens = _lensPackages.FirstOrDefault();
+
+        if (lens is not null)
+        {
+            _createCredentials.LensPackage = lens;
+        }
 
         if (_createCredentials.Client is not null)
         {

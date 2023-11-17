@@ -1,4 +1,5 @@
 ﻿@using MudBlazor.Utilities
+@using OpticSalon.Blazor.Data.Credentials
 @using OpticSalon.Domain.Models
 
 
@@ -36,41 +37,31 @@
     [Parameter]
     public List<Purpose> Purposes { get; set; } = new();
     [Parameter]
-    public Purpose SelectedPurpose { get; set; } = null!;
+    public OrderCreateCredentials Order { get; set; } = null!;
 
     private bool _isLoading;
 
     private void SelectPurpose(Purpose purpose)
     {
-        SelectedPurpose = purpose;
+        if (purpose != Order.Recipe.Purpose)
+        {
+            Order.Recipe.LeftEye = new EyeData();
+            Order.Recipe.RightEye = new EyeData();
+        }
+        Order.Recipe.Purpose = purpose;
     }
 
     private string GetListItemIcon(Purpose purpose)
     {
-        if (SelectedPurpose == purpose) return Icons.Material.Outlined.Check;
+        if (Order.Recipe.Purpose == purpose) return Icons.Material.Outlined.Check;
 
         return Icons.Material.Outlined.DragHandle;
     }
 
     private MudBlazor.Color GetListItemIconColor(Purpose purpose)
     {
-        if (SelectedPurpose == purpose) return MudBlazor.Color.Success;
+        if (Order.Recipe.Purpose == purpose) return MudBlazor.Color.Success;
 
         return MudBlazor.Color.Default;
-    }
-
-    protected override void OnInitialized()
-    {
-        SetDefaultData();
-    }
-
-    private void SetDefaultData()
-    {
-        var purpose = Purposes.FirstOrDefault();
-
-        if (purpose is not null)
-        {
-            SelectedPurpose = purpose;
-        }
     }
 }

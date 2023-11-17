@@ -16,7 +16,7 @@ namespace OpticSalon.Domain.Services.Impl
 
         public async Task<ResultWithData<Order>> CreateOrder(Recipe recipe, Frame frame, Color frameColor,
             LensPackage lens, int lensTintingPercent, string contactPhoneNumber, string deliveryAddress,
-            string comment, Client client)
+            string? comment, Client client)
         {
             try
             {
@@ -34,12 +34,12 @@ namespace OpticSalon.Domain.Services.Impl
                     CreatedDate = DateTime.Now
                 };
 
-                var createdOrder = await _orderRepository.AddOrder(newOrder);
+                var createdOrderId = await _orderRepository.AddOrder(newOrder);
 
                 return new ResultWithData<Order>()
                 {
                     Success = true,
-                    Description = $"Заказ успешно создан! Номер заказа - {createdOrder.Id}"
+                    Description = $"Заказ успешно создан! Номер заказа - {createdOrderId}"
                 };
             }
             catch

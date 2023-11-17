@@ -33,7 +33,6 @@ namespace OpticSalon.Data.Mappers.EntityMapping
         public partial Frame MapFrame(FrameDb frameDb);
         public partial Order Map(OrderDb orderDb);
         [MapperIgnoreTarget(nameof(OrderDb.Frame))]
-        [MapperIgnoreTarget(nameof(OrderDb.Recipe.Purpose))]
         [MapperIgnoreTarget(nameof(OrderDb.Client))]
         [MapperIgnoreTarget(nameof(OrderDb.FrameColor))]
         [MapperIgnoreTarget(nameof(OrderDb.LensPackage))]

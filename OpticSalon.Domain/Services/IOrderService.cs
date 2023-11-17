@@ -7,7 +7,7 @@ namespace OpticSalon.Domain.Services
     {
         public Task<ResultWithData<Order>> CreateOrder(Recipe recipe, Frame frame, Color frameColor, 
             LensPackage lens, int lensTintingPercent, string contactPhoneNumber, string deliveryAddress, 
-            string comment, Client client);
+            string? comment, Client client);
 
         public decimal GetOrderTotalCost(Order order);
     }
