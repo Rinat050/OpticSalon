@@ -122,14 +122,4 @@
             return number.ToString("0.00");
         }
     }
-
-    protected override void OnInitialized()
-    {
-        SetDefaultData();
-    }
-
-    private void SetDefaultData()
-    {
-        Recipe.Dp = RecipeDataFilter.GetDpRange().First();
-    }
 }

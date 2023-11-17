@@ -157,5 +157,36 @@ namespace OpticSalon.Domain.Services.Impl
                 };
             }
         }
+
+        public async Task<ResultWithData<Client>> GetClientById(int id)
+        {
+            try
+            {
+                var existClient = await _clientRepository.GetClientById(id);
+
+                if (existClient == null)
+                {
+                    return new ResultWithData<Client>()
+                    {
+                        Success = false,
+                        Description = ClientServiceMessages.ClientNotFounded
+                    };
+                }
+
+                return new ResultWithData<Client>()
+                {
+                    Success = true,
+                    Data = existClient
+                };
+            }
+            catch
+            {
+                return new ResultWithData<Client>()
+                {
+                    Success = false,
+                    Description = DefaultErrors.ServerError
+                };
+            }
+        }
     }
 }
