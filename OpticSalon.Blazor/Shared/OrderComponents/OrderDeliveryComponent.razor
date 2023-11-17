@@ -1,0 +1,42 @@
+﻿@using OpticSalon.Domain.FilterData
+@using OpticSalon.Domain.Models
+
+@if (_isLoading)
+{
+    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
+    return;
+}
+
+<MudContainer Class="d-flex align-center justify-center mud-width-full" style="height:90vh;">
+    <MudCard Class="p-4 w-100" Style="border-radius: 15px;"
+             Outlined="false" Elevation="5">
+        <MudCardHeader>
+            <MudStack Row AlignItems="AlignItems.Center">
+                <MudIcon Icon="@Icons.Material.Filled.CardTravel" Size="Size.Large"
+                         text-decoration Color="MudBlazor.Color.Secondary"></MudIcon>
+                <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">
+                    Данные доставки
+                </MudText>
+            </MudStack>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid Spacing="2">
+                <MudItem xs="12">
+                    <MudTextField T="string" Label="Адрес доставки" Variant="Variant.Outlined"></MudTextField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField T="string" Label="Номер телефона" Variant="Variant.Outlined"></MudTextField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField T="string" Label="Комментарий" Lines="5" Variant="Variant.Outlined"></MudTextField>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+</MudContainer>
+
+@code {
+    private bool _isLoading;
+    [Parameter]
+    public Recipe Recipe { get; set; }
+}

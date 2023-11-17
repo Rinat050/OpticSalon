@@ -23,7 +23,8 @@
         </MudListSubheader>
         @foreach(var purpose in _purposes)
         {
-            <MudListItem OnClick="(() => SelectPurpose(purpose))" Icon="@Icons.Material.Outlined.DragHandle">
+            <MudListItem OnClick="(() => SelectPurpose(purpose))" Icon="@(GetListItemIcon(purpose))" 
+                IconColor="@(GetListItemIconColor(purpose))">
                 @purpose.Name
             </MudListItem>
         }
@@ -39,5 +40,19 @@
     private void SelectPurpose(Purpose purpose)
     {
         _selected = purpose;
+    }
+
+    private string GetListItemIcon(Purpose purpose)
+    {
+        if (_selected == purpose) return Icons.Material.Outlined.Check;
+
+        return Icons.Material.Outlined.DragHandle;
+    }
+
+    private MudBlazor.Color GetListItemIconColor(Purpose purpose)
+    {
+        if (_selected == purpose) return MudBlazor.Color.Success;
+
+        return MudBlazor.Color.Default;
     }
 }

@@ -1,9 +1,13 @@
 ﻿@page "/createOrder/{frameId:int}/{colorId:int}"
 @using OpticSalon.Blazor.Data.Credentials
 @using OpticSalon.Blazor.Shared.OrderComponents
+@using OpticSalon.Domain.Models
 
-<MudTabs Style="height: 100%" Outlined="true" MinimumTabWidth="20px" Position="Position.Left">
-    <MudIconButton Color="Color.Secondary" Size="Size.Medium" Icon="@Icons.Material.Outlined.ArrowLeft"/>
+<MudTabs @bind-ActivePanelIndex="_selectedTabIndex" Style="height: 100%" Outlined="true" MinimumTabWidth="20px" Position="Position.Left">
+    <MudStack Style="height:100%" Row AlignItems="AlignItems.Center">
+        <MudIconButton Disabled="@(_selectedTabIndex == 0)" OnClick="@(() => ChangeTabIndex(_selectedTabIndex - 1))" 
+            Color="MudBlazor.Color.Secondary" Style="height:50px;" Size="Size.Medium" Icon="@Icons.Material.Outlined.ArrowLeft"/>
+    </MudStack>
         <MudTabPanel Text="Оправа" Icon="@Icons.Custom.Brands.Awesome">
             <OrderFrameComponent FrameId="FrameId" />
         </MudTabPanel>
@@ -11,12 +15,18 @@
             <PurposesListComponent />
         </MudTabPanel>
         <MudTabPanel Text="Рецепт" Icon="@Icons.Material.Filled.Article" >
+            <OrderRecipeComponent Recipe="recipe"/>
         </MudTabPanel>
         <MudTabPanel Text="Линзы" Icon="@Icons.Material.Outlined.Lens" >
+            <OrderLensComponent></OrderLensComponent>
         </MudTabPanel>
         <MudTabPanel Text="Доставка" Icon="@Icons.Material.Filled.CardTravel" >
+            <OrderDeliveryComponent></OrderDeliveryComponent>
         </MudTabPanel>
-     <MudIconButton Color="Color.Secondary" Size="Size.Medium" Icon="@Icons.Material.Outlined.ArrowRight"/>
+    <MudStack Style="height:100%" Row AlignItems="AlignItems.Center">
+        <MudIconButton Disabled="@(_selectedTabIndex == 4)" OnClick="@(() => ChangeTabIndex(_selectedTabIndex + 1))" 
+            Color="MudBlazor.Color.Secondary" Style="height:50px;" Size="Size.Medium" Icon="@Icons.Material.Outlined.ArrowRight"/>
+    </MudStack>
 </MudTabs>
 
 @code {
@@ -25,5 +35,16 @@
     [Parameter]
     public int ColorId { get; set; }
 
+    private Recipe recipe = new Recipe() { RightEye = new EyeData() };
+
+    private int _selectedTabIndex = 0;
+
     private OrderCreateCredentials _createCredentials = new();
+
+    private void ChangeTabIndex(int index)
+    {
+        if (index > 4 || index < 0) return;
+
+        _selectedTabIndex = index;
+    }
 }
