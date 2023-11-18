@@ -54,6 +54,15 @@ namespace OpticSalon.Data.Repositories
             return result == null ? null : Mapper.Map(result);
         }
 
+        public async Task UpdateClient(Client client)
+        {
+            var clientDb = Mapper.Map(client);
+            Context.Clients.Update(clientDb);
+            await Context.SaveChangesAsync();
+
+            Context.ChangeTracker.Clear();
+        }
+
         public async Task UpdateClientPreferences(ClientPreferences preferences)
         {
             var preferencesDb = Mapper.Map(preferences);

@@ -189,9 +189,26 @@ namespace OpticSalon.Domain.Services.Impl
             }
         }
 
-        public Task<BaseResult> UpdateClient(Client client)
+        public async Task<BaseResult> UpdateClient(Client client)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _clientRepository.UpdateClient(client);
+
+                return new BaseResult()
+                {
+                    Success = true,
+                    Description = ClientServiceMessages.SuccessUpdated
+                };
+            }
+            catch
+            {
+                return new BaseResult()
+                {
+                    Success = false,
+                    Description = DefaultErrors.ServerError
+                };
+            }
         }
     }
 }

@@ -52,14 +52,57 @@ namespace OpticSalon.Domain.Services.Impl
             }
         }
 
-        public Task<ResultWithData<Order>> GetOrderById(int id)
+        public async Task<ResultWithData<Order>> GetOrderById(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var res = await _orderRepository.GetOrderById(id);
+
+                if (res == null)
+                {
+                    return new ResultWithData<Order>()
+                    {
+                        Success = false,
+                        Description = "Не найдено"
+                    };
+                }
+
+                return new ResultWithData<Order>()
+                {
+                    Success = true,
+                    Data = res
+                };
+            }
+            catch
+            {
+                return new ResultWithData<Order>()
+                {
+                    Success = false,
+                    Description = DefaultErrors.ServerError
+                };
+            }
         }
 
-        public Task<ResultWithData<List<OrderShort>>> GetOrdersByClient(int clientId)
+        public async Task<ResultWithData<List<OrderShort>>> GetOrdersByClient(int clientId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var res = await _orderRepository.GetOrdersByClient(clientId);
+
+                return new ResultWithData<List<OrderShort>>()
+                {
+                    Success = true,
+                    Data = res
+                };
+            }
+            catch
+            {
+                return new ResultWithData<List<OrderShort>>()
+                {
+                    Success = false,
+                    Description = DefaultErrors.ServerError
+                };
+            }
         }
 
         public decimal GetOrderTotalCost(Order order)

@@ -22,5 +22,35 @@ namespace OpticSalon.Data.Repositories
 
             return orderDb.Id;
         }
+
+
+        public async Task<Order?> GetOrderById(int id)
+        {
+            var orderDb = await Context.Orders
+                        .Include(x => x.LensPackage)
+                        .Include(x => x.Client)
+                        .Include(x => x.Frame.Brand)
+                        .Include(x => x.Frame.Material)
+                        .Include(x => x.Frame.Gender)
+                        .Include(x => x.Frame.Sizes)
+                        .Include(x => x.Frame.Type)
+                        .Include(x => x.FrameColor)
+                        .Include(x => x.Recipe.Purpose)
+                        .Include(x => x.Recipe.LeftEye)
+                        .Include(x => x.Recipe.RightEye)
+                        .FirstOrDefaultAsync(o => o.Id == id);
+
+            return orderDb == null ? null : Mapper.MapOrder(orderDb);
+        }
+
+        public async Task<List<OrderShort>> GetOrdersByClient(int clientId)
+        {
+            var orders = await Context.Orders
+                        .Where(o => o.Id == clientId)
+                        .Select(o => Mapper.MapOrderShort(o))
+                        .ToListAsync();
+
+            return orders;
+        }
     }
 }

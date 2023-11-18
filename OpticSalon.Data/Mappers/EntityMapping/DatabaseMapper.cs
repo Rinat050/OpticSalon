@@ -31,11 +31,12 @@ namespace OpticSalon.Data.Mappers.EntityMapping
         public partial ClientPreferencesDb Map(ClientPreferences clientPreferences);
         public partial FrameShort MapFrameShort(FrameDb frameDb);
         public partial Frame MapFrame(FrameDb frameDb);
-        public partial Order Map(OrderDb orderDb);
+        public partial Order MapOrder(OrderDb orderDb);
         [MapperIgnoreTarget(nameof(OrderDb.Frame))]
         [MapperIgnoreTarget(nameof(OrderDb.Client))]
         [MapperIgnoreTarget(nameof(OrderDb.FrameColor))]
         [MapperIgnoreTarget(nameof(OrderDb.LensPackage))]
         public partial OrderDb Map(Order order);
+        public partial OrderShort MapOrderShort(OrderDb orderDb);
     }
 }
