@@ -30,7 +30,7 @@
             }
         </MudList>
         <MudStack Row AlignItems="AlignItems.Center">
-            <MudSelect @bind-Value="OrderCredentials.LensTintingPercent" Label="Тонировки линз (%)" T="int" Variant="Variant.Outlined">
+            <MudSelect @bind-Value="OrderCredentials.LensTintingPercent" Label="Тонировка линз (%)" T="int" Variant="Variant.Outlined">
                 @foreach (var value in LensTintingFilter.GetLensTintingRange())
                 {
                     <MudSelectItem Value="@(value)"></MudSelectItem>
