@@ -42,6 +42,8 @@
 @code {
     [Parameter]
     public Client Client { get; set; } = new();
+    [Parameter]
+    public Func<Task> OnValidSubmit { get; set; } = null;
 
     private bool _isLoading;
 
@@ -53,6 +55,7 @@
 
         if (res.Success)
         {
+            OnValidSubmit?.Invoke();
             Snackbar.Add(res.Description, Severity.Success);
             return;
         }

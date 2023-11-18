@@ -100,9 +100,7 @@
 
 @code {
     [Parameter]
-    public OpticSalon.Domain.Models.ClientPreferences ClientPreferences { get; set; } = new();
-    [Parameter]
-    public bool IsRegister { get; set; }
+    public OpticSalon.Domain.Models.ClientPreferences ClientPreferences { get; set; } = null!;
     [Parameter]
     public int ClientId { get; set; }
 
@@ -155,7 +153,10 @@
             _frameColors.ForEach(x => _pickerColors.Add(new MudColor(x.Value)));
         }
 
-        SetDefaultData();
+        if (_isNew)
+        {
+            SetDefaultData();  
+        }
     }
 
     private void SetDefaultData()
@@ -199,11 +200,7 @@
         if (result.Success)
         {
             Snackbar.Add(result.Description, Severity.Info);
-
-            if (IsRegister)
-                NavManager.NavigateTo("/login");
-
-            NavManager.NavigateTo("/");
+            NavManager.NavigateTo("/clientProfile");
             return;
         }
 

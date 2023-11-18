@@ -34,20 +34,22 @@
              Outlined="false" Elevation="0">
         <MudCardHeader>
             <MudGrid Class="m-2">
-                <MudAvatar Style="width: 100px; height:100px;" Class="m-1" Color="MudBlazor.Color.Primary"><MudText Class="m-5" Typo="Typo.h4">РС</MudText></MudAvatar>
+                <MudAvatar Style="width: 100px; height:100px;" Class="m-1" Color="MudBlazor.Color.Primary">
+                    <MudText Class="m-5" Typo="Typo.h4">@GetAvatarText()</MudText>
+                    </MudAvatar>
                 <MudStack Class="ms-4" Justify="Justify.Center">
-                    <MudText Color="MudBlazor.Color.Secondary" Typo="Typo.h5" Class="m-0 p-0">Ринат Сафиуллин</MudText>
-                    <MudText Color="MudBlazor.Color.Secondary" Typo="Typo.h6" Class="m-0 p-0">rinat.safiullin.05@bk.ru</MudText>
+                    <MudText Color="MudBlazor.Color.Secondary" Typo="Typo.h5" Class="m-0 p-0">@_client?.Name @_client?.Surname</MudText>
+                    <MudText Color="MudBlazor.Color.Secondary" Typo="Typo.h6" Class="m-0 p-0">@_user?.Email</MudText>
                 </MudStack>
             </MudGrid>
         </MudCardHeader>
         <MudCardContent>
             <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
                 <MudTabPanel Text="Личные данные">
-                    <ClientProfileDataComponent Client="_client"></ClientProfileDataComponent>
+                    <ClientProfileDataComponent Client="_client" OnValidSubmit="@(LoadClientInfo)"></ClientProfileDataComponent>
                 </MudTabPanel>
                 <MudTabPanel Text="Предпочтения">
-                    <ProfileClientPreferencesComponent ClientId="_client.Id" ClientPreferences="_clientPreferences"></ProfileClientPreferencesComponent>
+                    <ProfileClientPreferencesComponent ClientId="_client.Id" ClientPreferences="_clientPreferences" />
                 </MudTabPanel>
                 <MudTabPanel Text="Заказы">
                     <ClientOrdersComponent Orders="_orders"></ClientOrdersComponent>
@@ -58,6 +60,7 @@
 </MudContainer>
 
 @code {
+    private OpticSalonUser _user = new();
     private Client _client = null!;
     private ClientPreferences _clientPreferences = null!;
     private List<OrderShort> _orders = new(); 
@@ -70,11 +73,11 @@
 
     private async Task LoadData()
     {
-        if (_client == null) return;
-
         _isLoading = true;
 
         await LoadClientInfo();
+
+        if (_client == null) return;
 
         var preferencesRes = await ClientService.GetClientPreferences(_client.Id);
 
@@ -104,11 +107,20 @@
 
         var clientId = int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.ClientId).Value);
 
+        _user = await UserManager.FindByEmailAsync(userIdentity.Identity?.Name);
+
         var res = await ClientService.GetClientById(clientId);
 
         if (res.Success)
         {
             _client = res.Data!;
         }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private string GetAvatarText()
+    {
+        return $"{_client?.Name[0]}{_client?.Surname[0]}";
     }
 }

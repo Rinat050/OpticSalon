@@ -2,26 +2,30 @@
 
 @inject NavigationManager NavManager
 
-<MudCard Class="p-2 w-75" Style="border-radius: 15px;"
-         Outlined="false" Elevation="1">
-    <MudCardContent>
-         <MudTable T="OrderShort" Items="@Orders">
-            <HeaderContent>
-                <MudTh>Номер заказа</MudTh>
-                <MudTh>Дата создания</MudTh>
-                <MudTh>Адрес доставки</MudTh>
-                <MudTh>Номер телефона</MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd DataLabel="Номер заказа">@context.Id</MudTd>
-                <MudTd DataLabel="Дата создания">@context.CreatedDate</MudTd>
-                <MudTd DataLabel="Адрес доставки">@context.DeliveryAddress</MudTd>
-                <MudTd DataLabel="Номер телефона">@context.ContactPhoneNumber</MudTd>
-                <MudTd DataLabel="Просмотр"><MudIconButton Icon="@Icons.Material.Filled.ArrowRight" OnClick="@(() => ShowOrder(context.Id))"></MudIconButton></MudTd>
-            </RowTemplate>
-        </MudTable>
-    </MudCardContent>
-</MudCard>
+
+@if (Orders.Count() == 0)
+{
+    <MudAlert Class="m-2" Severity="Severity.Normal">Заказов пока нет...</MudAlert>
+    return;
+}
+
+<MudTable  T="OrderShort" Items="@Orders">
+    <HeaderContent>
+        <MudTh>Номер заказа</MudTh>
+        <MudTh>Дата создания</MudTh>
+        <MudTh>Адрес доставки</MudTh>
+        <MudTh>Номер телефона</MudTh>
+        <MudTh>Просмотр</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Номер заказа">@context.Id</MudTd>
+        <MudTd DataLabel="Дата создания">@context.CreatedDate</MudTd>
+        <MudTd DataLabel="Адрес доставки">@context.DeliveryAddress</MudTd>
+        <MudTd DataLabel="Номер телефона">@context.ContactPhoneNumber</MudTd>
+        <MudTd DataLabel="Просмотр"><MudIconButton Icon="@Icons.Material.Filled.ArrowRight" OnClick="@(() => ShowOrder(context.Id))"></MudIconButton></MudTd>
+    </RowTemplate>
+</MudTable>
+
 
 @code {
     [Parameter]

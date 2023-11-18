@@ -46,7 +46,7 @@ namespace OpticSalon.Data.Repositories
         public async Task<List<OrderShort>> GetOrdersByClient(int clientId)
         {
             var orders = await Context.Orders
-                        .Where(o => o.Id == clientId)
+                        .Where(o => o.ClientId == clientId)
                         .Select(o => Mapper.MapOrderShort(o))
                         .ToListAsync();
 
