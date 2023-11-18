@@ -56,7 +56,7 @@
         if (res.Success)
         {
             OnValidSubmit?.Invoke();
-            Snackbar.Add(res.Description, Severity.Success);
+            Snackbar.Add(res.Description, Severity.Info);
             return;
         }
 

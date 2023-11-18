@@ -1,4 +1,4 @@
-﻿@page "/catalog"
+﻿@page "/"
 
 @using MudBlazor.Utilities
 @using OpticSalon.Auth.Models
@@ -12,6 +12,7 @@
 @inject IGenderService GenderService
 @inject IClientService ClientService
 @inject IImageLoadingService ImageLoadingService
+@inject NavigationManager NavManager
 @inject IJSRuntime JS
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
 
@@ -46,18 +47,18 @@ else
         {
             <MudItem xs="12" sm="6" md="4" lg="3">
                 <MudCard Elevation="3">
-              
-                        <div class="mud-card-media" style="min-height:150px;">
-                            <MudImage id="@(frame.Id)" Style="display: block; margin: auto;object-fit: contain; max-width: 95%; max-height: 30vh" />
-                        </div>
-                    
+
+                    <div class="mud-card-media" style="min-height:150px;">
+                        <MudImage id="@(frame.Id)" Style="display: block; margin: auto;object-fit: contain; max-width: 95%; max-height: 30vh" />
+                    </div>
+
                     <MudCardContent>
                         <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">@($"{frame.Brand.Name} {frame.Model}")</MudText>
                         <MudText Typo="Typo.body2">Размеры: @(GetSizeString(frame.Sizes))</MudText>
                         <MudText Typo="Typo.body1">Стоимость: @($"{frame.Cost} руб.")</MudText>
                     </MudCardContent>
                     <MudCardActions>
-                        <MudButton FullWidth Variant="Variant.Outlined" Color="MudBlazor.Color.Primary">Подробнее</MudButton>
+                        <MudButton OnClick="@(() => ShowFrame(frame.Id))" FullWidth Variant="Variant.Outlined" Color="MudBlazor.Color.Primary">Подробнее</MudButton>
                     </MudCardActions>
                 </MudCard>
             </MudItem>
@@ -121,10 +122,13 @@ else
                                     Palette="_pickerColors"></MudColorPicker>
                 </MudStack>
             </MudItem>
-            <MudItem xs="12">
-                <MudCheckBox @bind-Checked="_filter.IsClientPrefencesSelected" Label="По вашим предпочтениям"
+            @if (_currentClientPreferences is not null)
+            {
+                <MudItem xs="12">
+                    <MudCheckBox @bind-Checked="_filter.IsClientPrefencesSelected" Label="По вашим предпочтениям"
                              Size="Size.Medium" Color="MudBlazor.Color.Primary"></MudCheckBox>
-            </MudItem>
+                </MudItem>
+            }
             <MudItem xs="12">
                 <MudButton FullWidth OnClick="@(async () => await FillFramesData())" Variant="Variant.Filled"
                            Color="MudBlazor.Color.Primary">Применить</MudButton>
@@ -188,7 +192,7 @@ else
             _frameColors.ForEach(x => _pickerColors.Add(new MudColor(x.Value)));
         }
 
-        //await LoadClientPreferences();
+        await LoadClientPreferences();
 
         await InvokeAsync(StateHasChanged);
     }
@@ -215,7 +219,7 @@ else
     {
         var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
 
-        if (userIdentity is null)
+        if (!userIdentity.Identity.IsAuthenticated)
         {
             return;
         }
@@ -275,7 +279,7 @@ else
                             await InvokeAsync(StateHasChanged);
                         }
                     }
-                    catch {}
+                    catch { }
                 });
 
                 tasks.Add(task);
@@ -292,5 +296,10 @@ else
     private void ClearFilter()
     {
         _filter = new FramesFilterCredentials();
+    }
+
+    private void ShowFrame(int frameId)
+    {
+        NavManager.NavigateTo($"/frameShow/{frameId}");
     }
 }

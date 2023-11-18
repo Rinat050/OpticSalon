@@ -4,6 +4,8 @@
 @inject IFrameService FrameService
 @inject IImageLoadingService ImageLoadingService
 @inject IJSRuntime JS
+@inject NavigationManager NavManager
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 
 <PageTitle>@($"{_frame?.Brand?.Name} {_frame?.Model}")</PageTitle>
 
@@ -105,7 +107,7 @@
                             </MudItem>
                         }
                         <MudItem xs="12">
-                            <MudButton FullWidth Variant="Variant.Filled"
+                            <MudButton FullWidth Variant="Variant.Filled" OnClick="CreateOrder"
                                 Color="MudBlazor.Color.Primary" Disabled="@(_selectedColor == null)" Class="mt-2">Заказать</MudButton>
                         </MudItem>
                     </MudGrid>
@@ -176,5 +178,18 @@
     private void ColorSelect(OpticSalon.Domain.Models.Color color)
     {
         _selectedColor = color;
+    }
+
+    private async Task CreateOrder()
+    {
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+
+        if (!userIdentity.Identity.IsAuthenticated)
+        {
+            NavManager.NavigateTo("/login");
+            return;
+        }
+
+        NavManager.NavigateTo($"/createOrder/{_frame.Id}/{_selectedColor.Id}");
     }
 }

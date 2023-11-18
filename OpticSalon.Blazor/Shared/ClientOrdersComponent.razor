@@ -1,7 +1,15 @@
-﻿@using OpticSalon.Domain.Models
+﻿@using OpticSalon.Blazor.Shared.Dialogs
+@using OpticSalon.Domain.Models
 
 @inject NavigationManager NavManager
+@inject IOrderService OrderService
+@inject IDialogService DialogService
 
+@if (_isLoading)
+{
+    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
+    return;
+}
 
 @if (Orders.Count() == 0)
 {
@@ -22,7 +30,7 @@
         <MudTd DataLabel="Дата создания">@context.CreatedDate</MudTd>
         <MudTd DataLabel="Адрес доставки">@context.DeliveryAddress</MudTd>
         <MudTd DataLabel="Номер телефона">@context.ContactPhoneNumber</MudTd>
-        <MudTd DataLabel="Просмотр"><MudIconButton Icon="@Icons.Material.Filled.ArrowRight" OnClick="@(() => ShowOrder(context.Id))"></MudIconButton></MudTd>
+        <MudTd DataLabel="Просмотр"><MudIconButton Icon="@Icons.Material.Filled.ArrowRight" OnClick="@(() => OpenOrderInfo(context.Id))"></MudIconButton></MudTd>
     </RowTemplate>
 </MudTable>
 
@@ -30,9 +38,22 @@
 @code {
     [Parameter]
     public List<OrderShort> Orders { get; set; } = new();
+    private bool _isLoading;
 
-    private void ShowOrder(int id)
+    private async Task OpenOrderInfo(int order)
     {
-        NavManager.NavigateTo($"/showOrder/{id}");
+        _isLoading = true;
+        var orderRes = await OrderService.GetOrderById(order);
+        _isLoading = false;
+
+        if (!orderRes.Success) return;
+
+        DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var parameters = new DialogParameters();
+        parameters.Add("Order", orderRes.Data!);
+
+        var dialog = await DialogService.ShowAsync<OrderShowDialog>($"Заказ №{order}" , parameters, options: maxWidth);
+
+        var res = await dialog.Result;
     }
 }

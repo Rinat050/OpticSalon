@@ -12,7 +12,7 @@
                     <MudIcon Icon="@Icons.Material.Outlined.Lens" Size="Size.Large"
                              Color="MudBlazor.Color.Secondary"></MudIcon>
                     <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">
-                        Выбор линз
+                        Выбор пакета линз
                     </MudText>
                 </MudStack>
             </MudListSubheader>
@@ -20,7 +20,7 @@
             {
                 <MudListItem OnClick="@(() => SelectLens(lens))" Icon="@(GetListItemIcon(lens))"
                          IconColor="@(GetListItemIconColor(lens))">
-                    <MudText Typo="Typo.subtitle1">@lens.Name</MudText>
+                    <MudText Typo="Typo.h6" Color="MudBlazor.Color.Primary">@lens.Name</MudText>
                     <MudText Class="m-1" Typo="Typo.body1">@lens.Description</MudText>
                     <MudStack Row AlignItems="AlignItems.Center">
                         <MudText Typo="Typo.subtitle2" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Стоимость:</MudText>

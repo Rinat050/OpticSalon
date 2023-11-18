@@ -11,5 +11,6 @@ namespace OpticSalon.Domain.Services
 
         public Task<ResultWithData<List<OrderShort>>> GetOrdersByClient(int clientId);
         public Task<ResultWithData<Order>> GetOrderById(int id);
+        public decimal GetOrderTotalCost(Order order);
     }
 }

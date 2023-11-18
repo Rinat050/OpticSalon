@@ -7,6 +7,8 @@
 @using OpticSalon.Blazor.Middleware
 @using OpticSalon.Domain.Models
 
+@attribute [Authorize(Roles = Role.Client)]
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 @inject OpticSalonSignInManager SignInManager
 @inject UserManager<OpticSalonUser> UserManager
 @inject ISnackbar Snackbar

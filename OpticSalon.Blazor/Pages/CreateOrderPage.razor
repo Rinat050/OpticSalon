@@ -12,6 +12,7 @@
 @inject IOrderService OrderService
 @inject ISnackbar Snackbar
 @inject NavigationManager NavManager
+@attribute [Authorize(Roles = Role.Client)]
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
 
 @if (_isLoading)
@@ -124,8 +125,8 @@
 
         if (res.Success)
         {
-            Snackbar.Add(res.Description, Severity.Success);
-            NavManager.NavigateTo("/catalog");
+            Snackbar.Add(res.Description, Severity.Info);
+            NavManager.NavigateTo("/");
             return;
         }
 

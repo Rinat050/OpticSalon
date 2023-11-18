@@ -3,7 +3,12 @@
 <PageTitle>OpticSalon.Blazor</PageTitle>
 
 <MudThemeProvider Theme="_theme" DefaultScrollbar="false"/>
-<MudDialogProvider/>
+<MudDialogProvider FullWidth="true"
+                   MaxWidth="MaxWidth.Medium"
+                   CloseButton="true"
+                   DisableBackdropClick="true"
+                   Position="DialogPosition.Center"
+                   CloseOnEscapeKey="true" />
 <MudSnackbarProvider/>
 
 <MudLayout>

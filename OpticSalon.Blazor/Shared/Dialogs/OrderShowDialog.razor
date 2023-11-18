@@ -1,0 +1,106 @@
+﻿@page "/orderShow/{orderId:int}"
+@using MudBlazor.Utilities
+@using OpticSalon.Domain.Models
+@inject IOrderService OrderService
+@inject NavigationManager NavManager
+
+@if (Order is null)
+{
+    <MudAlert Class="m-2" Severity="Severity.Normal">Заказ не найден...</MudAlert>
+    return;
+}
+
+<MudDialog Class="p-2">
+    <DialogContent>
+        <MudGrid Justify="Justify.SpaceAround" Spacing="1">
+            <MudGrid Spacing="1">
+                <MudItem xs="12">
+                    <MudStack Row AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Дата создания:</MudText>
+                        <MudText Typo="Typo.h6" Style="font-weight: 400">@(Order.CreatedDate)</MudText>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudStack Row AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.h6" Style="font-weight: 600" Class="m-0" Color="MudBlazor.Color.Secondary">Оправа:</MudText>
+                        <MudLink Typo="Typo.h6" Style="font-weight: 400" Class="m-0" OnClick="@(() => OpenFramePage(Order.Frame.Id))" 
+                            Underline="Underline.Always">
+                            @(Order.Frame.Brand?.Name) @(Order.Frame.Model)
+                        </MudLink>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudStack Row AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Цвет:</MudText>
+                        <MudFab Size="Size.Medium" style="@($"background-color: {Order.FrameColor.Value};")"></MudFab>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudStack Row AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Рецепт:</MudText>
+                        <MudText Typo="Typo.h6" Style="font-weight: 400">
+                            @($"OD Sph {GetNumber(Order.Recipe.RightEye.Sph)}")
+                            @($"OS Sph {GetNumber(Order.Recipe.LeftEye.Sph)}")
+                            @($"DP {Order.Recipe.Dp} мм")
+                        </MudText>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudStack Row AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Пакет линз:</MudText>
+                        <MudText Typo="Typo.h6" Style="font-weight: 400">@(Order.LensPackage.Name)</MudText>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudStack Row AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Тонировка линз:</MudText>
+                        <MudText Typo="Typo.h6" Style="font-weight: 400">@(Order.LensTintingPercent) %</MudText>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudStack Row AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Адрес доставки:</MudText>
+                        <MudText Typo="Typo.h6" Style="font-weight: 400">@(Order.DeliveryAddress)</MudText>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudStack Row AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Номер телефона:</MudText>
+                        <MudText Typo="Typo.h6" Style="font-weight: 400">@(Order.ContactPhoneNumber)</MudText>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudStack Row AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Итоговая стоимость:</MudText>
+                        <MudText Typo="Typo.h6" Style="font-weight: 400">@(OrderService.GetOrderTotalCost(Order)) руб.</MudText>
+                    </MudStack>
+                </MudItem>
+            </MudGrid>
+        </MudGrid>
+    </DialogContent>
+</MudDialog>
+
+
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter]
+    public Order Order { get; set; } = new();
+
+    private string GetNumber(double number)
+    {
+        if (number > 0)
+        {
+            return "+" + number.ToString("0.00");
+        }
+        else
+        {
+            return number.ToString("0.00");
+        }
+    }
+
+    private void OpenFramePage(int id)
+    {
+        NavManager.NavigateTo($"/frameShow/{id}");
+    }
+}
