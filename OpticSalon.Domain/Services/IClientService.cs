@@ -8,6 +8,7 @@ namespace OpticSalon.Domain.Services
         public Task<ResultWithData<Client>> CreateClient(string login, string password, string name, 
                                     string surname, string phoneNumber, string address);
         public Task<BaseResult> AddClientPreferences(ClientPreferences preferences);
+        public Task<BaseResult> UpdateClient(Client client);
         public Task<ResultWithData<ClientPreferences>> GetClientPreferences(int clientId);
         public Task<BaseResult> UpdateClientPreferences(ClientPreferences preferences);
         public Task<ResultWithData<Client>> GetClientById(int id);

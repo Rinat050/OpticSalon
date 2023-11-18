@@ -52,6 +52,16 @@ namespace OpticSalon.Domain.Services.Impl
             }
         }
 
+        public Task<ResultWithData<Order>> GetOrderById(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ResultWithData<List<OrderShort>>> GetOrdersByClient(int clientId)
+        {
+            throw new NotImplementedException();
+        }
+
         public decimal GetOrderTotalCost(Order order)
         {
             return order.Frame.Cost + order.LensPackage.Cost;

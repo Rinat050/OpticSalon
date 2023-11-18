@@ -1,0 +1,34 @@
+﻿@using OpticSalon.Domain.Models
+
+@inject NavigationManager NavManager
+
+<MudCard Class="p-2 w-75" Style="border-radius: 15px;"
+         Outlined="false" Elevation="1">
+    <MudCardContent>
+         <MudTable T="OrderShort" Items="@Orders">
+            <HeaderContent>
+                <MudTh>Номер заказа</MudTh>
+                <MudTh>Дата создания</MudTh>
+                <MudTh>Адрес доставки</MudTh>
+                <MudTh>Номер телефона</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Номер заказа">@context.Id</MudTd>
+                <MudTd DataLabel="Дата создания">@context.CreatedDate</MudTd>
+                <MudTd DataLabel="Адрес доставки">@context.DeliveryAddress</MudTd>
+                <MudTd DataLabel="Номер телефона">@context.ContactPhoneNumber</MudTd>
+                <MudTd DataLabel="Просмотр"><MudIconButton Icon="@Icons.Material.Filled.ArrowRight" OnClick="@(() => ShowOrder(context.Id))"></MudIconButton></MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public List<OrderShort> Orders { get; set; } = new();
+
+    private void ShowOrder(int id)
+    {
+        NavManager.NavigateTo($"/showOrder/{id}");
+    }
+}

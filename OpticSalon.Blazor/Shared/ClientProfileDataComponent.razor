@@ -1,6 +1,9 @@
 ﻿@using OpticSalon.Domain.Models
 
-<EditForm Model="@_model" OnValidSubmit="@Save">
+@inject IClientService ClientService
+@inject ISnackbar Snackbar
+
+<EditForm Model="@Client" OnValidSubmit="@Save">
     <DataAnnotationsValidator />
     <MudCard Class="p-2 w-75" Style="border-radius: 15px;"
              Outlined="false" Elevation="1">
@@ -8,20 +11,20 @@
         <MudCardContent>
             <MudGrid Justify="Justify.Center" Spacing="1">
                 <MudItem xs="12">
-                    <MudTextField @bind-Value="_model.Surname" For="@(() => _model.Surname)"
+                    <MudTextField @bind-Value="Client.Surname" For="@(() => Client.Surname)"
                                   Variant="Variant.Outlined" Label="Фамилия"></MudTextField>
                 </MudItem>
                 <MudItem xs="6">
-                    <MudTextField @bind-Value="_model.Name" For="@(() => _model.Name)"
+                    <MudTextField @bind-Value="Client.Name" For="@(() => Client.Name)"
                                   Variant="Variant.Outlined" Label="Имя"></MudTextField>
                 </MudItem>
                 <MudItem xs="6">
-                    <MudTextField @bind-Value="_model.PhoneNumber" For="@(() => _model.PhoneNumber)"
+                    <MudTextField @bind-Value="Client.PhoneNumber" For="@(() => Client.PhoneNumber)"
                                   Variant="Variant.Outlined" InputType="InputType.Telephone" Label="Телефон"
                                   Mask="@(new PatternMask("+0 (000) 000 00-00"))"></MudTextField>
                 </MudItem>
                 <MudItem xs="12">
-                    <MudTextField @bind-Value="_model.Address" For="@(() => _model.Address)"
+                    <MudTextField @bind-Value="Client.Address" For="@(() => Client.Address)"
                                   Variant="Variant.Outlined" Label="Адрес"></MudTextField>
                 </MudItem>
             </MudGrid>
@@ -37,11 +40,23 @@
 </EditForm>
 
 @code {
+    [Parameter]
+    public Client Client { get; set; } = new();
+
     private bool _isLoading;
-    private Client _model = new();
 
-    private void Save()
+    private async Task Save()
     {
+        _isLoading = true;
+        var res = await ClientService.UpdateClient(Client);
+        _isLoading = false;
 
+        if (res.Success)
+        {
+            Snackbar.Add(res.Description, Severity.Success);
+            return;
+        }
+
+        Snackbar.Add(res.Description, Severity.Warning);
     }
 }

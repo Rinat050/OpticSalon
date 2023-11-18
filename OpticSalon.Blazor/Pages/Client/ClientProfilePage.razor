@@ -11,8 +11,23 @@
 @inject UserManager<OpticSalonUser> UserManager
 @inject ISnackbar Snackbar
 @inject NavigationManager NavManager
+@inject IClientService ClientService
+@inject IOrderService OrderService
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Профиль</PageTitle>
+
+@if (_isLoading)
+{
+    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
+    return;
+}
+
+@if (_client == null)
+{
+    <MudAlert Class="m-2" Severity="Severity.Normal">Не найдено...</MudAlert>
+    return;
+}
 
 <MudContainer Class="d-flex align-center justify-center mud-width-full" >
     <MudCard Class="p-2 w-100" Style="border-radius: 20px;"
@@ -28,17 +43,14 @@
         </MudCardHeader>
         <MudCardContent>
             <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
-                <MudTabPanel Text="Аккаунт">
-                    <ClientProfileDataComponent></ClientProfileDataComponent>
-                </MudTabPanel>
                 <MudTabPanel Text="Личные данные">
-                    <ClientProfileDataComponent></ClientProfileDataComponent>
+                    <ClientProfileDataComponent Client="_client"></ClientProfileDataComponent>
                 </MudTabPanel>
                 <MudTabPanel Text="Предпочтения">
-                    <ProfileClientPreferencesComponent ClientId="1" ClientPreferences="_clientPreferences"></ProfileClientPreferencesComponent>
+                    <ProfileClientPreferencesComponent ClientId="_client.Id" ClientPreferences="_clientPreferences"></ProfileClientPreferencesComponent>
                 </MudTabPanel>
                 <MudTabPanel Text="Заказы">
-                    <ClientProfileDataComponent></ClientProfileDataComponent>
+                    <ClientOrdersComponent Orders="_orders"></ClientOrdersComponent>
                 </MudTabPanel>
             </MudTabs>
         </MudCardContent>
@@ -46,7 +58,57 @@
 </MudContainer>
 
 @code {
+    private Client _client = null!;
     private ClientPreferences _clientPreferences = null!;
+    private List<OrderShort> _orders = new(); 
+    private bool _isLoading;
 
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
 
+    private async Task LoadData()
+    {
+        if (_client == null) return;
+
+        _isLoading = true;
+
+        await LoadClientInfo();
+
+        var preferencesRes = await ClientService.GetClientPreferences(_client.Id);
+
+        if (preferencesRes.Success)
+        {
+            _clientPreferences = preferencesRes.Data!;
+        }
+
+        var ordersRes = await OrderService.GetOrdersByClient(_client.Id);
+
+        if (ordersRes.Success)
+        {
+            _orders = ordersRes.Data!;
+        }
+
+        _isLoading = false;
+    }
+
+    private async Task LoadClientInfo()
+    {
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+
+        if (userIdentity is null)
+        {
+            return;
+        }
+
+        var clientId = int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.ClientId).Value);
+
+        var res = await ClientService.GetClientById(clientId);
+
+        if (res.Success)
+        {
+            _client = res.Data!;
+        }
+    }
 }

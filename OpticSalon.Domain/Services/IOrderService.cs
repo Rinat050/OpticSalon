@@ -9,6 +9,7 @@ namespace OpticSalon.Domain.Services
             LensPackage lens, int lensTintingPercent, string contactPhoneNumber, string deliveryAddress, 
             string? comment, Client client);
 
-        public decimal GetOrderTotalCost(Order order);
+        public Task<ResultWithData<List<OrderShort>>> GetOrdersByClient(int clientId);
+        public Task<ResultWithData<Order>> GetOrderById(int id);
     }
 }

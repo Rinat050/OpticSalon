@@ -188,5 +188,10 @@ namespace OpticSalon.Domain.Services.Impl
                 };
             }
         }
+
+        public Task<BaseResult> UpdateClient(Client client)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
