@@ -42,7 +42,7 @@ namespace OpticSalon.Blazor.Middleware
             else if (context.Request.Path == "/logout")
             {
                 await signInManager.SignOutAsync();
-                context.Response.Redirect("/login");
+                context.Response.Redirect("/");
             }
             else
             {

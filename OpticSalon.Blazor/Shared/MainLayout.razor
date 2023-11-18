@@ -1,20 +1,41 @@
 ﻿@inherits LayoutComponentBase
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
 
-<PageTitle>OpticSalon.Blazor</PageTitle>
+<PageTitle>Главная страница</PageTitle>
 
-<MudThemeProvider Theme="_theme" DefaultScrollbar="false"/>
+<MudThemeProvider Theme="_theme" DefaultScrollbar="false" />
 <MudDialogProvider FullWidth="true"
                    MaxWidth="MaxWidth.Medium"
                    CloseButton="true"
                    DisableBackdropClick="true"
                    Position="DialogPosition.Center"
                    CloseOnEscapeKey="true" />
-<MudSnackbarProvider/>
+<MudSnackbarProvider />
 
 <MudLayout>
     <MudAppBar Elevation="1">
+        <MudImage Class="ms-4" Src="images/logo-dark-text.png" Height="55" Width="110"></MudImage>
         <MudSpacer />
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
+        <MudTooltip Text="Каталог">
+            <MudIconButton Href="/" Size="Size.Medium" Icon="@Icons.Material.Filled.Apps" Color="Color.Inherit" />
+        </MudTooltip>
+        <AuthorizeView Context="AuthorizeContext">
+            <Authorized>
+                <AuthorizeView>
+                    <MudTooltip Text="Профиль">
+                        <MudIconButton Href="/clientProfile" Size="Size.Medium" Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" />
+                    </MudTooltip>
+                    <MudTooltip Text="Выход">
+                        <MudIconButton Href="/logout" Size="Size.Medium" Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
+                    </MudTooltip>
+                </AuthorizeView>
+            </Authorized>
+            <NotAuthorized>
+                <MudTooltip Text="Войти">
+                    <MudIconButton Href="/login" Size="Size.Medium" Icon="@Icons.Material.Filled.Login" Color="Color.Inherit" />
+                </MudTooltip>
+            </NotAuthorized>
+        </AuthorizeView>
     </MudAppBar>
     <MudMainContent Class="ms-5 me-5 mt-0">
         @Body
