@@ -265,7 +265,7 @@ else
             {
                 var task = new Task(async () =>
                 {
-                    var loadingRes = await ImageLoadingService.GetFrameImageAsync(frame.MainImageName);
+                    var loadingRes = await ImageLoadingService.GetFrameImageStreamAsync(frame.MainImageName);
 
                     if (!loadingRes.Success) return;
 

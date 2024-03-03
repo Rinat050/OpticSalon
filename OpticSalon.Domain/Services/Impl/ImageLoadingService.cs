@@ -15,11 +15,11 @@ namespace OpticSalon.Domain.Services.Impl
             _fileStorage = fileStorage;
         }
 
-        public async Task<ResultWithData<Stream>> GetFrameImageAsync(string fileName)
+        public async Task<ResultWithData<Stream>> GetFrameImageStreamAsync(string fileName)
         {
             try
             {
-                var res = await _fileStorage.GetFile(ImageStorageConsts.FrameImagesBucket, fileName);
+                var res = await _fileStorage.GetFileStream(ImageStorageConsts.FrameImagesBucket, fileName);
 
                 if (res == null)
                 {
@@ -39,6 +39,37 @@ namespace OpticSalon.Domain.Services.Impl
             catch
             {
                 return new ResultWithData<Stream>()
+                {
+                    Success = false,
+                    Description = DefaultErrors.ServerError
+                };
+            }
+        }
+
+        public async Task<ResultWithData<FileDto>> GetFrameImageAsync(string fileName)
+        {
+            try
+            {
+                var res = await _fileStorage.GetFile(ImageStorageConsts.FrameImagesBucket, fileName);
+
+                if (res == null)
+                {
+                    return new ResultWithData<FileDto>()
+                    {
+                        Success = false,
+                        Description = ImageLoadingMessages.NotFounded
+                    };
+                }
+
+                return new ResultWithData<FileDto>()
+                {
+                    Success = true,
+                    Data = res
+                };
+            }
+            catch
+            {
+                return new ResultWithData<FileDto>()
                 {
                     Success = false,
                     Description = DefaultErrors.ServerError

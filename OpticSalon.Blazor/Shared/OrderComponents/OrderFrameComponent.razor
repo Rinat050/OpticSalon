@@ -86,7 +86,7 @@
         {
             if (Frame is null || _isImageLoaded) return;
 
-            var loadingRes = await ImageLoadingService.GetFrameImageAsync(Frame.MainImageName);
+            var loadingRes = await ImageLoadingService.GetFrameImageStreamAsync(Frame.MainImageName);
 
             if (!loadingRes.Success) return;
 
