@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Mvc;
 using MudBlazor.Services;
 using OpticSalon.Auth;
 using OpticSalon.Blazor.Data;
@@ -14,6 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddMvc(options => options.EnableEndpointRouting = false);
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services
     .AddData(builder.Configuration)
@@ -42,6 +44,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseMvcWithDefaultRoute();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");

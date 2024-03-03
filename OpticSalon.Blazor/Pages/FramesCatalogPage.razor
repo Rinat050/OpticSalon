@@ -49,7 +49,7 @@ else
                 <MudCard Elevation="3">
 
                     <div class="mud-card-media" style="min-height:150px;">
-                        <MudImage id="@(frame.Id)" Style="display: block; margin: auto;object-fit: contain; max-width: 95%; max-height: 30vh" />
+                        <MudImage id="@(frame.Id)" Src="@GetImageSrc(frame.MainImageName)" Style="display: block; margin: auto;object-fit: contain; max-width: 95%; max-height: 30vh" />
                     </div>
 
                     <MudCardContent>
@@ -253,44 +253,9 @@ else
         StateHasChanged();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private string GetImageSrc(string name)
     {
-        try
-        {
-            if (_frames.Count == 0 || _isImagesLoaded) return;
-
-            List<Task> tasks = new List<Task>();
-
-            foreach (var frame in _frames)
-            {
-                var task = new Task(async () =>
-                {
-                    var loadingRes = await ImageLoadingService.GetFrameImageStreamAsync(frame.MainImageName);
-
-                    if (!loadingRes.Success) return;
-
-                    var dotnetImageStream = new DotNetStreamReference(loadingRes.Data!);
-                    try
-                    {
-                        var res = await JS.InvokeAsync<bool>("getById", $"{frame.Id}");
-                        if (res)
-                        {
-                            await JS.InvokeVoidAsync("setImage", $"{frame.Id}", dotnetImageStream);
-                            await InvokeAsync(StateHasChanged);
-                        }
-                    }
-                    catch { }
-                });
-
-                tasks.Add(task);
-                task.Start();
-            }
-
-            Task.WaitAll(tasks.ToArray());
-            _isImagesLoaded = true;
-        }
-        catch (Exception)
-        { }
+        return $"https://localhost:7087/getImage?name={name}";
     }
 
     private void ClearFilter()

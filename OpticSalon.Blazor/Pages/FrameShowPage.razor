@@ -38,7 +38,7 @@
             <MudGrid Justify="Justify.SpaceAround" Spacing="1">
                 <MudItem xs="12" sm="4">
                     <div style="display:flex; justify-content:start;">
-                        <MudImage id="frame-image" Elevation="2" Style="min-width:150px; width: 85%;" Alt="" />
+                        <MudImage id="frame-image" Src="@GetImageSrc(_frame.MainImageName)" Elevation="2" Style="min-width:150px; width: 85%;" Alt="" />
                     </div>
                 </MudItem>
                 <MudItem xs="12" sm="4">
@@ -139,6 +139,11 @@
         return $"{sizes.LensWidth}-{sizes.DistanceBetweenLens}-{sizes.TempleLenght}";
     }
 
+    private string GetImageSrc(string name)
+    {
+        return $"https://localhost:7087/getImage?name={name}";
+    }
+
     private async Task LoadFrame()
     {
         _isLoading = true;
@@ -149,30 +154,6 @@
         {
             _frame = res.Data!;
         }
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        try
-        {
-            if (_frame is null || _isImageLoaded) return;
-
-            var loadingRes = await ImageLoadingService.GetFrameImageStreamAsync(_frame.MainImageName);
-
-            if (!loadingRes.Success) return;
-
-            var dotnetImageStream = new DotNetStreamReference(loadingRes.Data!);
-            var res = await JS.InvokeAsync<bool>("getById", "frame-image");
-            if (res)
-            {
-                await JS.InvokeVoidAsync("setImage", "frame-image", dotnetImageStream);
-            }
-
-            _isImageLoaded = true;
-            await InvokeAsync(StateHasChanged);
-        }
-        catch (Exception)
-        { }
     }
 
     private void ColorSelect(OpticSalon.Domain.Models.Color color)
