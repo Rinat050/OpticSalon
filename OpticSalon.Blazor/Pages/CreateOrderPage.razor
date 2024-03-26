@@ -1,10 +1,13 @@
 ﻿@page "/createOrder/{frameId:int}/{colorId:int}"
 @using OpticSalon.Auth.Models
+@using OpticSalon.Blazor.Data.Consts
 @using OpticSalon.Blazor.Data.Credentials
 @using OpticSalon.Blazor.Shared.OrderComponents
+@using OpticSalon.Blazor.Services
 @using OpticSalon.Domain.FilterData
 @using OpticSalon.Domain.Models
 @inject IFrameService FrameService
+@inject BrowserService BrowserService
 @inject IFrameColorService FrameColorService
 @inject ILensPackageService LensPackageService
 @inject IPurposeService PurposeService
@@ -14,6 +17,8 @@
 @inject NavigationManager NavManager
 @attribute [Authorize(Roles = Role.Client)]
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>Оформление заказа</PageTitle>
 
 @if (_isLoading)
 {
@@ -27,34 +32,44 @@
     return;
 }
 
-<MudTabs @bind-ActivePanelIndex="_selectedTabIndex" Style="height: 100%" Outlined="true" MinimumTabWidth="20px" Position="Position.Left">
-    <MudStack Style="height:100%" Row AlignItems="AlignItems.Center">
-        <MudIconButton Disabled="@(_selectedTabIndex == 0)" OnClick="@(() => ChangeTabIndex(_selectedTabIndex - 1))" 
-            Color="MudBlazor.Color.Secondary" Style="height:50px;" Size="Size.Medium" Icon="@Icons.Material.Outlined.ArrowLeft"/>
-    </MudStack>
-        <MudTabPanel Text="Оправа" Icon="@Icons.Custom.Brands.Awesome">
-            <OrderFrameComponent Frame="_createCredentials.Frame" Color="_createCredentials.FrameColor"/>
-        </MudTabPanel>
-        <MudTabPanel Text="Назначение" Icon="@Icons.Material.Filled.FormatListBulleted">
-            <PurposesListComponent Purposes="_recipePurposes" Order="@(_createCredentials)" />
-        </MudTabPanel>
-        <MudTabPanel Text="Рецепт" Icon="@Icons.Material.Filled.Article" >
-            <OrderRecipeComponent Recipe="_createCredentials.Recipe" />
-        </MudTabPanel>
-        <MudTabPanel Text="Линзы" Icon="@Icons.Material.Outlined.Lens" >
-            <OrderLensComponent Packages="_lensPackages" OrderCredentials="_createCredentials"></OrderLensComponent>
-        </MudTabPanel>
-        <MudTabPanel Text="Доставка" Icon="@Icons.Material.Filled.CardTravel" >
-            <OrderDeliveryComponent OrderCredentials="_createCredentials" OnValidSubmit="@(CreateOrder)">
-                <MudButton Style="min-width: 100px;" Variant="Variant.Filled" 
-                Color="MudBlazor.Color.Primary" ButtonType="ButtonType.Submit">Оформить заказ</MudButton>
-            </OrderDeliveryComponent>
-        </MudTabPanel>
-    <MudStack Style="height:100%" Row AlignItems="AlignItems.Center">
-        <MudIconButton Disabled="@(_selectedTabIndex == 4)" OnClick="@(() => ChangeTabIndex(_selectedTabIndex + 1))" 
-            Color="MudBlazor.Color.Secondary" Style="height:50px;" Size="Size.Medium" Icon="@Icons.Material.Outlined.ArrowRight"/>
-    </MudStack>
-</MudTabs>
+<MudStack Justify="Justify.Center">
+    <MudTabs @bind-ActivePanelIndex="_selectedTabIndex" Centered MinimumTabWidth="20px" Position="Position.Top">
+        <MudStack Row Justify="Justify.Center">
+            @if (_isButtonsVisible)
+            {
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.Center">
+                    <MudIconButton Disabled="@(_selectedTabIndex == 0)" OnClick="@(() => ChangeTabIndex(_selectedTabIndex - 1))" 
+                    Color="MudBlazor.Color.Secondary" Style="height:50px; width:50px;" Size="Size.Medium" Icon="@Icons.Material.Outlined.ArrowLeft"/>
+                </MudStack>
+            }
+            <MudTabPanel Text="Оправа" Icon="@Icons.Custom.Brands.Awesome">
+                <OrderFrameComponent Frame="_createCredentials.Frame" Color="_createCredentials.FrameColor"/>
+            </MudTabPanel>
+            <MudTabPanel Text="Назначение" Icon="@Icons.Material.Filled.FormatListBulleted">
+                <PurposesListComponent Purposes="_recipePurposes" Order="@(_createCredentials)" />
+            </MudTabPanel>
+            <MudTabPanel Text="Рецепт" Icon="@Icons.Material.Filled.Article" >
+                <OrderRecipeComponent Recipe="_createCredentials.Recipe" />
+            </MudTabPanel>
+            <MudTabPanel Text="Линзы" Icon="@Icons.Material.Outlined.Lens" >
+                <OrderLensComponent Packages="_lensPackages" OrderCredentials="_createCredentials"></OrderLensComponent>
+            </MudTabPanel>
+            <MudTabPanel Text="Доставка" Icon="@Icons.Material.Filled.CardTravel" >
+                <OrderDeliveryComponent OrderCredentials="_createCredentials" OnValidSubmit="@(CreateOrder)">
+                    <MudButton Style="min-width: 100px;" Variant="Variant.Filled" 
+                    Color="MudBlazor.Color.Primary" ButtonType="ButtonType.Submit">Оформить заказ</MudButton>
+                </OrderDeliveryComponent>
+            </MudTabPanel>
+            @if(_isButtonsVisible)
+            {
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.Center">
+                    <MudIconButton Disabled="@(_selectedTabIndex == 4)" OnClick="@(() => ChangeTabIndex(_selectedTabIndex + 1))" 
+                        Color="MudBlazor.Color.Secondary" Style="height:50px; width:50px;" Size="Size.Medium" Icon="@Icons.Material.Outlined.ArrowRight"/>
+                </MudStack>
+            }
+        </MudStack>
+    </MudTabs>
+</MudStack>
 
 @code {
     [Parameter]
@@ -65,6 +80,7 @@
     private int _selectedTabIndex = 0;
     private bool _isNotFound;
     private bool _isLoading;
+    private bool _isButtonsVisible = true;
 
     private OrderCreateCredentials _createCredentials = new();
     private List<LensPackage> _lensPackages = new();
@@ -137,12 +153,30 @@
     {
         _isLoading = true;
         _createCredentials = new OrderCreateCredentials();
+
+        await SetButtonsVisibility();
+
         await LoadClientInfo();
 
         await LoadData();
 
         SetDefaultData();
         _isLoading = false;
+    }
+
+    private async Task SetButtonsVisibility()
+    {
+        var dimensions = await BrowserService.GetDimensions();
+
+        if (dimensions.Width < DeviceConsts.MobileDeviceWidth)
+        {
+            _isButtonsVisible = false;
+            return;
+        }
+
+        _isButtonsVisible = true;
+
+        await InvokeAsync(StateHasChanged);
     }
 
     private void SetDefaultData()
@@ -153,7 +187,7 @@
             RightEye = new (),
             Dp = RecipeDataFilter.GetDpRange().First()
         };
-        
+
         var purpose = _recipePurposes.FirstOrDefault();
 
         if (purpose is not null)

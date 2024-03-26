@@ -6,6 +6,7 @@ using MudBlazor.Services;
 using OpticSalon.Auth;
 using OpticSalon.Blazor.Data;
 using OpticSalon.Blazor.Middleware;
+using OpticSalon.Blazor.Services;
 using OpticSalon.Data;
 using OpticSalon.Domain;
 using OpticSalon.MinIO;
@@ -17,6 +18,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddMvc(options => options.EnableEndpointRouting = false);
 builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddScoped<BrowserService>(); ;
 builder.Services
     .AddData(builder.Configuration)
     .AddAuth(builder.Configuration)

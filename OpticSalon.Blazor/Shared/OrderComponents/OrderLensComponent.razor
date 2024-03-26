@@ -3,7 +3,7 @@
 @using OpticSalon.Domain.FilterData
 @using OpticSalon.Domain.Models
 
-<MudContainer Class="d-flex align-center justify-center mud-width-full">
+<MudContainer Class="d-flex align-center justify-center mud-width-full mt-3">
     <MudCard Class="p-4 m-2 w-100" Style="border-radius: 15px;"
              Outlined="false" Elevation="5">
         <MudList Clickable="true">
@@ -29,14 +29,6 @@
                 </MudListItem>
             }
         </MudList>
-        <MudStack Row AlignItems="AlignItems.Center">
-            <MudSelect @bind-Value="OrderCredentials.LensTintingPercent" Label="Тонировка линз (%)" T="int" Variant="Variant.Outlined">
-                @foreach (var value in LensTintingFilter.GetLensTintingRange())
-                {
-                    <MudSelectItem Value="@(value)"></MudSelectItem>
-                }
-            </MudSelect>
-        </MudStack>
     </MudCard>
 </MudContainer>
 

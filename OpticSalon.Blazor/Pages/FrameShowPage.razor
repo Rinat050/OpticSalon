@@ -1,8 +1,10 @@
 ﻿@page "/frameShow/{frameId:int}"
 @using MudBlazor.Utilities
 @using OpticSalon.Domain.Models
+@using OpticSalon.Blazor.Services
 @inject IFrameService FrameService
 @inject IImageLoadingService ImageLoadingService
+@inject BrowserService BrowserService
 @inject IJSRuntime JS
 @inject NavigationManager NavManager
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
@@ -15,7 +17,7 @@
     return;
 }
 
-<MudContainer Class="d-flex align-center justify-center mud-width-full" style="height:90vh;">
+<MudContainer Class="d-flex align-center justify-center mud-width-full" style="min-height:90vh;">
 
     @if (_frame is null)
     {
@@ -29,19 +31,19 @@
             <MudStack Row AlignItems="AlignItems.Center">
                 <MudIcon Icon="@Icons.Custom.Brands.Awesome" Size="Size.Large"
                          Color="MudBlazor.Color.Secondary"></MudIcon>
-                <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">
+                <MudText Typo="Typo.h6" Color="MudBlazor.Color.Secondary">
                     Оправа @($"{_frame.Brand?.Name} {_frame.Model}")
                 </MudText>
             </MudStack>
         </MudCardHeader>
         <MudCardContent>
             <MudGrid Justify="Justify.SpaceAround" Spacing="1">
-                <MudItem xs="12" sm="4">
+                <MudItem xs="12" sm="8" md="4">
                     <div style="display:flex; justify-content:start;">
                         <MudImage id="frame-image" Src="@GetImageSrc(_frame.MainImageName)" Elevation="2" Style="min-width:150px; width: 85%;" Alt="" />
                     </div>
                 </MudItem>
-                <MudItem xs="12" sm="4">
+                <MudItem xs="12" sm="6" md="4">
                     <MudGrid Spacing="1">
                         <MudItem xs="12">
                            <MudStack Row AlignItems="AlignItems.Center">
@@ -87,7 +89,7 @@
                         </MudItem>
                     </MudGrid>
                 </MudItem>
-                <MudItem xs="12" sm="4">
+                <MudItem xs="12" sm="6" md="4">
                     <MudGrid>
                         <MudItem xs="12">
                            <MudContainer Class="p-0">
@@ -116,8 +118,6 @@
         </MudCardContent>
     </MudCard>
 </MudContainer>
-
-
 
 @code {
     [Parameter]

@@ -3,6 +3,7 @@
 @using MudBlazor.Utilities
 @using OpticSalon.Auth.Models
 @using OpticSalon.Blazor.Data.Credentials
+@using OpticSalon.Blazor.Services
 @using OpticSalon.Domain.Models
 @inject IFrameService FrameService
 @inject IFrameTypeService FrameTypeService
@@ -13,7 +14,6 @@
 @inject IClientService ClientService
 @inject IImageLoadingService ImageLoadingService
 @inject NavigationManager NavManager
-@inject IJSRuntime JS
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Каталог</PageTitle>
@@ -47,7 +47,6 @@ else
         {
             <MudItem xs="12" sm="6" md="4" lg="3">
                 <MudCard Elevation="3">
-
                     <div class="mud-card-media" style="min-height:150px;">
                         <MudImage id="@(frame.Id)" Src="@GetImageSrc(frame.MainImageName)" Style="display: block; margin: auto;object-fit: contain; max-width: 95%; max-height: 30vh" />
                     </div>
@@ -66,7 +65,7 @@ else
     </MudGrid>
 }
 
-<MudDrawer @bind-Open="@_isDrawerOpen" Width="30%" Height="100%"
+<MudDrawer Width="350px" @bind-Open="@_isDrawerOpen" Height="100%"
            Anchor="Anchor.Right" Elevation="1" Style="overflow-x: hidden;" Variant="@DrawerVariant.Temporary">
     <MudDrawerHeader>
         <MudStack Row AlignItems="AlignItems.Center">
@@ -118,7 +117,7 @@ else
                 <MudStack Row AlignItems="AlignItems.Center">
                     <MudFab Size="Size.Medium" style="@($"background-color: {_filter.Color?.Value};")"></MudFab>
                     <MudColorPicker ValueChanged="@(ColorChanged)" Clearable Variant="Variant.Outlined" Label="Цвет оправы"
-                                    TransformOrigin="Origin.CenterLeft" ColorPickerView="ColorPickerView.Palette"
+                                    TransformOrigin="Origin.CenterCenter" ColorPickerView="ColorPickerView.Palette"
                                     Palette="_pickerColors"></MudColorPicker>
                 </MudStack>
             </MudItem>

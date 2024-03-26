@@ -19,12 +19,12 @@ namespace OpticSalon.Blazor.Controllers
         {
             var res = await _imageLoadingService.GetFrameImageAsync(name);
 
-            if (res == null)
+            if (res.Success)
             {
-                return NotFound();
+                return File(res.Data!.ContentStream, res.Data!.ContentType);
             }
 
-            return File(res.Data!.ContentStream, res.Data!.ContentType);
+            return NotFound();
         }
     }
 }

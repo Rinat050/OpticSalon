@@ -13,8 +13,8 @@
 <EditForm Model="@ClientPreferences" OnValidSubmit="@Save">
     <DataAnnotationsValidator />
     <MudContainer Class="d-flex align-center justify-center mud-width-full" style="height:90vh;">
-        <MudCard Class="p-4 w-75" Style="border-radius: 15px;"
-                 Outlined="false" Elevation="5">
+        <MudItem xs="12" sm="11" md="9" lg="8">
+            <MudCard Class="p-4" Style="border-radius: 15px;" Outlined="false" Elevation="4">
             <MudCardHeader>
                 <MudStack Row AlignItems="AlignItems.Center">
                     <MudIcon Icon="@Icons.Material.Outlined.EditNote" Size="Size.Large" 
@@ -26,7 +26,7 @@
 
             <MudCardContent>
                 <MudGrid Justify="Justify.Center" Spacing="1">
-                    <MudItem xs="6">
+                    <MudItem xs="12" sm="6">
                        <MudSelect T="FrameType" @bind-Value="ClientPreferences.FrameType" Variant="Variant.Outlined" 
                             Label="Тип оправы" ToStringFunc="@((x) => x?.Name)" For="@(() => ClientPreferences.FrameType)">
                            @foreach(var type in _frameTypes)
@@ -35,7 +35,7 @@
                            }
                        </MudSelect>
                     </MudItem>
-                    <MudItem xs="6">
+                    <MudItem xs="12" sm="6">
                        <MudSelect T="FrameMaterial" @bind-Value="ClientPreferences.FrameMaterial" Variant="Variant.Outlined" 
                             Label="Материал оправы" ToStringFunc="@((x) => x?.Name)" For="@(() => ClientPreferences.FrameMaterial)">
                            @foreach(var material in _frameMaterials)
@@ -58,11 +58,10 @@
                                 <MudStack Row AlignItems="AlignItems.Center">
                                     <MudIcon Icon="@Icons.Material.Outlined.DesignServices" Size="Size.Medium" 
                                         Color="MudBlazor.Color.Secondary"></MudIcon>
-                                    <MudText Typo="Typo.h6" Color="MudBlazor.Color.Secondary">
-                                        Размеры оправы</MudText>
+                                    <MudText Typo="Typo.h6" Color="MudBlazor.Color.Secondary">Размеры оправы</MudText>
                                 </MudStack>
                             </MudItem>
-                            <MudItem xs="4">
+                            <MudItem xs="12" sm="4">
                                 <MudSelect T="int" @bind-Value="ClientPreferences.FrameSizes.LensWidth" Variant="Variant.Outlined" 
                                     Label="Ширина линзы" For="@(() => ClientPreferences.FrameSizes.LensWidth)">
                                    @foreach(var size in FrameSizesFilter.GetLensWidthRange())
@@ -71,7 +70,7 @@
                                    }
                                </MudSelect>
                             </MudItem>
-                            <MudItem xs="4">
+                            <MudItem xs="12" sm="4">
                                 <MudSelect T="int" @bind-Value="ClientPreferences.FrameSizes.DistanceBetweenLens" Variant="Variant.Outlined" 
                                     Label="Ширина моста" For="@(() => ClientPreferences.FrameSizes.DistanceBetweenLens)">
                                    @foreach(var size in FrameSizesFilter.GetDistanceBetweenLensRange())
@@ -80,7 +79,7 @@
                                    }
                                </MudSelect>
                             </MudItem>
-                            <MudItem xs="4">
+                            <MudItem xs="12" sm="4">
                                 <MudSelect T="int" @bind-Value="ClientPreferences.FrameSizes.TempleLenght" Variant="Variant.Outlined" 
                                     Label="Длина заушника" For="@(() => ClientPreferences.FrameSizes.TempleLenght)">
                                    @foreach(var size in FrameSizesFilter.GetTempleLenghtRange())
@@ -93,22 +92,21 @@
                     </MudItem>
                 </MudGrid>
             </MudCardContent>
-            <MudGrid Justify="Justify.SpaceBetween">
+           <MudCardActions>
+                <MudGrid Justify="Justify.FlexEnd" Class="me-3">
                     @if (IsRegister)
                     {
-                        <MudItem xs="6" Class="d-flex justify-content-end">
-                            <MudLink OnClick="@(() => NavManager.NavigateTo("/login"))" 
-                                Underline="Underline.None" Class="mt-3 ms-1">
+                        <MudLink OnClick="@(() => NavManager.NavigateTo("/login"))" 
+                                Underline="Underline.None" Class="mt-2 me-2">
                                 Пропустить
                             </MudLink>
-                        </MudItem>
                     }
-                    <MudItem xs="6">
-                        <MudButton Disabled="@_isLoading" FullWidth Variant="Variant.Filled"
-                            Color="MudBlazor.Color.Primary" ButtonType="ButtonType.Submit">Сохранить</MudButton>
-                    </MudItem>
+                    <MudButton Disabled="@_isLoading" Variant="Variant.Filled"
+                        Color="MudBlazor.Color.Primary" ButtonType="ButtonType.Submit">Сохранить</MudButton>
                 </MudGrid>
-        </MudCard>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
     </MudContainer>
 </EditForm>
 
