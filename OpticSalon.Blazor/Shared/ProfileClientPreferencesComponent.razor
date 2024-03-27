@@ -17,11 +17,11 @@
 
 <EditForm Model="@ClientPreferences" OnValidSubmit="@Save">
     <DataAnnotationsValidator />
-    <MudCard Class="p-2 w-75" Style="border-radius: 15px;"
+    <MudCard Class="p-2 w-100" Style="border-radius: 15px;"
              Outlined="false" Elevation="1">
         <MudCardContent>
             <MudGrid Justify="Justify.Center" Spacing="1">
-                <MudItem xs="6">
+                <MudItem xs="12" md="6">
                     <MudSelect T="FrameType" @bind-Value="ClientPreferences.FrameType" Variant="Variant.Outlined"
                                Label="Тип оправы" ToStringFunc="@((x) => x?.Name)" For="@(() => ClientPreferences.FrameType)">
                         @foreach (var type in _frameTypes)
@@ -30,7 +30,7 @@
                         }
                     </MudSelect>
                 </MudItem>
-                <MudItem xs="6">
+                <MudItem xs="12" md="6">
                     <MudSelect T="FrameMaterial" @bind-Value="ClientPreferences.FrameMaterial" Variant="Variant.Outlined"
                                Label="Материал оправы" ToStringFunc="@((x) => x?.Name)" For="@(() => ClientPreferences.FrameMaterial)">
                         @foreach (var material in _frameMaterials)
@@ -47,7 +47,7 @@
                                         Palette="_pickerColors"></MudColorPicker>
                     </MudStack>
                 </MudItem>
-                <MudItem>
+                <MudItem xs="12">
                     <MudGrid>
                         <MudItem xs="12">
                             <MudStack Row AlignItems="AlignItems.Center">
@@ -58,7 +58,7 @@
                                 </MudText>
                             </MudStack>
                         </MudItem>
-                        <MudItem xs="4">
+                        <MudItem xs="12" sm="4">
                             <MudSelect T="int" @bind-Value="ClientPreferences.FrameSizes.LensWidth" Variant="Variant.Outlined"
                                        Label="Ширина линзы" For="@(() => ClientPreferences.FrameSizes.LensWidth)">
                                 @foreach (var size in FrameSizesFilter.GetLensWidthRange())
@@ -67,7 +67,7 @@
                                 }
                             </MudSelect>
                         </MudItem>
-                        <MudItem xs="4">
+                        <MudItem xs="12" sm="4">
                             <MudSelect T="int" @bind-Value="ClientPreferences.FrameSizes.DistanceBetweenLens" Variant="Variant.Outlined"
                                        Label="Ширина моста" For="@(() => ClientPreferences.FrameSizes.DistanceBetweenLens)">
                                 @foreach (var size in FrameSizesFilter.GetDistanceBetweenLensRange())
@@ -76,7 +76,7 @@
                                 }
                             </MudSelect>
                         </MudItem>
-                        <MudItem xs="4">
+                        <MudItem xs="12" sm="4">
                             <MudSelect T="int" @bind-Value="ClientPreferences.FrameSizes.TempleLenght" Variant="Variant.Outlined"
                                        Label="Длина заушника" For="@(() => ClientPreferences.FrameSizes.TempleLenght)">
                                 @foreach (var size in FrameSizesFilter.GetTempleLenghtRange())
@@ -87,14 +87,16 @@
                         </MudItem>
                     </MudGrid>
                 </MudItem>
+                <MudItem xs="12">
+                    <MudGrid Justify="Justify.FlexEnd">
+                        <MudItem xs="12" md="4">
+                            <MudButton Class="me-3" Disabled="@_isLoading" FullWidth Variant="Variant.Filled"
+                                       Color="MudBlazor.Color.Primary" ButtonType="ButtonType.Submit">Сохранить</MudButton>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
             </MudGrid>
         </MudCardContent>
-        <MudGrid Justify="Justify.FlexStart">
-            <MudItem xs="3">
-                <MudButton Class="m-2" Disabled="@_isLoading" FullWidth Variant="Variant.Filled"
-                           Color="MudBlazor.Color.Primary" ButtonType="ButtonType.Submit">Сохранить</MudButton>
-            </MudItem>
-        </MudGrid>
     </MudCard>
 </EditForm>
 
