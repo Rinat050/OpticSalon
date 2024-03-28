@@ -1,4 +1,6 @@
-﻿namespace OpticSalon.Domain.Models
+﻿using OpticSalon.Domain.Enums;
+
+namespace OpticSalon.Domain.Models
 {
     public class Order
     {
@@ -13,5 +15,7 @@
         public DateTime CreatedDate { get; set; }
         public Client Client { get; set; } = null!;
         public Color FrameColor { get; set; } = null!;
+        public Employee Master { get; set; } = null!;
+        public OrderStatus Status { get; set; }
     }
 }

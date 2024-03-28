@@ -17,6 +17,9 @@
         public DateTime CreatedDate { get; set; }
         public ClientDb Client { get; set; } = null!;
         public int ClientId { get; set; }
+        public EmployeeDb Master { get; set; } = null!;
+        public int MasterId { get; set; }
+        public int Status { get; set; }
         public string? Comment { get; set; }
     }
 }

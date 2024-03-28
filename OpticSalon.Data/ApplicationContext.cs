@@ -12,6 +12,7 @@ namespace OpticSalon.Data
 
         public DbSet<BrandDb> Brands { get; set; } = null!;
         public DbSet<ClientDb> Clients { get; set; } = null!;
+        public DbSet<EmployeeDb> Employees { get; set; } = null!;
         public DbSet<ClientPreferencesDb> ClientPreferences { get; set; } = null!;
         public DbSet<EyeDataDb> EyeData { get; set; } = null!;
         public DbSet<ColorDb> Colors { get; set; } = null!;
