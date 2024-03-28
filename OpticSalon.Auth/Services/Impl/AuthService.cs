@@ -67,6 +67,11 @@ namespace OpticSalon.Auth.Services.Impl
                     await _userManager.AddToRoleAsync(user, role);
                     await _userManager.AddClaimAsync(user, new Claim(UserClaims.ClientId, createdEntityId.ToString()));
                 }
+                else if (role == Role.Admin || role == Role.Master || role == Role.Manager)
+                {
+                    await _userManager.AddToRoleAsync(user, role);
+                    await _userManager.AddClaimAsync(user, new Claim(UserClaims.EmployeeId, createdEntityId.ToString()));
+                }
                 else
                 {
                     return new AuthResult() { Success = false, Description = AuthResults.InvalidRole };

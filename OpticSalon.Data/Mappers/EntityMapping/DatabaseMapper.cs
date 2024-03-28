@@ -21,6 +21,8 @@ namespace OpticSalon.Data.Mappers.EntityMapping
         public partial GenderDb Map(Gender gender);
         public partial Purpose Map(PurposeDb purposeDb);
         public partial PurposeDb Map(Purpose purpose);
+        public partial Employee Map(EmployeeDb employeeDb);
+        public partial EmployeeDb Map(Employee employee);
         public partial LensPackage Map(LensPackageDb lensPackageDb);
         public partial LensPackageDb Map(LensPackage lensPackage);
         public partial ClientPreferences Map(ClientPreferencesDb clientPreferencesDb);
