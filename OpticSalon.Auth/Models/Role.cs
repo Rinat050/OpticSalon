@@ -6,5 +6,13 @@
         public const string Master = "Мастер";
         public const string Manager = "Менеджер";
         public const string Admin = "Администратор";
+
+        public static List<string> GetEmployeeRoles()
+        {
+            return new List<string>()
+            {
+                Manager, Admin, Master
+            };
+        }
     }
 }

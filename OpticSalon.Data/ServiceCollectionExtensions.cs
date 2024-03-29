@@ -33,6 +33,7 @@ namespace OpticSalon.Data
             services.AddScoped<ILensPackagesRepository, LensPackageRepository>();
             services.AddScoped<IPurposeRepository, PurposeRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 
             return services;
         }

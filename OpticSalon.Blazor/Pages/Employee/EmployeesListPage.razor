@@ -1,0 +1,101 @@
+﻿@page "/employees"
+@using Microsoft.AspNetCore.Identity
+@using OpticSalon.Auth.Models
+@using OpticSalon.Blazor.Shared.Dialogs
+
+@inject IEmployeeService EmployeeService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<PageTitle>Список сотрудников</PageTitle>
+
+@if (_isLoading)
+{
+    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
+    return;
+}
+
+@if (_employees.Count == 0)
+{
+    <MudAlert Class="m-2" Severity="Severity.Normal">Список не найден...</MudAlert>
+    return;
+}
+
+<MudTable T="OpticSalon.Domain.Models.Employee" Items="_employees" Filter="new Func<OpticSalon.Domain.Models.Employee,bool>(Filter)">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Список сотрудников</MudText>
+        <MudSpacer />        
+        <MudTextField @bind-Value="_searchStr" Variant="Variant.Outlined" Placeholder="Поиск" 
+            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" 
+            IconSize="Size.Medium" Class="m-2"></MudTextField>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@OpenCreateEmployeeDialog">Новый сотрудник</MudButton>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh><MudTableSortLabel SortBy="new Func<OpticSalon.Domain.Models.Employee, object>(x=>x.Surname)">Фамилия</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<OpticSalon.Domain.Models.Employee, object>(x=>x.Name)">Имя</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<OpticSalon.Domain.Models.Employee, object>(x=>x.PhoneNumber)">Номер телефона</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<OpticSalon.Domain.Models.Employee, object>(x=>x.Address)">Адрес</MudTableSortLabel></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Фамилия">@context.Surname</MudTd>
+        <MudTd DataLabel="Имя">@context.Name</MudTd>
+        <MudTd DataLabel="Номер телефона">@context.PhoneNumber</MudTd>
+        <MudTd DataLabel="Адрес">@context.Address</MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private bool _isLoading;
+    private string _searchStr = "";
+    private List<OpticSalon.Domain.Models.Employee> _employees = new();
+
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+        var res = await EmployeeService.GetAllEmployeesAsync();
+
+        if (res.Success)
+        {
+            _employees = res.Data!;
+        }
+
+        _isLoading = false;
+    }
+
+    private async Task OpenCreateEmployeeDialog()
+    {
+        var parameters = new DialogParameters();
+
+        var dialog = await DialogService.ShowAsync<CreateEmployeeDialog>("Добавление сотрудника", parameters);
+
+        var res = await dialog.Result;
+
+        if (!res.Canceled)
+        {
+            await LoadData();
+        }
+    }
+
+
+    private bool Filter(OpticSalon.Domain.Models.Employee employee) => FilterFunc(employee, _searchStr);
+
+    private bool FilterFunc(OpticSalon.Domain.Models.Employee employee, string searchStr)
+    {
+        if (string.IsNullOrWhiteSpace(searchStr))
+            return true;
+        if (employee.Surname.Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (employee.Name.Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (employee.Address.Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{employee.Surname} {employee.Name}".Contains(searchStr))
+            return true;
+        return false;
+    }
+}

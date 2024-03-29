@@ -10,7 +10,7 @@ namespace OpticSalon.Data.Repositories
         {
         }
 
-        public async Task<Employee> AddEmployee(Employee employee)
+        public async Task<Employee> AddEmployeeAsync(Employee employee)
         {
             var employeeDb = Mapper.Map(employee);
             await Context.Employees.AddAsync(employeeDb);
@@ -20,11 +20,17 @@ namespace OpticSalon.Data.Repositories
             return Mapper.Map(employeeDb);
         }
 
-        public async Task DeleteEmployee(Employee employee)
+        public async Task DeleteEmployeeAsync(Employee employee)
         {
             var employeeDb = Mapper.Map(employee);
             Context.Employees.Remove(employeeDb);
             await Context.SaveChangesAsync();
+        }
+
+        public async Task<List<Employee>> GetAllEmployeesAsync()
+        {
+            var result = await Context.Employees.Select(x => Mapper.Map(x)).ToListAsync();
+            return result;
         }
     }
 }
