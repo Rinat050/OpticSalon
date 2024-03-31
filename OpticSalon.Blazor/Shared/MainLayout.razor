@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿@using OpticSalon.Auth.Models
+@inherits LayoutComponentBase
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Главная страница</PageTitle>
@@ -20,9 +21,17 @@
         </MudTooltip>
         <AuthorizeView Context="AuthorizeContext">
             <Authorized>
-                <AuthorizeView>
+                <AuthorizeView Roles="@Role.Client">
                     <MudTooltip Text="Профиль">
                         <MudIconButton Href="/clientProfile" Size="Size.Medium" Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" />
+                    </MudTooltip>
+                    <MudTooltip Text="Выход">
+                        <MudIconButton Href="/logout" Size="Size.Medium" Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
+                    </MudTooltip>
+                </AuthorizeView>
+                <AuthorizeView Roles="@Role.Admin">
+                    <MudTooltip Text="Сотрудники">
+                        <MudIconButton Href="/employees" Size="Size.Medium" Icon="@Icons.Material.Filled.People" Color="Color.Inherit" />
                     </MudTooltip>
                     <MudTooltip Text="Выход">
                         <MudIconButton Href="/logout" Size="Size.Medium" Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />

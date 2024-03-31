@@ -7,6 +7,8 @@
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
 
+@attribute [Authorize(Roles = Role.Admin)]
+
 <PageTitle>Список сотрудников</PageTitle>
 
 @if (_isLoading)
