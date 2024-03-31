@@ -1,0 +1,109 @@
+﻿@page "/masterOrders"
+@using OpticSalon.Auth.Models
+@using OpticSalon.Domain.Enums
+@using OpticSalon.Domain.Extensions
+
+
+<PageTitle>Заказы</PageTitle>
+
+@if (_isLoading)
+{
+    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
+    return;
+}
+
+
+<MudDropContainer T="Order" @ref="_dropContainer" Items="@_orders"  Style="min-height:85vh;"
+    ItemsSelector="@((item,column) => item.Status.GetDisplayName() == column)" 
+    Class="d-flex flex-rotop-row flex-wrap m-1 ">
+    <ChildContent>
+        <MudItem xs="12" sm="6" md="3">
+            <MudDropZone T="Order" Identifier="@OrderStatus.Created.GetDisplayName()" 
+                Class="mud-height-full rounded-lg mud-alert-text-error pa-3 ma-3">
+                <MudGrid>
+                    <MudIcon Size="Size.Small" Class="ma-2" Icon="@Icons.Material.Filled.Create"></MudIcon>
+                    <MudText Typo="Typo.button" Class="ma-2">@OrderStatus.Created.GetDisplayName()</MudText>
+                    <MudSpacer/>
+                    <MudText Typo="Typo.button" Class="ma-2">@GetOrdersCountByStatus(OrderStatus.Created)</MudText>
+                </MudGrid>
+            </MudDropZone>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudDropZone T="Order" Identifier="@OrderStatus.InWork.GetDisplayName()" 
+                Class="mud-height-full rounded-lg mud-alert-text-warning pa-3 ma-3">
+                <MudGrid>
+                    <MudIcon Size="Size.Small" Class="ma-2" Icon="@Icons.Material.Filled.AccessTime"></MudIcon>
+                    <MudText Typo="Typo.button" Class="ma-2">@OrderStatus.InWork.GetDisplayName()</MudText>
+                    <MudSpacer/>
+                    <MudText Typo="Typo.button" Class="ma-2">@GetOrdersCountByStatus(OrderStatus.InWork)</MudText>
+                </MudGrid>
+            </MudDropZone>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudDropZone T="Order" Identifier="@OrderStatus.Completed.GetDisplayName()" 
+                Class="mud-height-full rounded-lg mud-alert-text-info pa-3 ma-3">
+               <MudGrid>
+                    <MudIcon Size="Size.Small" Class="ma-2" Icon="@Icons.Material.Filled.CardTravel"></MudIcon>
+                    <MudText Typo="Typo.button" Class="ma-2">@OrderStatus.Completed.GetDisplayName()</MudText>
+                    <MudSpacer/>
+                    <MudText Typo="Typo.button" Class="ma-2">@GetOrdersCountByStatus(OrderStatus.Completed)</MudText>
+                </MudGrid>
+            </MudDropZone>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudDropZone T="Order" Identifier="@OrderStatus.Issued.GetDisplayName()"
+                Class="mud-height-full rounded-lg mud-alert-text-success pa-3 ma-3">
+                <MudGrid>
+                    <MudIcon Size="Size.Small" Class="ma-2" Icon="@Icons.Material.Filled.CheckBox"></MudIcon>
+                    <MudText Typo="Typo.button" Class="ma-2">@OrderStatus.Issued.GetDisplayName()</MudText>
+                    <MudSpacer/>
+                    <MudText Typo="Typo.button" Class="ma-2">@GetOrdersCountByStatus(OrderStatus.Issued)</MudText>
+                </MudGrid>
+            </MudDropZone>
+        </MudItem>
+    </ChildContent>
+    <ItemRenderer>
+		<MudPaper Elevation="25" Class="pa-4 rounded-lg my-3">
+            <MudText Typo="Typo.body1"><MudIcon Size="Size.Small" Class="ma-2" Icon="@Icons.Material.Filled.Assignment"/>
+                Заказ №@context.Number</MudText>
+            <MudText Typo="Typo.body1">Оправа @context.FrameName</MudText>
+            <MudText Typo="Typo.body1">Дата создания: @context.CreatedDate.ToShortDateString()</MudText>
+        </MudPaper>
+	</ItemRenderer>
+</MudDropContainer>
+
+@code {
+    private MudDropContainer<Order> _dropContainer;
+    private bool _isLoading;
+    private List<Order> _orders = new List<Order>()
+    {
+        new Order() {Number = 1234, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Created},
+        new Order() {Number = 1234, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Created},
+        new Order() {Number = 1234, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Created},
+        new Order() {Number = 2344, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.InWork},
+        new Order() {Number = 2344, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.InWork},
+        new Order() {Number = 2344, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.InWork},
+        new Order() {Number = 23434, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Completed},
+        new Order() {Number = 53434, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Issued},
+        new Order() {Number = 53434, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Issued},
+        new Order() {Number = 53434, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Issued},
+        new Order() {Number = 53434, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Issued},
+        new Order() {Number = 53434, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Issued},
+        new Order() {Number = 53434, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Issued},
+        new Order() {Number = 53434, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Issued},
+        new Order() {Number = 53434, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Issued},
+    };
+
+    public class Order
+    {
+        public int Number { get; set; }
+        public string FrameName { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public OrderStatus Status { get; set; }
+    }
+
+    private int GetOrdersCountByStatus(OrderStatus status)
+    {
+        return _orders.Where(x => x.Status == status).Count();
+    }
+}
