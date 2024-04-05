@@ -8,10 +8,12 @@ namespace OpticSalon.Domain.Services.Impl
     public class OrderService : IOrderService
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly IEmployeeService _employeeService;
 
-        public OrderService(IOrderRepository orderRepository)
+        public OrderService(IOrderRepository orderRepository, IEmployeeService employeeService)
         {
             _orderRepository = orderRepository;
+            _employeeService = employeeService;
         }
 
         public async Task<ResultWithData<Order>> CreateOrder(Recipe recipe, Frame frame, Color frameColor,
@@ -19,6 +21,17 @@ namespace OpticSalon.Domain.Services.Impl
         {
             try
             {
+                var availableMasterRes = await _employeeService.GetMasterIdForOrderAsync();
+
+                if (!availableMasterRes.Success)
+                {
+                    return new ResultWithData<Order>()
+                    {
+                        Success = false,
+                        Description = availableMasterRes.Description
+                    };
+                }
+
                 var newOrder = new Order()
                 {
                     Recipe = recipe,
@@ -28,7 +41,9 @@ namespace OpticSalon.Domain.Services.Impl
                     ContactPhoneNumber = contactPhoneNumber,
                     Comment = comment,
                     Client = client,
-                    CreatedDate = DateTime.Now
+                    CreatedDate = DateTime.Now,
+                    Master = availableMasterRes.Data!,
+                    Status = Enums.OrderStatus.Created
                 };
 
                 var createdOrderId = await _orderRepository.AddOrder(newOrder);

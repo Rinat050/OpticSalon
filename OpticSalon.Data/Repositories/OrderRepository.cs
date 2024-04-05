@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using OpticSalon.Domain.Enums;
 using OpticSalon.Domain.Models;
 using OpticSalon.Domain.Repositories;
 
@@ -23,12 +24,26 @@ namespace OpticSalon.Data.Repositories
             return orderDb.Id;
         }
 
+        public async Task<List<MasterOrdersCount>> GetMastersOrdersCount()
+        {
+            var res = await Context.Orders
+                .Where(x => (OrderStatus)x.Status != OrderStatus.Issued)
+                .GroupBy(x => x.MasterId).Select(x => new MasterOrdersCount()
+                {
+                    MasterId = x.Key,
+                    Count = x.Count()
+                })
+                .ToListAsync();
+
+            return res;
+        }
 
         public async Task<Order?> GetOrderById(int id)
         {
             var orderDb = await Context.Orders
                         .Include(x => x.LensPackage)
                         .Include(x => x.Client)
+                        .Include(x => x.Master)
                         .Include(x => x.Frame.Brand)
                         .Include(x => x.Frame.Material)
                         .Include(x => x.Frame.Gender)

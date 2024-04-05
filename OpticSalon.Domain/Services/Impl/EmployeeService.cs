@@ -11,12 +11,17 @@ namespace OpticSalon.Domain.Services.Impl
     public class EmployeeService : IEmployeeService
     {
         private readonly IEmployeeRepository _employeeRepository;
+        private readonly IOrderRepository _orderRepository;
         private readonly IAuthService _authService;
+        private readonly IUserService _userService;
 
-        public EmployeeService(IEmployeeRepository employeeRepository, IAuthService authService)
+        public EmployeeService(IEmployeeRepository employeeRepository, 
+                IAuthService authService, IOrderRepository orderRepository, IUserService userService)
         {
             _employeeRepository = employeeRepository;
             _authService = authService;
+            _orderRepository = orderRepository;
+            _userService = userService;
         }
 
         public async Task<ResultWithData<Employee>> CreateEmployeeAsync(string login, string password, string name,
@@ -49,7 +54,7 @@ namespace OpticSalon.Domain.Services.Impl
                 return new ResultWithData<Employee>()
                 {
                     Success = true,
-                    Description = EmployeeServiceMessages.SuccessCreated,
+                    Description = SuccessMessages.EmployeeServiceMessages.SuccessCreated,
                     Data = createdEmployee
                 };
             }
@@ -74,6 +79,68 @@ namespace OpticSalon.Domain.Services.Impl
             catch
             {
                 return new ResultWithData<List<Employee>>() { Success = false, Description = DefaultErrors.ServerError };
+            }
+        }
+
+        public async Task<ResultWithData<Employee>> GetMasterIdForOrderAsync()
+        {
+            try
+            {
+                var mastersOrdersCount = await _orderRepository.GetMastersOrdersCount();
+                var allMastersRes = await _userService.GetEmployeesUserByRoleAsync(Role.Master);
+
+                if (!allMastersRes.Success)
+                {
+                    return new ResultWithData<Employee>()
+                    {
+                        Success = false,
+                        Description = allMastersRes.Description
+                    };
+                }
+
+                if (allMastersRes.Data.Count == 0)
+                {
+                    return new ResultWithData<Employee>()
+                    {
+                        Success = false,
+                        Description = ErrorMessages.EmployeeServiceMessages.MasterNotFounded
+                    };
+                }
+
+                foreach(var masterId in allMastersRes.Data)
+                {
+                    var masterOrders = mastersOrdersCount
+                                            .FirstOrDefault(x => x.MasterId == masterId);
+
+                    if (masterOrders == null)
+                    {
+                        var res = await _employeeRepository.GetEmployeeByIdAsync(masterId);
+
+                        return new ResultWithData<Employee>()
+                        {
+                            Success = true,
+                            Data = res
+                        };
+                    }
+                }
+
+                var minCount = mastersOrdersCount.Min(x => x.Count);
+
+                var resId = mastersOrdersCount.FirstOrDefault(x => x.Count == minCount)!.MasterId;
+                var master = await _employeeRepository.GetEmployeeByIdAsync(resId);
+
+                return new ResultWithData<Employee>()
+                {
+                    Success = true,
+                    Data = master
+                };
+            }
+            catch
+            {
+                return new ResultWithData<Employee>() 
+                {   Success = false, 
+                    Description = DefaultErrors.ServerError 
+                };
             }
         }
     }

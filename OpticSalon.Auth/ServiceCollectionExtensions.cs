@@ -40,6 +40,7 @@ namespace OpticSalon.Auth
                 .AddSignInManager<OpticSalonSignInManager>();
 
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IUserService, UserService>();
 
             return services;
         }
