@@ -15,8 +15,7 @@ namespace OpticSalon.Domain.Services.Impl
         }
 
         public async Task<ResultWithData<Order>> CreateOrder(Recipe recipe, Frame frame, Color frameColor,
-            LensPackage lens, int lensTintingPercent, string contactPhoneNumber, string deliveryAddress,
-            string? comment, Client client)
+            LensPackage lens, string contactPhoneNumber, string? comment, Client client)
         {
             try
             {
@@ -26,11 +25,9 @@ namespace OpticSalon.Domain.Services.Impl
                     LensPackage = lens,
                     Frame = frame,
                     FrameColor = frameColor,
-                    DeliveryAddress = deliveryAddress,
                     ContactPhoneNumber = contactPhoneNumber,
                     Comment = comment,
                     Client = client,
-                    LensTintingPercent = lensTintingPercent,
                     CreatedDate = DateTime.Now
                 };
 

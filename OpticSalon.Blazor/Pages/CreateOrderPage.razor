@@ -135,9 +135,8 @@
     private async void CreateOrder()
     {
         var res = await OrderService.CreateOrder(_createCredentials.Recipe, _createCredentials.Frame, 
-            _createCredentials.FrameColor, _createCredentials.LensPackage, _createCredentials.LensTintingPercent, 
-            _createCredentials.ContactPhoneNumber, _createCredentials.DeliveryAddress, _createCredentials.Comment, 
-            _createCredentials.Client);
+            _createCredentials.FrameColor, _createCredentials.LensPackage, _createCredentials.ContactPhoneNumber, 
+            _createCredentials.Comment, _createCredentials.Client);
 
         if (res.Success)
         {
@@ -204,7 +203,6 @@
 
         if (_createCredentials.Client is not null)
         {
-            _createCredentials.DeliveryAddress = _createCredentials.Client.Address;
             _createCredentials.ContactPhoneNumber = _createCredentials.Client.PhoneNumber;
         }
     }

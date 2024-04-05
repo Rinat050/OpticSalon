@@ -20,11 +20,6 @@
             <MudCardContent>
                 <MudGrid Spacing="2">
                     <MudItem xs="12">
-                        <MudTextField T="string" @bind-Value="OrderCredentials.DeliveryAddress"
-                                      Label="Адрес доставки" Variant="Variant.Outlined"
-                                        For="@(() => OrderCredentials.DeliveryAddress)"></MudTextField>
-                    </MudItem>
-                    <MudItem xs="12">
                         <MudTextField T="string" @bind-Value="OrderCredentials.ContactPhoneNumber"
                                       Label="Номер телефона" Variant="Variant.Outlined" 
                                       Mask="@(new PatternMask("+0 (000) 000 00-00"))"
