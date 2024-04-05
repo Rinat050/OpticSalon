@@ -1,12 +1,13 @@
-﻿@page "/orderShow"
+﻿@page "/orderShow/{orderId:int}"
 @using OpticSalon.Blazor.Shared.OrderComponents
 @using OpticSalon.Domain.Enums
 @using OpticSalon.Domain.Extensions
 @using OpticSalon.Domain.Models
-@inject IFrameService FrameService
+@inject IOrderService OrderService
+@inject ISnackbar Snackbar
 @inject IImageLoadingService ImageLoadingService
 
-<PageTitle>Заказ №342</PageTitle>
+<PageTitle>Заказ @OrderId</PageTitle>
 
 @if (_isLoading)
 {
@@ -14,37 +15,45 @@
     return;
 }
 
+@if (_isNotFound)
+{
+    <MudAlert Class="m-2" Severity="Severity.Normal">Не найдено...</MudAlert>
+    return;
+}
+
 <MudContainer Class="d-flex align-center justify-center mud-width-full" style="min-height:90vh;">
     <MudCard Class="p-2 m-2" Style="border-radius: 20px;" Outlined="false" Elevation="4">
          <MudCardHeader>
-            <MudStack Row AlignItems="AlignItems.Center">
-                <MudIcon Class="m-1" Icon="@Icons.Material.Filled.Assignment" Size="Size.Medium" Color="MudBlazor.Color.Secondary"></MudIcon>
-                <MudText Typo="Typo.h6" Color="MudBlazor.Color.Secondary"><b>Заказ</b></MudText>
-                <MudText Typo="Typo.h6" Color="MudBlazor.Color.Primary"><b>5643</b></MudText>
-                <MudText Typo="Typo.h6" Color="MudBlazor.Color.Secondary"><b>от</b></MudText>
-                <MudText Typo="Typo.h6" Color="MudBlazor.Color.Primary"><b>21.03.2024</b></MudText>
-            </MudStack>
-            <MudSpacer/>
-            <MudStack Row AlignItems="AlignItems.Center">
-                @if (_status != OrderStatus.Issued)
-                {
-                    <MudChip Color="MudBlazor.Color.Primary">
-                        <MudText Typo="Typo.subtitle1">Статус</MudText>
-                    </MudChip>
-                    <MudSelect T="OrderStatus" Variant="Variant.Outlined"
-                        ToStringFunc="@((x) => x.GetDisplayName())">
-                        <MudSelectItem Value="@(OrderStatus.Created)" />
-                        <MudSelectItem Value="@(OrderStatus.InWork)" />
-                        <MudSelectItem Value="@(OrderStatus.Completed)" />
-                    </MudSelect>
-                }
-                else
-                {
-                    <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Primary">Статус заказа:</MudText>
-                    <MudText Typo="Typo.h6" Style="font-weight: 400">@(OrderStatus.Issued.GetDisplayName())</MudText>
-                }
-                <MudIconButton Icon="@Icons.Material.Filled.Save" Style="min-width: 50px;" Color="MudBlazor.Color.Secondary"></MudIconButton>
-            </MudStack>            
+            <MudGrid>
+                <MudStack Row AlignItems="AlignItems.Center">
+                    <MudIcon Class="m-1" Icon="@Icons.Material.Filled.Assignment" Size="Size.Medium" Color="MudBlazor.Color.Secondary"></MudIcon>
+                    <MudText Typo="Typo.h6" Color="MudBlazor.Color.Secondary"><b>Заказ</b></MudText>
+                    <MudText Typo="Typo.h6" Color="MudBlazor.Color.Primary"><b>@_order.Id</b></MudText>
+                    <MudText Typo="Typo.h6" Color="MudBlazor.Color.Secondary"><b>от</b></MudText>
+                    <MudText Typo="Typo.h6" Color="MudBlazor.Color.Primary"><b>@_order.CreatedDate.ToShortDateString()</b></MudText>
+                </MudStack>
+                <MudSpacer/>
+                <MudStack Row AlignItems="AlignItems.Center">
+                    @if (_order.Status != OrderStatus.Issued)
+                    {
+                        <MudChip Color="MudBlazor.Color.Primary">
+                            <MudText Typo="Typo.subtitle1">Статус</MudText>
+                        </MudChip>
+                        <MudSelect @bind-Value="_order.Status" T="OrderStatus" Variant="Variant.Outlined"
+                            ToStringFunc="@((x) => x.GetDisplayName())">
+                            <MudSelectItem Value="@(OrderStatus.Created)" />
+                            <MudSelectItem Value="@(OrderStatus.InWork)" />
+                            <MudSelectItem Value="@(OrderStatus.Completed)" />
+                        </MudSelect>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Primary">Статус заказа:</MudText>
+                        <MudText Typo="Typo.h6" Style="font-weight: 400">@(_order.Status.GetDisplayName())</MudText>
+                    }
+                    <MudIconButton Icon="@Icons.Material.Filled.Save" OnClick="@Save" Disabled="@_isSaveBtnDisabled" Style="min-width: 50px;" Color="MudBlazor.Color.Secondary"></MudIconButton>
+                </MudStack>    
+            </MudGrid>        
         </MudCardHeader>
         <MudCardContent>
             <MudGrid>
@@ -59,7 +68,7 @@
                             <MudGrid Justify="Justify.SpaceAround" Spacing="1">
                                 <MudItem xs="12" md="6" sm="6">
                                     <div style="display:flex; justify-content:start;">
-                                        <MudImage id="frame-image" Src="@GetImageSrc(_frame.MainImageName)" Elevation="2" Style="min-width:150px; width: 90%;" Alt="" />
+                                        <MudImage id="frame-image" Src="@GetImageSrc(_order.Frame.MainImageName)" Elevation="2" Style="min-width:150px; width: 90%;" Alt="" />
                                     </div>
                                 </MudItem>
                                 <MudItem xs="12" md="6" sm="6">
@@ -67,25 +76,25 @@
                                         <MudItem xs="12">
                                            <MudStack Row AlignItems="AlignItems.Center">
                                                 <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Бренд:</MudText>
-                                                <MudText Typo="Typo.h6" Style="font-weight: 400">@(_frame.Brand?.Name)</MudText>
+                                                <MudText Typo="Typo.h6" Style="font-weight: 400">@(_order.Frame.Brand?.Name)</MudText>
                                             </MudStack>
                                         </MudItem>
                                         <MudItem xs="12">
                                             <MudStack Row AlignItems="AlignItems.Center">
                                                 <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Модель:</MudText>
-                                                <MudText Typo="Typo.h6" Style="font-weight: 400">@(_frame.Model)</MudText>
+                                                <MudText Typo="Typo.h6" Style="font-weight: 400">@(_order.Frame.Model)</MudText>
                                             </MudStack>
                                         </MudItem>
                                         <MudItem xs="12">
                                             <MudStack Row AlignItems="AlignItems.Center">
                                                 <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Размеры:</MudText>
-                                                <MudText Typo="Typo.h6" Style="font-weight: 400">@GetSizeString(_frame.Sizes)</MudText>
+                                                <MudText Typo="Typo.h6" Style="font-weight: 400">@GetSizeString(_order.Frame.Sizes)</MudText>
                                             </MudStack>
                                         </MudItem>
                                         
                                         <MudItem xs="12">
                                             <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Выбранный цвет:</MudText>
-                                            <MudFab Size="Size.Medium" Class="m-2 ms-0" style="@($"background-color: {_color?.Value};")"></MudFab>
+                                            <MudFab Size="Size.Medium" Class="m-2 ms-0" style="@($"background-color: {_order.FrameColor?.Value};")"></MudFab>
                                         </MudItem>
                                     </MudGrid>
                                 </MudItem>
@@ -109,19 +118,19 @@
                                 <MudItem xs="12" sm="4" md="4">
                                     <MudStack Row AlignItems="AlignItems.Center">
                                         <MudText Typo="Typo.h6" Style="font-weight: 400" Color="MudBlazor.Color.Secondary">Sph:</MudText>
-                                        <MudText Typo="Typo.h6">4.0</MudText>
+                                        <MudText Typo="Typo.h6">@GetNumber(_order.Recipe.RightEye.Sph)</MudText>
                                     </MudStack>
                                 </MudItem>
                                 <MudItem xs="12" sm="4" md="4">
                                     <MudStack Row AlignItems="AlignItems.Center">
                                         <MudText Typo="Typo.h6" Style="font-weight: 400" Color="MudBlazor.Color.Secondary">Cyl:</MudText>
-                                        <MudText Typo="Typo.h6">4.0</MudText>
+                                        <MudText Typo="Typo.h6">@GetNumber(_order.Recipe.RightEye.Cyl)</MudText>
                                     </MudStack>
                                 </MudItem>
                                 <MudItem xs="12" sm="3" md="3">
                                     <MudStack Row AlignItems="AlignItems.Center">
                                         <MudText Typo="Typo.h6" Style="font-weight: 400" Color="MudBlazor.Color.Secondary">Ax:</MudText>
-                                        <MudText Typo="Typo.h6">4.0</MudText>
+                                        <MudText Typo="Typo.h6">@_order.Recipe.RightEye.Axis</MudText>
                                     </MudStack>
                                 </MudItem>
                                 <MudItem xs="12" sm="1" md="1">
@@ -131,25 +140,25 @@
                                 <MudItem xs="12" sm="4" md="4">
                                     <MudStack Row AlignItems="AlignItems.Center">
                                         <MudText Typo="Typo.h6" Style="font-weight: 400" Color="MudBlazor.Color.Secondary">Sph:</MudText>
-                                        <MudText Typo="Typo.h6">4.0</MudText>
+                                        <MudText Typo="Typo.h6">@GetNumber(_order.Recipe.LeftEye.Sph)</MudText>
                                     </MudStack>
                                 </MudItem>
                                 <MudItem xs="12" sm="4" md="4">
                                     <MudStack Row AlignItems="AlignItems.Center">
                                         <MudText Typo="Typo.h6" Style="font-weight: 400" Color="MudBlazor.Color.Secondary">Cyl:</MudText>
-                                        <MudText Typo="Typo.h6">4.0</MudText>
+                                        <MudText Typo="Typo.h6">@GetNumber(_order.Recipe.LeftEye.Cyl)</MudText>
                                     </MudStack>
                                 </MudItem>
                                 <MudItem xs="12" sm="3" md="3">
                                     <MudStack Row AlignItems="AlignItems.Center">
                                         <MudText Typo="Typo.h6" Style="font-weight: 400" Color="MudBlazor.Color.Secondary">Ax:</MudText>
-                                        <MudText Typo="Typo.h6">4.0</MudText>
+                                        <MudText Typo="Typo.h6">@_order.Recipe.LeftEye.Axis</MudText>
                                     </MudStack>
                                 </MudItem>
                                 <MudItem xs="12">
                                     <MudStack Row AlignItems="AlignItems.Center">
                                         <MudText Typo="Typo.h6" Style="font-weight: 600;" Color="MudBlazor.Color.Secondary">Dp (mm):</MudText>
-                                        <MudText Typo="Typo.h6">54</MudText>
+                                        <MudText Typo="Typo.h6">@_order.Recipe.Dp</MudText>
                                     </MudStack>
                                 </MudItem>
                             </MudGrid>
@@ -168,19 +177,19 @@
                                 <MudItem xs="12">
                                     <MudStack Row AlignItems="AlignItems.Center">
                                         <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Пакет линз:</MudText>
-                                        <MudText Typo="Typo.h6" Style="font-weight: 400">Золотой</MudText>
+                                        <MudText Typo="Typo.h6" Style="font-weight: 400">@_order.LensPackage.Name</MudText>
                                     </MudStack>
                                 </MudItem>
                                 <MudItem xs="12">
                                     <MudStack Row AlignItems="AlignItems.Center">
                                         <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Номер телефона клиента:</MudText>
-                                        <MudText Typo="Typo.h6" Style="font-weight: 400">+7(999)555-12-34</MudText>
+                                        <MudText Typo="Typo.h6" Style="font-weight: 400">@_order.ContactPhoneNumber</MudText>
                                     </MudStack>
                                 </MudItem>
                                 <MudItem xs="12">
                                     <MudStack Row AlignItems="AlignItems.Start">
                                         <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Комментарий:</MudText>
-                                        <MudText Typo="Typo.h6" Style="font-weight: 400">текст </MudText>
+                                        <MudText Typo="Typo.h6" Style="font-weight: 400">@_order.Comment</MudText>
                                     </MudStack>
                                 </MudItem>
                             </MudGrid>
@@ -193,26 +202,31 @@
 </MudContainer>
 
 @code {
-    private Frame _frame = new ();
-    private OpticSalon.Domain.Models.Color _color { get; set; } = new();
+    [Parameter]
+    public int OrderId { get; set; }
+    private Order _order;
     private bool _isLoading;
-    private OrderStatus _status = OrderStatus.Created;
+    private bool _isNotFound;
+    private bool _isSaveBtnDisabled;
 
     protected async override Task OnInitializedAsync()
     {
-        await LoadFrame();
+        await LoadOrderData();
     }
 
-    private async Task LoadFrame()
+    private async Task LoadOrderData()
     {
         _isLoading = true;
-        var res = await FrameService.GetFrameById(1); 
+        var res = await OrderService.GetOrderById(OrderId); 
         _isLoading = false;
 
-        if (res.Success)
+        if (!res.Success)
         {
-            _frame = res.Data!;
+            _isNotFound = true;
+            return;
         }
+
+        _order = res.Data!;
     }
 
     private string GetSizeString(FrameSizes sizes)
@@ -223,5 +237,32 @@
     private string GetImageSrc(string name)
     {
         return $"https://localhost:7087/getImage?name={name}";
+    }
+
+    private string GetNumber(double number)
+    {
+        if (number > 0)
+        {
+            return "+" + number.ToString("0.00");
+        }
+        else
+        {
+            return number.ToString("0.00");
+        }
+    }
+
+    private async Task Save()
+    {
+        _isSaveBtnDisabled = true;
+        var res = await OrderService.UpdateOrder(_order);
+        _isSaveBtnDisabled = false;
+
+        if (res.Success)
+        {
+            Snackbar.Add(res.Description, Severity.Info);
+            return;
+        }
+
+        Snackbar.Add(res.Description, Severity.Warning);
     }
 }

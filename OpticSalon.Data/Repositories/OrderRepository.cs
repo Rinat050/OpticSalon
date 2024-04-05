@@ -67,5 +67,17 @@ namespace OpticSalon.Data.Repositories
 
             return orders;
         }
+
+        public async Task UpdateOrder(Order order)
+        {
+            var orderDb = Mapper.Map(order);
+            orderDb.Recipe.Purpose = null!;
+            orderDb.CreatedDate = DateTime.SpecifyKind(orderDb.CreatedDate, DateTimeKind.Utc);
+
+            Context.Orders.Update(orderDb);
+            await Context.SaveChangesAsync();
+
+            Context.ChangeTracker.Clear();
+        }
     }
 }

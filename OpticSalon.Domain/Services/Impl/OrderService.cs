@@ -2,6 +2,7 @@
 using OpticSalon.Domain.Models;
 using OpticSalon.Domain.Repositories;
 using OpticSalon.Domain.ResultModels;
+using OpticSalon.Domain.SuccessMessages;
 
 namespace OpticSalon.Domain.Services.Impl
 {
@@ -120,6 +121,28 @@ namespace OpticSalon.Domain.Services.Impl
         public decimal GetOrderTotalCost(Order order)
         {
             return order.Frame.Cost + order.LensPackage.Cost;
+        }
+
+        public async Task<BaseResult> UpdateOrder(Order order)
+        {
+            try
+            {
+                await _orderRepository.UpdateOrder(order);
+
+                return new BaseResult()
+                {
+                    Success = true,
+                    Description = OrderServiceMessages.SuccessUpdate
+                };
+            }
+            catch
+            {
+                return new BaseResult()
+                {
+                    Success = false,
+                    Description = DefaultErrors.ServerError
+                };
+            }
         }
     }
 }
