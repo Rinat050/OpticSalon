@@ -18,7 +18,7 @@ namespace OpticSalon.Blazor.Middleware
             _next = next;
         }
 
-        public async Task Invoke(HttpContext context, SignInManager<OpticSalonUser> signInManager)
+        public async Task Invoke(HttpContext context, SignInManager<OpticSalonUser> signInManager, UserManager<OpticSalonUser> userManager)
         {
             if (context.Request.Path == "/login" && context.Request.Query.ContainsKey("key"))
             {
@@ -37,7 +37,19 @@ namespace OpticSalon.Blazor.Middleware
                     return;
                 }
 
-                context.Response.Redirect("/");
+                var user = await userManager.FindByEmailAsync(info.Email);
+
+                var roles = await userManager.GetRolesAsync(user);
+
+                switch (roles.First())
+                {
+                    case Role.Master:
+                        context.Response.Redirect("/masterOrders");
+                        break;
+                    default:
+                        context.Response.Redirect("/");
+                        break;
+                }
             }
             else if (context.Request.Path == "/logout")
             {
