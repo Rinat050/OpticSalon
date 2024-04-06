@@ -31,7 +31,8 @@ namespace OpticSalon.Data.Repositories
                 {
                     CreatedDate = x.CreatedDate,
                     OrderID = x.Id,
-                    OrderType = OrderType.ManufactureOrder
+                    OrderType = OrderType.ManufactureOrder,
+                    OrderStatus = (OrderStatus) x.Status
                 }).ToListAsync();
 
             return res;

@@ -7,5 +7,6 @@ namespace OpticSalon.Domain.Models
         public int OrderID { get; set; }
         public DateTime CreatedDate { get; set; }
         public OrderType OrderType { get; set; }
+        public OrderStatus OrderStatus { get; set; }
     }
 }

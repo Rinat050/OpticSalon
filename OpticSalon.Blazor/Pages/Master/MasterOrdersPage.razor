@@ -1,8 +1,13 @@
 ﻿@page "/masterOrders"
+@attribute [Authorize(Roles = Role.Master)]
+
 @using OpticSalon.Auth.Models
 @using OpticSalon.Domain.Enums
 @using OpticSalon.Domain.Extensions
+@using OpticSalon.Domain.Models
 
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
+@inject IEmployeeService EmployeeService
 
 <PageTitle>Заказы</PageTitle>
 
@@ -12,13 +17,25 @@
     return;
 }
 
+<MudPaper Class="w-100 p-2">
+    <MudGrid Class="w-100 ms-2 p-2">
+        <MudStack Row AlignItems="AlignItems.Center">
+            <MudIcon Icon="@Icons.Material.Filled.Assignment" Size="Size.Medium" Color="MudBlazor.Color.Secondary"></MudIcon>
+            <MudText Typo="Typo.h6" Color="MudBlazor.Color.Secondary">Заказы</MudText>
+        </MudStack>
+        <MudSpacer />
+        <MudTextField ValueChanged="@((text) => SearchTextChanged(text))" T="string" Placeholder="Поиск" 
+            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" 
+            IconSize="Size.Medium" Class="mt-0 mb-2 me-1"></MudTextField>
+    </MudGrid>
+</MudPaper>
 
-<MudDropContainer T="Order" @ref="_dropContainer" Items="@_orders"  Style="min-height:85vh;"
-    ItemsSelector="@((item,column) => item.Status.GetDisplayName() == column)" 
+<MudDropContainer T="MasterOrder" @ref="_dropContainer" ItemDropped="ItemUpdated" Items="@_filterOrders" Style="min-height:78vh;"
+    ItemsSelector="@((item,column) => item.OrderStatus.GetDisplayName() == column)" 
     Class="d-flex flex-rotop-row flex-wrap m-1 ">
     <ChildContent>
         <MudItem xs="12" sm="6" md="3">
-            <MudDropZone T="Order" Identifier="@OrderStatus.Created.GetDisplayName()" 
+            <MudDropZone T="MasterOrder" Identifier="@OrderStatus.Created.GetDisplayName()" 
                 Class="mud-height-full rounded-lg mud-alert-text-error pa-3 ma-3">
                 <MudGrid>
                     <MudIcon Size="Size.Small" Class="ma-2" Icon="@Icons.Material.Filled.Create"></MudIcon>
@@ -29,7 +46,7 @@
             </MudDropZone>
         </MudItem>
         <MudItem xs="12" sm="6" md="3">
-            <MudDropZone T="Order" Identifier="@OrderStatus.InWork.GetDisplayName()" 
+            <MudDropZone T="MasterOrder" Identifier="@OrderStatus.InWork.GetDisplayName()" 
                 Class="mud-height-full rounded-lg mud-alert-text-warning pa-3 ma-3">
                 <MudGrid>
                     <MudIcon Size="Size.Small" Class="ma-2" Icon="@Icons.Material.Filled.AccessTime"></MudIcon>
@@ -40,7 +57,7 @@
             </MudDropZone>
         </MudItem>
         <MudItem xs="12" sm="6" md="3">
-            <MudDropZone T="Order" Identifier="@OrderStatus.Completed.GetDisplayName()" 
+            <MudDropZone T="MasterOrder" Identifier="@OrderStatus.Completed.GetDisplayName()" 
                 Class="mud-height-full rounded-lg mud-alert-text-info pa-3 ma-3">
                <MudGrid>
                     <MudIcon Size="Size.Small" Class="ma-2" Icon="@Icons.Material.Filled.CardTravel"></MudIcon>
@@ -51,7 +68,7 @@
             </MudDropZone>
         </MudItem>
         <MudItem xs="12" sm="6" md="3">
-            <MudDropZone T="Order" Identifier="@OrderStatus.Issued.GetDisplayName()"
+            <MudDropZone T="MasterOrder" Identifier="@OrderStatus.Issued.GetDisplayName()"
                 Class="mud-height-full rounded-lg mud-alert-text-success pa-3 ma-3">
                 <MudGrid>
                     <MudIcon Size="Size.Small" Class="ma-2" Icon="@Icons.Material.Filled.CheckBox"></MudIcon>
@@ -65,45 +82,91 @@
     <ItemRenderer>
 		<MudPaper Elevation="25" Class="pa-4 rounded-lg my-3">
             <MudText Typo="Typo.body1"><MudIcon Size="Size.Small" Class="ma-2" Icon="@Icons.Material.Filled.Assignment"/>
-                Заказ №@context.Number</MudText>
-            <MudText Typo="Typo.body1">Оправа @context.FrameName</MudText>
+                Заказ №@context.OrderID</MudText>
+            <MudText Typo="Typo.body1">Тип: @context.OrderType.GetDisplayName()</MudText>
             <MudText Typo="Typo.body1">Дата создания: @context.CreatedDate.ToShortDateString()</MudText>
         </MudPaper>
 	</ItemRenderer>
 </MudDropContainer>
 
 @code {
-    private MudDropContainer<Order> _dropContainer;
+    private MudDropContainer<MasterOrder> _dropContainer;
+    private int _masterId;
     private bool _isLoading;
-    private List<Order> _orders = new List<Order>()
-    {
-        new Order() {Number = 1234, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Created},
-        new Order() {Number = 1234, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Created},
-        new Order() {Number = 1234, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Created},
-        new Order() {Number = 2344, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.InWork},
-        new Order() {Number = 2344, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.InWork},
-        new Order() {Number = 2344, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.InWork},
-        new Order() {Number = 23434, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Completed},
-        new Order() {Number = 53434, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Issued},
-        new Order() {Number = 53434, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Issued},
-        new Order() {Number = 53434, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Issued},
-        new Order() {Number = 53434, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Issued},
-        new Order() {Number = 53434, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Issued},
-        new Order() {Number = 53434, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Issued},
-        new Order() {Number = 53434, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Issued},
-        new Order() {Number = 53434, FrameName = "BULGET 1775", CreatedDate = DateTime.Now, Status = OrderStatus.Issued},
-    };
+    private string _search = "";
+    private List<MasterOrder> _allOrders = new();
+    private List<MasterOrder> _filterOrders = new();
 
-    public class Order
+    protected async override Task OnInitializedAsync()
     {
-        public int Number { get; set; }
-        public string FrameName { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public OrderStatus Status { get; set; }
+        _isLoading = true;
+        await LoadMasterInfo();
+        await LoadMasterOrders();
+        _isLoading = false;
     }
 
     private int GetOrdersCountByStatus(OrderStatus status)
     {
-        return _orders.Where(x => x.Status == status).Count();
+        return _filterOrders.Where(x => x.OrderStatus == status).Count();
+    }
+
+    private async Task LoadMasterInfo()
+    {
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+
+        if (userIdentity is null)
+        {
+            return;
+        }
+
+        _masterId = int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.EmployeeId).Value);
+    }
+
+    private async Task LoadMasterOrders()
+    {
+        if (_masterId == 0)
+        {
+            return;
+        }
+
+        var result = await EmployeeService.GetMasterOrdersAsync(_masterId);
+
+        if (result.Success)
+        {
+            _allOrders = result.Data!;
+            Search();
+        }
+    }
+
+    private void ItemUpdated(MudItemDropInfo<MasterOrder> dropItem)
+    {
+        var dropStatus = dropItem.DropzoneIdentifier.GetValueFromName<OrderStatus>();
+
+        if (dropItem.Item.OrderStatus == OrderStatus.Issued || dropStatus == OrderStatus.Issued)
+        {
+            return;
+        }
+
+        dropItem.Item.OrderStatus = dropStatus;
+    }
+
+    private void SearchTextChanged(string text)
+    {
+        _search = text.ToLower();
+
+        Search();
+    }
+
+    private void Search()
+    {
+        if (string.IsNullOrWhiteSpace(_search))
+        {
+            _filterOrders = _allOrders;
+            return;
+        }
+
+        _filterOrders = _allOrders
+                .Where(x => x.OrderID.ToString().ToLower().Contains(_search)
+                || x.OrderType.GetDisplayName()!.ToLower().Contains(_search)).ToList();
     }
 }
