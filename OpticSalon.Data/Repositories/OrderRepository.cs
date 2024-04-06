@@ -24,10 +24,24 @@ namespace OpticSalon.Data.Repositories
             return orderDb.Id;
         }
 
-        public async Task<List<MasterOrdersCount>> GetMastersOrdersCount()
+        public async Task<List<MasterOrder>> GetMasterOrders(int masterId)
+        {
+            var res = await Context.Orders.Where(x => x.MasterId == masterId)
+                .Select(x => new MasterOrder()
+                {
+                    CreatedDate = x.CreatedDate,
+                    OrderID = x.Id,
+                    OrderType = OrderType.ManufactureOrder
+                }).ToListAsync();
+
+            return res;
+        }
+
+        public async Task<List<MasterOrdersCount>> GetMastersActiveOrdersCount()
         {
             var res = await Context.Orders
-                .Where(x => (OrderStatus)x.Status != OrderStatus.Issued)
+                .Where(x => (OrderStatus)x.Status != OrderStatus.Issued 
+                        && (OrderStatus)x.Status != OrderStatus.Completed)
                 .GroupBy(x => x.MasterId).Select(x => new MasterOrdersCount()
                 {
                     MasterId = x.Key,

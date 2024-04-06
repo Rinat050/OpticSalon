@@ -82,11 +82,11 @@ namespace OpticSalon.Domain.Services.Impl
             }
         }
 
-        public async Task<ResultWithData<Employee>> GetMasterIdForOrderAsync()
+        public async Task<ResultWithData<Employee>> GetMasterForOrderAsync()
         {
             try
             {
-                var mastersOrdersCount = await _orderRepository.GetMastersOrdersCount();
+                var mastersOrdersCount = await _orderRepository.GetMastersActiveOrdersCount();
                 var allMastersRes = await _userService.GetEmployeesUserByRoleAsync(Role.Master);
 
                 if (!allMastersRes.Success)
@@ -141,6 +141,26 @@ namespace OpticSalon.Domain.Services.Impl
                 {   Success = false, 
                     Description = DefaultErrors.ServerError 
                 };
+            }
+        }
+
+        public async Task<ResultWithData<List<MasterOrder>>> GetMasterOrdersAsync(int masterId)
+        {
+            try
+            {
+                var manufactureOrders = await _orderRepository.GetMasterOrders(masterId);
+
+                var orderedList = manufactureOrders.OrderByDescending(x => x.CreatedDate).ToList();
+
+                return new ResultWithData<List<MasterOrder>>()
+                {
+                    Success = true,
+                    Data = orderedList
+                };
+            }
+            catch
+            {
+                return new ResultWithData<List<MasterOrder>>() { Success = false, Description = DefaultErrors.ServerError };
             }
         }
     }

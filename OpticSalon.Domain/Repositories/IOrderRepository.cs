@@ -1,5 +1,4 @@
-﻿
-using OpticSalon.Domain.Models;
+﻿using OpticSalon.Domain.Models;
 
 namespace OpticSalon.Domain.Repositories
 {
@@ -9,6 +8,7 @@ namespace OpticSalon.Domain.Repositories
         public Task UpdateOrder(Order order);
         public Task<Order?> GetOrderById(int id);
         public Task<List<OrderShort>> GetOrdersByClient(int clientId);
-        public Task<List<MasterOrdersCount>> GetMastersOrdersCount();
+        public Task<List<MasterOrder>> GetMasterOrders(int masterId);
+        public Task<List<MasterOrdersCount>> GetMastersActiveOrdersCount();
     }
 }

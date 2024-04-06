@@ -22,7 +22,7 @@ namespace OpticSalon.Domain.Services.Impl
         {
             try
             {
-                var availableMasterRes = await _employeeService.GetMasterIdForOrderAsync();
+                var availableMasterRes = await _employeeService.GetMasterForOrderAsync();
 
                 if (!availableMasterRes.Success)
                 {
