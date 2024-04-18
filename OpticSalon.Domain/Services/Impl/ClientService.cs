@@ -210,5 +210,27 @@ namespace OpticSalon.Domain.Services.Impl
                 };
             }
         }
+
+        public async Task<ResultWithData<List<Client>>> GetAllClients()
+        {
+            try
+            {
+                var allClients = await _clientRepository.GetAllClients();
+
+                return new ResultWithData<List<Client>>()
+                {
+                    Success = true,
+                    Data = allClients
+                };
+            }
+            catch
+            {
+                return new ResultWithData<List<Client>>()
+                {
+                    Success = false,
+                    Description = DefaultErrors.ServerError
+                };
+            }
+        }
     }
 }

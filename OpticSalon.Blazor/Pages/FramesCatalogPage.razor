@@ -1,10 +1,13 @@
 ﻿@page "/"
 
+@using Microsoft.AspNetCore.Identity
 @using MudBlazor.Utilities
 @using OpticSalon.Auth.Models
 @using OpticSalon.Blazor.Data.Credentials
 @using OpticSalon.Blazor.Services
 @using OpticSalon.Domain.Models
+
+@inject UserManager<OpticSalonUser> UserManager
 @inject IFrameService FrameService
 @inject IFrameTypeService FrameTypeService
 @inject IFrameMaterialService FrameMaterialService
@@ -152,6 +155,7 @@ else
 
     private bool _isDrawerOpen;
     private bool _isLoading;
+    private bool _isClient;
     private bool _isImagesLoaded;
     private List<MudColor> _pickerColors { get; set; } = new();
 
@@ -219,6 +223,15 @@ else
         var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
 
         if (!userIdentity.Identity.IsAuthenticated)
+        {
+            return;
+        }
+
+        var user = await UserManager.FindByEmailAsync(userIdentity.Identity?.Name);
+
+        _isClient = await UserManager.IsInRoleAsync(user, Role.Client);
+
+        if (!_isClient)
         {
             return;
         }

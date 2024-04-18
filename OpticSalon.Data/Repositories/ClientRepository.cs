@@ -35,6 +35,12 @@ namespace OpticSalon.Data.Repositories
             await Context.SaveChangesAsync();
         }
 
+        public async Task<List<Client>> GetAllClients()
+        {
+            var clientsDb = await Context.Clients.Select(x => Mapper.Map(x)).ToListAsync();
+            return clientsDb;
+        }
+
         public async Task<Client?> GetClientById(int id)
         {
             var clientDb = await Context.Clients.FirstOrDefaultAsync(x => x.Id == id);

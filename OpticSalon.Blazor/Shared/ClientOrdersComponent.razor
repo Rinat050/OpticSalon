@@ -21,14 +21,12 @@
     <HeaderContent>
         <MudTh>Номер заказа</MudTh>
         <MudTh>Дата создания</MudTh>
-        <MudTh>Адрес доставки</MudTh>
         <MudTh>Номер телефона</MudTh>
         <MudTh>Просмотр</MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Номер заказа">@context.Id</MudTd>
         <MudTd DataLabel="Дата создания">@context.CreatedDate</MudTd>
-        <MudTd DataLabel="Адрес доставки">@context.DeliveryAddress</MudTd>
         <MudTd DataLabel="Номер телефона">@context.ContactPhoneNumber</MudTd>
         <MudTd DataLabel="Просмотр"><MudIconButton Icon="@Icons.Material.Filled.ArrowRight" OnClick="@(() => OpenOrderInfo(context.Id))"></MudIconButton></MudTd>
     </RowTemplate>

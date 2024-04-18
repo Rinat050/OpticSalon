@@ -1,11 +1,17 @@
 ﻿@page "/orderShow/{orderId:int}"
+
+@using OpticSalon.Auth.Models
 @using OpticSalon.Blazor.Shared.OrderComponents
 @using OpticSalon.Domain.Enums
 @using OpticSalon.Domain.Extensions
 @using OpticSalon.Domain.Models
+
 @inject IOrderService OrderService
 @inject ISnackbar Snackbar
 @inject IImageLoadingService ImageLoadingService
+@inject NavigationManager NavManager
+
+@attribute [Authorize(Roles = $"{Role.Master},{Role.Admin},{Role.Manager}")]
 
 <PageTitle>Заказ @OrderId</PageTitle>
 
@@ -34,8 +40,7 @@
                 </MudStack>
                 <MudSpacer/>
                 <MudStack Row AlignItems="AlignItems.Center">
-                    @if (_order.Status != OrderStatus.Issued)
-                    {
+                    <AuthorizeView Roles="@Role.Admin">
                         <MudChip Color="MudBlazor.Color.Primary">
                             <MudText Typo="Typo.subtitle1">Статус</MudText>
                         </MudChip>
@@ -44,14 +49,34 @@
                             <MudSelectItem Value="@(OrderStatus.Created)" />
                             <MudSelectItem Value="@(OrderStatus.InWork)" />
                             <MudSelectItem Value="@(OrderStatus.Completed)" />
+                            <MudSelectItem Value="@(OrderStatus.Issued)" />
                         </MudSelect>
-                    }
-                    else
-                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Save" OnClick="@Save" Disabled="@_isSaveBtnDisabled" Style="min-width: 50px;" Color="MudBlazor.Color.Secondary"></MudIconButton>
+                    </AuthorizeView>
+                    <AuthorizeView Roles="@Role.Master">
+                        @if (_order.Status != OrderStatus.Issued)
+                        {
+                            <MudChip Color="MudBlazor.Color.Primary">
+                                <MudText Typo="Typo.subtitle1">Статус</MudText>
+                            </MudChip>
+                            <MudSelect @bind-Value="_order.Status" T="OrderStatus" Variant="Variant.Outlined"
+                                ToStringFunc="@((x) => x.GetDisplayName())">
+                                <MudSelectItem Value="@(OrderStatus.Created)" />
+                                <MudSelectItem Value="@(OrderStatus.InWork)" />
+                                <MudSelectItem Value="@(OrderStatus.Completed)" />
+                            </MudSelect>
+                            <MudIconButton Icon="@Icons.Material.Filled.Save" OnClick="@Save" Disabled="@_isSaveBtnDisabled" Style="min-width: 50px;" Color="MudBlazor.Color.Secondary"></MudIconButton>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Primary">Статус заказа:</MudText>
+                            <MudText Typo="Typo.h6" Style="font-weight: 400">@(_order.Status.GetDisplayName())</MudText>
+                        }
+                    </AuthorizeView>
+                    <AuthorizeView Roles="@Role.Manager">
                         <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Primary">Статус заказа:</MudText>
                         <MudText Typo="Typo.h6" Style="font-weight: 400">@(_order.Status.GetDisplayName())</MudText>
-                    }
-                    <MudIconButton Icon="@Icons.Material.Filled.Save" OnClick="@Save" Disabled="@_isSaveBtnDisabled" Style="min-width: 50px;" Color="MudBlazor.Color.Secondary"></MudIconButton>
+                    </AuthorizeView>
                 </MudStack>    
             </MudGrid>        
         </MudCardHeader>
@@ -82,7 +107,10 @@
                                         <MudItem xs="12">
                                             <MudStack Row AlignItems="AlignItems.Center">
                                                 <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Модель:</MudText>
-                                                <MudText Typo="Typo.h6" Style="font-weight: 400">@(_order.Frame.Model)</MudText>
+                                               <MudLink Typo="Typo.h6" Style="font-weight: 400" Class="m-0" OnClick="@(() => OpenFramePage(_order.Frame.Id))" 
+                                                    Underline="Underline.Always">
+                                                    @_order?.Frame?.Model
+                                                </MudLink>
                                             </MudStack>
                                         </MudItem>
                                         <MudItem xs="12">
@@ -264,5 +292,10 @@
         }
 
         Snackbar.Add(res.Description, Severity.Warning);
+    }
+
+    private void OpenFramePage(int id)
+    {
+        NavManager.NavigateTo($"/frameShow/{id}");
     }
 }

@@ -1,6 +1,9 @@
-﻿@using OpticSalon.Blazor.Data.Credentials
+﻿@using OpticSalon.Auth.Models
+@using OpticSalon.Blazor.Data.Credentials
 @using OpticSalon.Domain.FilterData
 @using OpticSalon.Domain.Models
+
+@inject IClientService ClientService
 
 <MudContainer Class="mt-3">
     <EditForm  Model="@OrderCredentials" OnValidSubmit="@OnValidSubmit">
@@ -13,16 +16,23 @@
                     <MudIcon Icon="@Icons.Material.Filled.CardTravel" Size="Size.Large"
                              text-decoration Color="MudBlazor.Color.Secondary"></MudIcon>
                     <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">
-                        Данные доставки
+                        Прочие данные
                     </MudText>
                 </MudStack>
             </MudCardHeader>
             <MudCardContent>
                 <MudGrid Spacing="2">
+                    @if(!IsClient)
+                    {
+                        <MudItem xs="12">
+                            <MudAutocomplete T="Client" For="@(() => OrderCredentials.Client)" Label="Клиент" Value="@OrderCredentials.Client"
+                                SearchFunc="@SearchFilter" ValueChanged="@OnClientChanged" ToStringFunc="@_clientToStringFunc" Variant="Variant.Outlined" />
+                        </MudItem>
+                    }
                     <MudItem xs="12">
                         <MudTextField T="string" @bind-Value="OrderCredentials.ContactPhoneNumber"
-                                      Label="Номер телефона" Variant="Variant.Outlined" 
-                                      Mask="@(new PatternMask("+0 (000) 000 00-00"))"
+                                    Label="Номер телефона" Variant="Variant.Outlined" 
+                                    Mask="@(new PatternMask("+0 (000) 000 00-00"))"
                                       For="@(() => OrderCredentials.ContactPhoneNumber)"></MudTextField>
                     </MudItem>
                     <MudItem xs="12">
@@ -35,7 +45,7 @@
                                 <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Итоговая стоимость:</MudText>
                                 <MudText Typo="Typo.h6" Style="font-weight: 400">@(GetTotalCost()) руб.</MudText>
                             </MudStack>
-                        </MudItem>
+                    </MudItem>
                 </MudGrid>
             </MudCardContent>
             <MudCardActions>
@@ -46,16 +56,46 @@
 </EditForm>
 </MudContainer>
 
-@code {
+@code 
+{
     [Parameter]
     public OrderCreateCredentials OrderCredentials { get; set; } = new();
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
     [Parameter]
     public Action OnValidSubmit { get; set; }
+    [Parameter]
+    public bool IsClient { get; set; }
+
+    private Func<Client, string> _clientToStringFunc => x => x != null ? $"{x?.Surname} {x?.Name}, {x?.PhoneNumber}" : "";
 
     private decimal GetTotalCost()
     {
         return OrderCredentials.Frame.Cost + OrderCredentials.LensPackage.Cost;
+    }
+
+    private async Task<IEnumerable<Client>> SearchFilter(string value)
+    {
+        var res = await ClientService.GetAllClients();
+
+        if (!res.Success)
+        {
+            return new List<Client>();
+        }
+
+        var clients = res.Data!;
+
+        if (string.IsNullOrEmpty(value))
+            return clients;
+        return clients
+            .Where(x => $"{x.Surname} {x.Name} {x.PhoneNumber}"
+            .Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private void OnClientChanged(Client client)
+    {
+        OrderCredentials.Client = client;
+
+        OrderCredentials.ContactPhoneNumber = client.PhoneNumber;
     }
 }

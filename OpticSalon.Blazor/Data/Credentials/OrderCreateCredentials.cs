@@ -13,6 +13,7 @@ namespace OpticSalon.Blazor.Data.Credentials
         [StringLength(18, MinimumLength = 18, ErrorMessage = "Необходимо 11 символов!")]
         public string ContactPhoneNumber { get; set; } = null!;
         public string? Comment { get; set; }
+        [Required(ErrorMessage = "Поле обязательно для заполнения!")]
         public Client Client { get; set; } = null!;
     }
 }

@@ -1,4 +1,5 @@
 ﻿@page "/createOrder/{frameId:int}/{colorId:int}"
+@using Microsoft.AspNetCore.Identity
 @using OpticSalon.Auth.Models
 @using OpticSalon.Blazor.Data.Consts
 @using OpticSalon.Blazor.Data.Credentials
@@ -6,6 +7,7 @@
 @using OpticSalon.Blazor.Services
 @using OpticSalon.Domain.FilterData
 @using OpticSalon.Domain.Models
+
 @inject IFrameService FrameService
 @inject BrowserService BrowserService
 @inject IFrameColorService FrameColorService
@@ -15,7 +17,9 @@
 @inject IOrderService OrderService
 @inject ISnackbar Snackbar
 @inject NavigationManager NavManager
-@attribute [Authorize(Roles = Role.Client)]
+@inject UserManager<OpticSalonUser> UserManager
+
+@attribute [Authorize(Roles = $"{Role.Client},{Role.Manager}")]
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Оформление заказа</PageTitle>
@@ -54,8 +58,8 @@
             <MudTabPanel Text="Линзы" Icon="@Icons.Material.Outlined.Lens" >
                 <OrderLensComponent Packages="_lensPackages" OrderCredentials="_createCredentials"></OrderLensComponent>
             </MudTabPanel>
-            <MudTabPanel Text="Доставка" Icon="@Icons.Material.Filled.CardTravel" >
-                <OrderDeliveryComponent OrderCredentials="_createCredentials" OnValidSubmit="@(CreateOrder)">
+            <MudTabPanel Text="Прочие данные" Icon="@Icons.Material.Filled.CardTravel" >
+                <OrderDeliveryComponent OrderCredentials="_createCredentials" IsClient="@_isClient" OnValidSubmit="@(CreateOrder)">
                     <MudButton Style="min-width: 100px;" Variant="Variant.Filled" 
                     Color="MudBlazor.Color.Primary" ButtonType="ButtonType.Submit">Оформить заказ</MudButton>
                 </OrderDeliveryComponent>
@@ -80,6 +84,7 @@
     private int _selectedTabIndex = 0;
     private bool _isNotFound;
     private bool _isLoading;
+    private bool _isClient;
     private bool _isButtonsVisible = true;
 
     private OrderCreateCredentials _createCredentials = new();
@@ -150,6 +155,17 @@
 
     protected async override Task OnInitializedAsync()
     {
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+
+        if (userIdentity is null)
+        {
+            return;
+        }
+
+        var user = await UserManager.FindByEmailAsync(userIdentity.Identity?.Name);
+
+        _isClient = await UserManager.IsInRoleAsync(user, Role.Client);
+
         _isLoading = true;
         _createCredentials = new OrderCreateCredentials();
 
@@ -209,6 +225,11 @@
 
     private async Task LoadClientInfo()
     {
+        if (!_isClient)
+        {
+            return;
+        }
+
         var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
 
         if (userIdentity is null)

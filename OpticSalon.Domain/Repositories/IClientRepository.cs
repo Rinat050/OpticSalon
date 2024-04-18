@@ -6,6 +6,7 @@ namespace OpticSalon.Domain.Repositories
     {
         public Task<Client> AddClient(Client client);
         public Task<Client?> GetClientById(int id);
+        public Task<List<Client>> GetAllClients();
         public Task<ClientPreferences?> GetClientPreferences(int clientId);
         public Task AddClientPreferences(ClientPreferences preferences);
         public Task UpdateClient(Client client);

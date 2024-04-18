@@ -1,5 +1,4 @@
 ﻿@page "/masterOrders"
-@attribute [Authorize(Roles = Role.Master)]
 
 @using OpticSalon.Auth.Models
 @using OpticSalon.Domain.Enums
@@ -8,6 +7,8 @@
 
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
 @inject IEmployeeService EmployeeService
+
+@attribute [Authorize(Roles = Role.Master)]
 
 <PageTitle>Заказы</PageTitle>
 

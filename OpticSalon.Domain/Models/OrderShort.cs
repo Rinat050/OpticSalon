@@ -4,7 +4,6 @@
     {
         public int Id { get; set; }
         public string CreatedDate { get; set; } = null!;
-        public string DeliveryAddress { get; set; } = null!;
         public string ContactPhoneNumber { get; set; } = null!;
     }
 }
