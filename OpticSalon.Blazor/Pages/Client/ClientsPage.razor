@@ -1,0 +1,125 @@
+﻿@page "/clients"
+@using Microsoft.AspNetCore.Identity
+@using OpticSalon.Auth.Models
+@using OpticSalon.Blazor.Shared.Dialogs
+@using OpticSalon.Domain.Models
+@using Color = MudBlazor.Color
+
+@inject IClientService ClientService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+@attribute [Authorize(Roles = $"{Role.Admin}, {Role.Manager}")]
+
+<PageTitle>Клиенты</PageTitle>
+
+@if (_isLoading)
+{
+    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
+    return;
+}
+
+@if (_clients.Count == 0)
+{
+    <MudAlert Class="m-2" Severity="Severity.Normal">Не найдено...</MudAlert>
+    return;
+}
+
+<MudTable T="OpticSalon.Domain.Models.Client" Items="_clients" Filter="new Func<OpticSalon.Domain.Models.Client,bool>(Filter)">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Клиенты</MudText>
+        <MudSpacer />        
+        <MudTextField @bind-Value="_searchStr" Placeholder="Поиск" 
+            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" 
+            IconSize="Size.Medium" Class="m-2"></MudTextField>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@OpenCreateClientDialog">Новый клиент</MudButton>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh><MudTableSortLabel SortBy="new Func<OpticSalon.Domain.Models.Client, object>(x=>x.Surname)">Фамилия</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<OpticSalon.Domain.Models.Client, object>(x=>x.Name)">Имя</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<OpticSalon.Domain.Models.Client, object>(x=>x.PhoneNumber)">Номер телефона</MudTableSortLabel></MudTh>
+        <MudTh>Редактирование</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Фамилия">@context.Surname</MudTd>
+        <MudTd DataLabel="Имя">@context.Name</MudTd>
+        <MudTd DataLabel="Номер телефона">@context.PhoneNumber</MudTd>
+        <MudTd DataLabel="Редактирование">
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Medium"
+                        OnClick="@(async () => await OpenEditClientDialog(context))"></MudIconButton>
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private bool _isLoading;
+    private string _searchStr = "";
+    private List<OpticSalon.Domain.Models.Client> _clients = new();
+
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+        var res = await ClientService.GetAllClients();
+
+        if (res.Success)
+        {
+            _clients = res.Data!;
+        }
+
+        _isLoading = false;
+    }
+
+    private async Task OpenCreateClientDialog()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("IsNew", true);
+
+        var dialog = await DialogService.ShowAsync<EditClientDialog>("Добавление клиента", parameters);
+
+        var res = await dialog.Result;
+
+        if (!res.Canceled)
+        {
+            await LoadData();
+        }
+    }
+
+    private async Task OpenEditClientDialog(Client client)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("Client", client);
+
+        var dialog = await DialogService.ShowAsync<EditClientDialog>("Изменение данных клиента", parameters);
+
+        var res = await dialog.Result;
+
+        if (!res.Canceled)
+        {
+            await LoadData();
+        }
+    }
+
+    private bool Filter(OpticSalon.Domain.Models.Client client) => FilterFunc(client, _searchStr);
+
+    private bool FilterFunc(OpticSalon.Domain.Models.Client client, string searchStr)
+    {
+        if (string.IsNullOrWhiteSpace(searchStr))
+            return true;
+        if (client.Name.Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (client.Surname.Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (client.Address.Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (client.PhoneNumber.ToString().Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{client.Surname} {client.Name}".Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+}
