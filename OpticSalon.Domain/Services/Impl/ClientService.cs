@@ -125,6 +125,34 @@ namespace OpticSalon.Domain.Services.Impl
             }
         }
 
+        public async Task<ResultWithData<Client>> CreateClient(string name, string surname, 
+                                                        string phoneNumber, string address)
+        {
+            try
+            {
+                var newClient = new Client()
+                {
+                    Name = name,
+                    Surname = surname,
+                    PhoneNumber = phoneNumber,
+                    Address = address
+                };
+
+                var createdClient = await _clientRepository.AddClient(newClient);
+
+                return new ResultWithData<Client>()
+                {
+                    Success = true,
+                    Description = ClientServiceMessages.SuccessCreated,
+                    Data = createdClient
+                };
+            }
+            catch
+            {
+                return new ResultWithData<Client>() { Success = false, Description = DefaultErrors.ServerError };
+            }
+        }
+
         public async Task<BaseResult> UpdateClientPreferences(ClientPreferences preferences)
         {
             try

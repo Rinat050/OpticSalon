@@ -1,9 +1,11 @@
 ﻿@using OpticSalon.Auth.Models
 @using OpticSalon.Blazor.Data.Credentials
+@using OpticSalon.Blazor.Shared.Dialogs
 @using OpticSalon.Domain.FilterData
 @using OpticSalon.Domain.Models
 
 @inject IClientService ClientService
+@inject IDialogService DialogService
 
 <MudContainer Class="mt-3">
     <EditForm  Model="@OrderCredentials" OnValidSubmit="@OnValidSubmit">
@@ -25,8 +27,11 @@
                     @if(!IsClient)
                     {
                         <MudItem xs="12">
-                            <MudAutocomplete T="Client" For="@(() => OrderCredentials.Client)" Label="Клиент" Value="@OrderCredentials.Client"
-                                SearchFunc="@SearchFilter" ValueChanged="@OnClientChanged" ToStringFunc="@_clientToStringFunc" Variant="Variant.Outlined" />
+                            <MudStack Row>
+                                <MudAutocomplete T="Client" For="@(() => OrderCredentials.Client)" Label="Клиент" Value="@OrderCredentials.Client"
+                                    SearchFunc="@SearchFilter" ValueChanged="@OnClientChanged" ToStringFunc="@_clientToStringFunc" Variant="Variant.Outlined" />
+                                <MudFab OnClick="@ShowCreateClientDialog" Color="MudBlazor.Color.Primary" StartIcon="@Icons.Material.Filled.Add" ></MudFab>
+                            </MudStack>
                         </MudItem>
                     }
                     <MudItem xs="12">
@@ -97,5 +102,13 @@
         OrderCredentials.Client = client;
 
         OrderCredentials.ContactPhoneNumber = client.PhoneNumber;
+    }
+
+    private async Task ShowCreateClientDialog()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("IsNew", true);
+
+        var dialog = await DialogService.ShowAsync<EditClientDialog>("Добавление клиента", parameters);
     }
 }

@@ -1,0 +1,87 @@
+﻿@using OpticSalon.Blazor.Data.Credentials
+@using OpticSalon.Domain.Models
+@using OpticSalon.Domain.ResultModels
+
+@inject IClientService ClientService
+@inject ISnackbar Snackbar
+
+<EditForm Model="Client" OnValidSubmit="@Save">
+    <DataAnnotationsValidator />
+    <MudDialog Class="p-2">
+        <DialogContent>
+            <MudGrid Spacing="1">
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Client.Surname" For="@(() => Client.Surname)"
+                                    Variant="Variant.Outlined" Label="Фамилия"></MudTextField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Client.Name" For="@(() => Client.Name)"
+                                    Variant="Variant.Outlined" Label="Имя"></MudTextField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Client.PhoneNumber" For="@(() => Client.PhoneNumber)"
+                                    Variant="Variant.Outlined" InputType="InputType.Telephone" Label="Телефон"
+                                    Mask="@(new PatternMask("+0 (000) 000 00-00"))"></MudTextField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Client.Address" For="@(() => Client.Address)"
+                                    Variant="Variant.Outlined" Label="Адрес"></MudTextField>
+                </MudItem>
+            </MudGrid>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="@Close">Отмена</MudButton>
+            <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Primary" 
+                    ButtonType="ButtonType.Submit">Сохранить</MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public Client Client { get; set; }
+    [Parameter] public bool IsNew { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitializedAsync();
+
+        if (IsNew)
+        {
+            Client = new Client();
+            return;
+        }
+
+        if (Client is null)
+        {
+            Client = new Client();
+        }
+    }
+
+    private void Close() => MudDialog.Close();
+
+    private async Task Save()
+    {
+        BaseResult result;
+
+        if (IsNew)
+        {
+            result = await ClientService.CreateClient(Client.Name, Client.Surname, 
+                                                Client.PhoneNumber, Client.Address);
+        }
+        else
+        {
+            result = await ClientService.UpdateClient(Client);
+        }
+
+        if (result.Success)
+        {
+            Snackbar.Add(result.Description, Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            Snackbar.Add(result.Description, Severity.Error);
+        }
+    }
+}
