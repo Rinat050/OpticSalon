@@ -1,0 +1,81 @@
+﻿@using OpticSalon.Blazor.Data.Credentials
+@using OpticSalon.Domain.Models
+@using OpticSalon.Domain.ResultModels
+
+@inject ILensPackageService LensPackageService
+@inject ISnackbar Snackbar
+
+<EditForm Model="LensPackage" OnValidSubmit="@Save">
+    <DataAnnotationsValidator />
+    <MudDialog Class="p-2">
+        <DialogContent>
+            <MudGrid Spacing="1">
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="LensPackage.Name" For="@(() => LensPackage.Name)"
+                                    Variant="Variant.Outlined" Label="Название"></MudTextField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="LensPackage.Description" For="@(() => LensPackage.Description)"
+                                    Variant="Variant.Outlined" Lines="9" Label="Описание"></MudTextField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudNumericField @bind-Value="LensPackage.Cost" For="@(() => LensPackage.Cost)"
+                                    Variant="Variant.Outlined" Label="Стоимость"></MudNumericField>
+                </MudItem>
+            </MudGrid>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="@Close">Отмена</MudButton>
+            <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Primary" 
+                    ButtonType="ButtonType.Submit">Сохранить</MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public LensPackage LensPackage { get; set; }
+    [Parameter] public bool IsNew { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitializedAsync();
+
+        if (IsNew)
+        {
+            LensPackage = new LensPackage();
+            return;
+        }
+
+        if (LensPackage is null)
+        {
+            LensPackage = new LensPackage();
+        }
+    }
+
+    private void Close() => MudDialog.Close();
+
+    private async Task Save()
+    {
+        BaseResult result;
+
+        if (IsNew)
+        {
+            result = await LensPackageService.CreateLensPackage(LensPackage);
+        }
+        else
+        {
+            result = await LensPackageService.UpdateLensPackage(LensPackage);
+        }
+
+        if (result.Success)
+        {
+            Snackbar.Add(result.Description, Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            Snackbar.Add(result.Description, Severity.Warning);
+        }
+    }
+}

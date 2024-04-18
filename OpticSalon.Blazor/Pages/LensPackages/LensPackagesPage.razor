@@ -1,0 +1,149 @@
+﻿@page "/lensPackages"
+@using Microsoft.AspNetCore.Identity
+@using OpticSalon.Auth.Models
+@using OpticSalon.Blazor.Shared.Dialogs
+@using OpticSalon.Domain.Models
+@using Color = MudBlazor.Color
+
+@inject ILensPackageService LensPackageService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+@attribute [Authorize(Roles = Role.Admin)]
+
+<PageTitle>Пакеты линз</PageTitle>
+
+@if (_isLoading)
+{
+    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
+    return;
+}
+
+@if (_lensPackages.Count == 0)
+{
+    <MudAlert Class="m-2" Severity="Severity.Normal">Не найдено...</MudAlert>
+    return;
+}
+
+<MudTable T="OpticSalon.Domain.Models.LensPackage" Items="_lensPackages" Filter="new Func<OpticSalon.Domain.Models.LensPackage,bool>(Filter)">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Пакеты линз</MudText>
+        <MudSpacer />        
+        <MudTextField @bind-Value="_searchStr" Placeholder="Поиск" 
+            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" 
+            IconSize="Size.Medium" Class="m-2"></MudTextField>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@OpenCreateLensDialog">Новый пакет</MudButton>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh><MudTableSortLabel SortBy="new Func<OpticSalon.Domain.Models.LensPackage, object>(x=>x.Name)">Название</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<OpticSalon.Domain.Models.LensPackage, object>(x=>x.Cost)">Стоимость</MudTableSortLabel></MudTh>
+        <MudTh>Редактирование</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Фамилия">@context.Name</MudTd>
+        <MudTd DataLabel="Имя">@context.Cost руб.</MudTd>
+        <MudTd DataLabel="Редактирование">
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Medium"
+                        OnClick="@(async () => await OpenEditLensDialog(context))"></MudIconButton>
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Medium" 
+                        OnClick="@(async () => await Delete(context))"></MudIconButton>
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private bool _isLoading;
+    private string _searchStr = "";
+    private List<OpticSalon.Domain.Models.LensPackage> _lensPackages = new();
+
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+        var res = await LensPackageService.GetAllLensPackages();
+
+        if (res.Success)
+        {
+            _lensPackages = res.Data!;
+        }
+
+        _isLoading = false;
+    }
+
+    private async Task OpenCreateLensDialog()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("IsNew", true);
+
+        var dialog = await DialogService.ShowAsync<EditLensPackageDialog>("Добавление пакета линз", parameters);
+
+        var res = await dialog.Result;
+
+        if (!res.Canceled)
+        {
+            await LoadData();
+        }
+    }
+
+    private async Task OpenEditLensDialog(LensPackage lens)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("LensPackage", lens);
+
+        var dialog = await DialogService.ShowAsync<EditLensPackageDialog>("Изменение пакета линз", parameters);
+
+        var res = await dialog.Result;
+
+        if (!res.Canceled)
+        {
+            await LoadData();
+        }
+    }
+
+    private bool Filter(OpticSalon.Domain.Models.LensPackage lensPackage) => FilterFunc(lensPackage, _searchStr);
+
+    private bool FilterFunc(OpticSalon.Domain.Models.LensPackage lensPackage, string searchStr)
+    {
+        if (string.IsNullOrWhiteSpace(searchStr))
+            return true;
+        if (lensPackage.Name.Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (lensPackage.Description.Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (lensPackage.Cost.ToString().Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private async Task Delete(LensPackage lensPackage)
+    {
+        var parameters = new DialogParameters
+        {
+            { "Question", "Вы точно хотите удалить данный пакет линз?" }
+        };
+
+        var dialog = await DialogService.ShowAsync<QuestionDialog>("Удаление", parameters);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+        {
+            return;
+        }
+
+        lensPackage.IsDeleted = true;
+
+        var res = await LensPackageService.UpdateLensPackage(lensPackage);
+
+        if (!res.Success)
+        {
+            Snackbar.Add(res.Description, Severity.Warning);
+            return;
+        }
+
+        await LoadData();
+    }
+}
