@@ -25,13 +25,15 @@ namespace OpticSalon.Data.Repositories
         }
 
         public async Task<List<FrameShort>> GetFrames(int? typeId, int? materialId, int? colorId, 
-                                            int? genderId, int? brandId, ClientPreferences? clientPreferences)
+                                            int? genderId, int? brandId, ClientPreferences? clientPreferences,
+                                            decimal minCost, decimal maxCost)
         {
             Predicate<FrameDb> _type = x => true;
             Predicate<FrameDb> _material = x => true;
             Predicate<FrameDb> _color = x => true;
             Predicate<FrameDb> _gender = x => true;
             Predicate<FrameDb> _brand = x => true;
+            Predicate<FrameDb> _cost = x => x.Cost >= minCost && x.Cost <= maxCost;
             Predicate<FrameDb> _preferences = x => true;
 
             if (typeId != null)
@@ -64,11 +66,23 @@ namespace OpticSalon.Data.Repositories
                                         .ToListAsync();
 
             var frames = res.Where(x => _type(x) && _color(x) && _brand(x) &&
-                                _gender(x) && _material(x) && _preferences(x))
+                                _gender(x) && _material(x) && _preferences(x) && _cost(x))
                             .Select(x => Mapper.MapFrameShort(x))
                             .ToList();
 
             return frames;
+        }
+
+        public decimal GetMaxFrameCost()
+        {
+            var res =  Context.Frames.Max(x => x.Cost);
+            return res;
+        }
+
+        public decimal GetMinFrameCost()
+        {
+            var res = Context.Frames.Min(x => x.Cost);
+            return res;
         }
     }
 }

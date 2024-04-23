@@ -9,6 +9,8 @@ namespace OpticSalon.Blazor.Data.Credentials
         public Brand Brand { get; set; } = null!;
         public Gender Gender { get; set; } = null!;
         public Color Color { get; set; } = null!;
+        public decimal MinCost { get; set; }
+        public decimal MaxCost { get; set; }
         public bool IsClientPrefencesSelected { get; set; }
     }
 }

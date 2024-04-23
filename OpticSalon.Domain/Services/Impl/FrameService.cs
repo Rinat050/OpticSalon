@@ -20,7 +20,8 @@ namespace OpticSalon.Domain.Services.Impl
             try
             {
                 var result = await _frameRepository.GetFrames(null, null,
-                                                null, null, null, null);
+                                                null, null, null, null,
+                                                0, int.MaxValue);
 
                 return new ResultWithData<List<FrameShort>>()
                 {
@@ -39,12 +40,13 @@ namespace OpticSalon.Domain.Services.Impl
         }
 
         public async Task<ResultWithData<List<FrameShort>>> GetAllFrames(int? typeId, int? materialId, 
-                                int? colorId, int? genderId, int? brandId, ClientPreferences? clientPreferences)
+                                int? colorId, int? genderId, int? brandId, ClientPreferences? clientPreferences,
+                                decimal minCost, decimal maxCost)
         {
             try
             {
                 var result = await _frameRepository.GetFrames(typeId, materialId,
-                                                colorId, genderId, brandId, clientPreferences);
+                                                colorId, genderId, brandId, clientPreferences, minCost, maxCost);
 
                 return new ResultWithData<List<FrameShort>>()
                 {
@@ -90,6 +92,30 @@ namespace OpticSalon.Domain.Services.Impl
                     Success = false,
                     Description = DefaultErrors.ServerError
                 };
+            }
+        }
+
+        public decimal GetMaxFrameCost()
+        {
+            try
+            {
+                return _frameRepository.GetMaxFrameCost();
+            }
+            catch
+            {
+                return int.MaxValue;
+            }
+        }
+
+        public decimal GetMinFrameCost()
+        {
+            try
+            {
+                return _frameRepository.GetMinFrameCost();
+            }
+            catch
+            {
+                return 0;
             }
         }
     }

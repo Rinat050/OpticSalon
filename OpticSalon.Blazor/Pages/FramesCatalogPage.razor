@@ -81,6 +81,16 @@ else
     <MudDrawerContainer>
         <MudGrid Class="p-3" Spacing="1">
             <MudItem xs="12">
+                <MudText Typo="Typo.button">Стоимость</MudText>
+            </MudItem>
+            <MudItem xs="12">
+                <MudStack Row AlignItems="AlignItems.Center">
+                    <MudNumericField T="decimal" @bind-Value="_filter.MinCost" Variant="Variant.Outlined" Label="От" Min="0" Max="@int.MaxValue"></MudNumericField>
+                    <MudText Typo="Typo.h5" Align="Align.Center">-</MudText>
+                    <MudNumericField T="decimal" @bind-Value="_filter.MaxCost" Variant="Variant.Outlined" Label="До" Min="0" Max="@int.MaxValue"></MudNumericField>
+                </MudStack>
+            </MudItem>
+            <MudItem xs="12">
                 <MudSelect T="FrameMaterial" @bind-Value="_filter.Material" Clearable Variant="Variant.Outlined"
                            Label="Материал оправы" ToStringFunc="@((x) => x?.Name)">
                     @foreach (var material in _frameMaterials)
@@ -161,12 +171,15 @@ else
 
     protected async override Task OnInitializedAsync()
     {
-        await FillFramesData();
         await FillFilterData();
+        await FillFramesData();
     }
 
     private async Task FillFilterData()
     {
+        _filter.MinCost = FrameService.GetMinFrameCost();
+        _filter.MaxCost = FrameService.GetMaxFrameCost();
+
         var frameTypeResult = await FrameTypeService.GetAllFrameTypes();
 
         if (frameTypeResult.Success)
@@ -206,7 +219,7 @@ else
         _isImagesLoaded = false;
         var res = await FrameService.GetAllFrames(_filter.Type?.Id, _filter.Material?.Id,
                                 _filter.Color?.Id, _filter.Gender?.Id, _filter.Brand?.Id,
-                                _filter.IsClientPrefencesSelected ? _currentClientPreferences : null);
+                                _filter.IsClientPrefencesSelected ? _currentClientPreferences : null, _filter.MinCost, _filter.MaxCost);
 
         if (res.Success)
         {
@@ -270,9 +283,12 @@ else
         return $"https://localhost:7087/getImage?name={name}";
     }
 
-    private void ClearFilter()
+    private async Task ClearFilter()
     {
         _filter = new FramesFilterCredentials();
+        _filter.MinCost = FrameService.GetMinFrameCost();
+        _filter.MaxCost = FrameService.GetMaxFrameCost();
+        await FillFramesData();
     }
 
     private void ShowFrame(int frameId)
