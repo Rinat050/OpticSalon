@@ -3,12 +3,14 @@
 @using Microsoft.AspNetCore.Identity
 @using MudBlazor.Utilities
 @using OpticSalon.Auth.Models
+@using OpticSalon.Blazor.Data.Consts
 @using OpticSalon.Blazor.Data.Credentials
 @using OpticSalon.Blazor.Services
 @using OpticSalon.Domain.Models
 
 @inject UserManager<OpticSalonUser> UserManager
 @inject IFrameService FrameService
+@inject BrowserService BrowserService
 @inject IFrameTypeService FrameTypeService
 @inject IFrameMaterialService FrameMaterialService
 @inject IFrameColorService FrameColorService
@@ -28,6 +30,17 @@
             <MudText Typo="Typo.h4" Color="MudBlazor.Color.Secondary">Каталог</MudText>
         </MudStack>
         <MudSpacer />
+        @if(_isSearchBarVisible)
+        {
+            <MudTextField ValueChanged="@((text) => SearchTextChanged(text))" T="string" Placeholder="Поиск" 
+            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" 
+            IconSize="Size.Medium"></MudTextField>
+        }
+        else
+        {
+            <MudIconButton Icon="@Icons.Material.Filled.Search" Color="MudBlazor.Color.Primary" Size="Size.Medium"
+                        OnClick="@ChangeSearchDrawer"></MudIconButton>
+        }
         <MudButton Disabled="_isLoading" Style="min-width: 100px;" OnClick="ChangeDrawer"
                    Variant="Variant.Filled" Color="MudBlazor.Color.Primary">Фильтр</MudButton>
     </MudStack>
@@ -66,6 +79,18 @@ else
             </MudItem>
         }
     </MudGrid>
+}
+
+@if(!_isSearchBarVisible)
+{
+    <MudDrawer @bind-Open="@_isSerachDrawerOpen" Anchor="Anchor.Top" Style="overflow-x: hidden;" 
+        Variant="@DrawerVariant.Temporary">
+        <MudDrawerHeader>
+            <MudTextField ValueChanged="@((text) => SearchTextChanged(text))" T="string" Placeholder="Поиск" 
+                Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" 
+                IconSize="Size.Medium"></MudTextField>            
+        </MudDrawerHeader>
+    </MudDrawer>
 }
 
 <MudDrawer Width="350px" @bind-Open="@_isDrawerOpen" Height="100%"
@@ -154,6 +179,7 @@ else
 </MudDrawer>
 
 @code {
+    private List<FrameShort> _allFrames = new();
     private List<FrameShort> _frames = new();
     private List<FrameMaterial> _frameMaterials = new();
     private List<FrameType> _frameTypes = new();
@@ -162,9 +188,12 @@ else
     private List<Gender> _genders = new();
     private FramesFilterCredentials _filter = new();
     private ClientPreferences _currentClientPreferences = null!;
+    private string _searchStr = "";
 
     private bool _isDrawerOpen;
     private bool _isLoading;
+    private bool _isSerachDrawerOpen;
+    private bool _isSearchBarVisible;
     private bool _isClient;
     private bool _isImagesLoaded;
     private List<MudColor> _pickerColors { get; set; } = new();
@@ -173,6 +202,7 @@ else
     {
         await FillFilterData();
         await FillFramesData();
+        await SetSearchBar();
     }
 
     private async Task FillFilterData()
@@ -213,6 +243,21 @@ else
         await InvokeAsync(StateHasChanged);
     }
 
+    private async Task SetSearchBar()
+    {
+        var dimensions = await BrowserService.GetDimensions();
+
+        if (dimensions.Width < DeviceConsts.MobileDeviceWidth)
+        {
+            _isSearchBarVisible = false;
+            return;
+        }
+
+        _isSearchBarVisible = true;
+
+        await InvokeAsync(StateHasChanged);
+    }
+
     private async Task FillFramesData()
     {
         _isLoading = true;
@@ -223,12 +268,34 @@ else
 
         if (res.Success)
         {
-            _frames = res.Data!;
+            _allFrames = res.Data!;
+            Search();
         }
 
         _isLoading = false;
 
         await InvokeAsync(StateHasChanged);
+    }
+
+    private void SearchTextChanged(string text)
+    {
+        _searchStr = text.ToLower();
+
+        Search();
+    }
+
+    private void Search()
+    {
+        if (string.IsNullOrWhiteSpace(_searchStr))
+        {
+            _frames = _allFrames;
+            return;
+        }
+
+        _frames = _allFrames
+                .Where(x => x.Brand.Name.ToString().ToLower().Contains(_searchStr)
+                || x.Model.ToLower().Contains(_searchStr) 
+                || $"{x.Brand.Name} {x.Model}".ToLower().Contains(_searchStr)).ToList();
     }
 
     private async Task LoadClientPreferences()
@@ -267,6 +334,11 @@ else
     private void ChangeDrawer()
     {
         _isDrawerOpen = !_isDrawerOpen;
+    }
+
+    private void ChangeSearchDrawer()
+    {
+        _isSerachDrawerOpen = !_isSerachDrawerOpen;
     }
 
     private void ColorChanged(MudColor mudColor)
