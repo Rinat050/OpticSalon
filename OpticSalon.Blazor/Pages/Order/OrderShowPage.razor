@@ -13,7 +13,7 @@
 @inject NavigationManager NavManager
 @inject IDialogService DialogService
 
-@attribute [Authorize(Roles = $"{Role.Master},{Role.Admin},{Role.Manager}")]
+@attribute [Authorize(Roles = $"{Role.Client},{Role.Master},{Role.Admin},{Role.Manager}")]
 
 <PageTitle>Заказ @OrderId</PageTitle>
 

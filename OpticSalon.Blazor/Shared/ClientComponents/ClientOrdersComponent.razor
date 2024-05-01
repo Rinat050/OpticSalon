@@ -1,9 +1,10 @@
 ﻿@using OpticSalon.Blazor.Shared.Dialogs
+@using OpticSalon.Domain.Enums
+@using OpticSalon.Domain.Extensions
 @using OpticSalon.Domain.Models
 
 @inject NavigationManager NavManager
 @inject IOrderService OrderService
-@inject IDialogService DialogService
 
 @if (_isLoading)
 {
@@ -22,12 +23,14 @@
         <MudTh>Номер заказа</MudTh>
         <MudTh>Дата создания</MudTh>
         <MudTh>Номер телефона</MudTh>
+        <MudTh>Статус</MudTh>
         <MudTh>Просмотр</MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Номер заказа">@context.Id</MudTd>
         <MudTd DataLabel="Дата создания">@context.CreatedDate</MudTd>
         <MudTd DataLabel="Номер телефона">@context.ContactPhoneNumber</MudTd>
+        <MudTd DataLabel="Статус"><MudChip Color="@_statusColors[context.Status]">@context.Status.GetDisplayName()</MudChip></MudTd>
         <MudTd DataLabel="Просмотр"><MudIconButton Icon="@Icons.Material.Filled.ArrowRight" OnClick="@(() => OpenOrderInfo(context.Id))"></MudIconButton></MudTd>
     </RowTemplate>
 </MudTable>
@@ -38,20 +41,16 @@
     public List<OrderShortForClient> Orders { get; set; } = new();
     private bool _isLoading;
 
+    private Dictionary<OrderStatus, MudBlazor.Color> _statusColors = new Dictionary<OrderStatus, MudBlazor.Color>()
+    {
+        {OrderStatus.Created , MudBlazor.Color.Surface},
+        {OrderStatus.InWork , MudBlazor.Color.Warning},
+        {OrderStatus.Completed , MudBlazor.Color.Info},
+        {OrderStatus.Issued , MudBlazor.Color.Success}
+    };
+
     private async Task OpenOrderInfo(int order)
     {
-        _isLoading = true;
-        var orderRes = await OrderService.GetOrderById(order);
-        _isLoading = false;
-
-        if (!orderRes.Success) return;
-
-        DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true };
-        var parameters = new DialogParameters();
-        parameters.Add("Order", orderRes.Data!);
-
-        var dialog = await DialogService.ShowAsync<OrderShowDialog>($"Заказ №{order}" , parameters, options: maxWidth);
-
-        var res = await dialog.Result;
+        NavManager.NavigateTo($"/orderShow/{order}");
     }
 }
