@@ -11,7 +11,7 @@ namespace OpticSalon.Domain.Models
         public string ContactPhoneNumber { get; set; } = null!;
         public string? Comment { get; set; }
         public DateTime CreatedDate { get; set; }
-        public DateTime? IsssueDate { get; set; }
+        public DateTime? IssueDate { get; set; }
         public Client Client { get; set; } = null!;
         public Color FrameColor { get; set; } = null!;
         public Employee Master { get; set; } = null!;

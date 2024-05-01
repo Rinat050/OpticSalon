@@ -40,6 +40,6 @@ namespace OpticSalon.Data.Mappers.EntityMapping
         [MapperIgnoreTarget(nameof(OrderDb.LensPackage))]
         [MapperIgnoreTarget(nameof(OrderDb.Master))]
         public partial OrderDb Map(Order order);
-        public partial OrderShort MapOrderShort(OrderDb orderDb);
+        public partial OrderShortForClient MapOrderShort(OrderDb orderDb);
     }
 }

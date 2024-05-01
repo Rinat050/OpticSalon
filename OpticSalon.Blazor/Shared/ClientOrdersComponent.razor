@@ -17,7 +17,7 @@
     return;
 }
 
-<MudTable  T="OrderShort" Items="@Orders">
+<MudTable  T="OrderShortForClient" Items="@Orders">
     <HeaderContent>
         <MudTh>Номер заказа</MudTh>
         <MudTh>Дата создания</MudTh>
@@ -35,7 +35,7 @@
 
 @code {
     [Parameter]
-    public List<OrderShort> Orders { get; set; } = new();
+    public List<OrderShortForClient> Orders { get; set; } = new();
     private bool _isLoading;
 
     private async Task OpenOrderInfo(int order)

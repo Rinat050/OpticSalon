@@ -1,6 +1,6 @@
 ﻿namespace OpticSalon.Domain.Models
 {
-    public class OrderShort
+    public class OrderShortForClient
     {
         public int Id { get; set; }
         public string CreatedDate { get; set; } = null!;

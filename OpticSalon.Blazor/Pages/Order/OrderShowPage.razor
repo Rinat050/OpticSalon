@@ -1,6 +1,7 @@
 ﻿@page "/orderShow/{orderId:int}"
 
 @using OpticSalon.Auth.Models
+@using OpticSalon.Blazor.Shared.Dialogs
 @using OpticSalon.Blazor.Shared.OrderComponents
 @using OpticSalon.Domain.Enums
 @using OpticSalon.Domain.Extensions
@@ -10,6 +11,7 @@
 @inject ISnackbar Snackbar
 @inject IImageLoadingService ImageLoadingService
 @inject NavigationManager NavManager
+@inject IDialogService DialogService
 
 @attribute [Authorize(Roles = $"{Role.Master},{Role.Admin},{Role.Manager}")]
 
@@ -41,41 +43,78 @@
                 <MudSpacer/>
                 <MudStack Row AlignItems="AlignItems.Center">
                     <AuthorizeView Roles="@Role.Admin">
-                        <MudChip Color="MudBlazor.Color.Primary">
-                            <MudText Typo="Typo.subtitle1">Статус</MudText>
-                        </MudChip>
-                        <MudSelect @bind-Value="_order.Status" T="OrderStatus" Variant="Variant.Outlined"
-                            ToStringFunc="@((x) => x.GetDisplayName())">
-                            <MudSelectItem Value="@(OrderStatus.Created)" />
-                            <MudSelectItem Value="@(OrderStatus.InWork)" />
-                            <MudSelectItem Value="@(OrderStatus.Completed)" />
-                            <MudSelectItem Value="@(OrderStatus.Issued)" />
+                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Статус заказа:</MudText>
+                        <MudSelect @bind-Value="_order.Status" T="OrderStatus" Variant="Variant.Outlined">
+                            <MudSelectItem Value="@(OrderStatus.Created)">
+                                <MudChip Class="m-0" Size="Size.Small" Color="@_statusColors[OrderStatus.Created]">
+                                    <MudText Typo="Typo.subtitle1">@OrderStatus.Created.GetDisplayName()</MudText>
+                                </MudChip>
+                            </MudSelectItem>
+                            <MudSelectItem Value="@(OrderStatus.InWork)">
+                                <MudChip Class="m-0" Size="Size.Small" Color="@_statusColors[OrderStatus.InWork]">
+                                    <MudText Typo="Typo.subtitle1">@OrderStatus.InWork.GetDisplayName()</MudText>
+                                </MudChip>
+                            </MudSelectItem>
+                            <MudSelectItem Value="@(OrderStatus.Completed)">
+                                <MudChip Size="Size.Small" Class="m-0" Color="@_statusColors[OrderStatus.Completed]">
+                                    <MudText Typo="Typo.subtitle1">@OrderStatus.Completed.GetDisplayName()</MudText>
+                                </MudChip>
+                            </MudSelectItem>
+                            <MudSelectItem Value="@(OrderStatus.Issued)">
+                                <MudChip Class="m-0" Size="Size.Small" Color="@_statusColors[OrderStatus.Issued]">
+                                    <MudText Typo="Typo.subtitle1">@OrderStatus.Issued.GetDisplayName()</MudText>
+                                </MudChip>
+                            </MudSelectItem>
                         </MudSelect>
                         <MudIconButton Icon="@Icons.Material.Filled.Save" OnClick="@Save" Disabled="@_isSaveBtnDisabled" Style="min-width: 50px;" Color="MudBlazor.Color.Secondary"></MudIconButton>
                     </AuthorizeView>
                     <AuthorizeView Roles="@Role.Master">
-                        @if (_order.Status != OrderStatus.Issued)
+                        @if (_order.Status != OrderStatus.Issued && _order.Status != OrderStatus.Completed)
                         {
-                            <MudChip Color="MudBlazor.Color.Primary">
-                                <MudText Typo="Typo.subtitle1">Статус</MudText>
-                            </MudChip>
+                            <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Статус заказа:</MudText>
                             <MudSelect @bind-Value="_order.Status" T="OrderStatus" Variant="Variant.Outlined"
                                 ToStringFunc="@((x) => x.GetDisplayName())">
-                                <MudSelectItem Value="@(OrderStatus.Created)" />
-                                <MudSelectItem Value="@(OrderStatus.InWork)" />
-                                <MudSelectItem Value="@(OrderStatus.Completed)" />
+                                <MudSelectItem Value="@(OrderStatus.Created)">
+                                    <MudChip Size="Size.Small" Color="@_statusColors[OrderStatus.Created]">
+                                        <MudText Typo="Typo.subtitle1">@OrderStatus.Created.GetDisplayName()</MudText>
+                                    </MudChip>
+                                </MudSelectItem>
+                                <MudSelectItem Value="@(OrderStatus.InWork)">
+                                    <MudChip Size="Size.Small" Color="@_statusColors[OrderStatus.InWork]">
+                                        <MudText Typo="Typo.subtitle1">@OrderStatus.InWork.GetDisplayName()</MudText>
+                                    </MudChip>
+                                </MudSelectItem>
+                                <MudSelectItem Value="@(OrderStatus.Completed)">
+                                    <MudChip Size="Size.Small" Color="@_statusColors[OrderStatus.Completed]">
+                                        <MudText Typo="Typo.subtitle1">@OrderStatus.Completed.GetDisplayName()</MudText>
+                                    </MudChip>
+                                </MudSelectItem>
                             </MudSelect>
                             <MudIconButton Icon="@Icons.Material.Filled.Save" OnClick="@Save" Disabled="@_isSaveBtnDisabled" Style="min-width: 50px;" Color="MudBlazor.Color.Secondary"></MudIconButton>
                         }
                         else
                         {
                             <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Primary">Статус заказа:</MudText>
-                            <MudText Typo="Typo.h6" Style="font-weight: 400">@(_order.Status.GetDisplayName())</MudText>
+                            <MudChip Color="@_statusColors[_order.Status]">
+                                <MudText Typo="Typo.subtitle1">@_order.Status.GetDisplayName()</MudText>
+                            </MudChip>
                         }
                     </AuthorizeView>
                     <AuthorizeView Roles="@Role.Manager">
+                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Статус заказа:</MudText>
+                        <MudChip Color="@_statusColors[_order.Status]">
+                            <MudText Typo="Typo.subtitle1">@_order.Status.GetDisplayName()</MudText>
+                        </MudChip>
+                        @if (_order.Status == OrderStatus.Completed)
+                        {
+                              <MudButton Style="min-width: 100px;" OnClick="@IssueOrder" Variant="Variant.Filled" Color="MudBlazor.Color.Primary">Выдать заказ</MudButton>
+                        }      
+                    </AuthorizeView>
+                    <AuthorizeView Roles="@Role.Client">
                         <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Primary">Статус заказа:</MudText>
-                        <MudText Typo="Typo.h6" Style="font-weight: 400">@(_order.Status.GetDisplayName())</MudText>
+                        <MudChip Color="@_statusColors[_order.Status]">
+                            <MudText Typo="Typo.subtitle1">@_order.Status.GetDisplayName()</MudText>
+                        </MudChip>
                     </AuthorizeView>
                 </MudStack>    
             </MudGrid>        
@@ -208,9 +247,40 @@
                                         <MudText Typo="Typo.h6" Style="font-weight: 400">@_order.LensPackage.Name</MudText>
                                     </MudStack>
                                 </MudItem>
+                                <AuthorizeView Roles="@($"{Role.Admin}, {Role.Manager}")">
+                                    <MudItem xs="12">
+                                        <MudStack Row AlignItems="AlignItems.Start">
+                                            <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Клиент:</MudText>
+                                            <MudText Typo="Typo.h6" Style="font-weight: 400">@($"{_order.Client.Surname} {_order.Client.Name}")</MudText>
+                                        </MudStack>
+                                    </MudItem>
+                                </AuthorizeView>
+                                <AuthorizeView Roles="@($"{Role.Admin}, {Role.Manager}, {Role.Client}")">
+                                    <MudItem xs="12">
+                                        <MudStack Row AlignItems="AlignItems.Start">
+                                            <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Мастер:</MudText>
+                                            <MudText Typo="Typo.h6" Style="font-weight: 400">@($"{_order.Master.Surname} {_order.Master.Name}")</MudText>
+                                        </MudStack>
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudStack Row AlignItems="AlignItems.Start">
+                                            <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Итоговая стоимость:</MudText>
+                                            <MudText Typo="Typo.h6" Style="font-weight: 400">@(_order.Frame.Cost + _order.LensPackage.Cost) руб.</MudText>
+                                        </MudStack>
+                                    </MudItem>
+                                    @if (_order.Status == OrderStatus.Issued && _order.IssueDate != null)
+                                    {
+                                        <MudItem xs="12">
+                                            <MudStack Row AlignItems="AlignItems.Start">
+                                                <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Дата выдачи:</MudText>
+                                                <MudText Typo="Typo.h6" Style="font-weight: 400">@(((DateTime)_order.IssueDate).ToShortDateString())</MudText>
+                                            </MudStack>
+                                        </MudItem>
+                                    }
+                                </AuthorizeView>
                                 <MudItem xs="12">
                                     <MudStack Row AlignItems="AlignItems.Center">
-                                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Номер телефона клиента:</MudText>
+                                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Номер телефона:</MudText>
                                         <MudText Typo="Typo.h6" Style="font-weight: 400">@_order.ContactPhoneNumber</MudText>
                                     </MudStack>
                                 </MudItem>
@@ -236,6 +306,13 @@
     private bool _isLoading;
     private bool _isNotFound;
     private bool _isSaveBtnDisabled;
+    private Dictionary<OrderStatus, MudBlazor.Color> _statusColors = new Dictionary<OrderStatus, MudBlazor.Color>()
+    {
+        {OrderStatus.Created , MudBlazor.Color.Surface},
+        {OrderStatus.InWork , MudBlazor.Color.Warning},
+        {OrderStatus.Completed , MudBlazor.Color.Info},
+        {OrderStatus.Issued , MudBlazor.Color.Success}
+    };
 
     protected async override Task OnInitializedAsync()
     {
@@ -297,5 +374,33 @@
     private void OpenFramePage(int id)
     {
         NavManager.NavigateTo($"/frameShow/{id}");
+    }
+
+    private async void IssueOrder()
+    {
+        var parameters = new DialogParameters
+        {
+            { "Question", "Вы точно хотите выдать заказ клиенту?" }
+        };
+
+        var dialog = await DialogService.ShowAsync<QuestionDialog>("Выдача заказа", parameters);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+        {
+            return;
+        }
+
+        _order.Status = OrderStatus.Issued;
+
+        var res = await OrderService.UpdateOrder(_order);
+
+        if (!res.Success)
+        {
+            Snackbar.Add(res.Description, Severity.Warning);
+            return;
+        }
+
+        Snackbar.Add("Заказ выдан клиенту!", Severity.Success);
     }
 }

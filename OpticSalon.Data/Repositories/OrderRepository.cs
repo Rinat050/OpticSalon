@@ -17,6 +17,12 @@ namespace OpticSalon.Data.Repositories
 
             orderDb.Recipe.Purpose = null!;
             orderDb.CreatedDate = DateTime.SpecifyKind(orderDb.CreatedDate, DateTimeKind.Utc);
+
+            if (orderDb.IssueDate != null)
+            {
+                orderDb.IssueDate = DateTime.SpecifyKind((DateTime)orderDb.IssueDate, DateTimeKind.Utc);
+            }
+
             await Context.Orders.AddAsync(orderDb);
             await Context.SaveChangesAsync();
             Context.Entry(orderDb).State = EntityState.Detached;
@@ -73,11 +79,30 @@ namespace OpticSalon.Data.Repositories
             return orderDb == null ? null : Mapper.MapOrder(orderDb);
         }
 
-        public async Task<List<OrderShort>> GetOrdersByClient(int clientId)
+        public async Task<List<OrderShortForClient>> GetOrdersByClient(int clientId)
         {
             var orders = await Context.Orders
                         .Where(o => o.ClientId == clientId)
                         .Select(o => Mapper.MapOrderShort(o))
+                        .ToListAsync();
+
+            return orders;
+        }
+
+        public async Task<List<OrderShortForManager>> GetOrdersForManager()
+        {
+            var orders = await Context.Orders
+                        .Include(x => x.Client)
+                        .Include(x => x.Master)
+                        .Select(o => new OrderShortForManager()
+                        {
+                            Id = o.Id,
+                            Client = $"{o.Client.Surname} {o.Client.Name.First()}.",
+                            Master = $"{o.Master.Surname} {o.Master.Name.First()}.",
+                            CreatedDate = o.CreatedDate,
+                            IssueDate = o.IssueDate,
+                            Status = (OrderStatus) o.Status
+                        })
                         .ToListAsync();
 
             return orders;
@@ -88,6 +113,11 @@ namespace OpticSalon.Data.Repositories
             var orderDb = Mapper.Map(order);
             orderDb.Recipe.Purpose = null!;
             orderDb.CreatedDate = DateTime.SpecifyKind(orderDb.CreatedDate, DateTimeKind.Utc);
+
+            if (orderDb.IssueDate != null)
+            {
+                orderDb.IssueDate = DateTime.SpecifyKind((DateTime)orderDb.IssueDate, DateTimeKind.Utc);
+            }
 
             Context.Orders.Update(orderDb);
             await Context.SaveChangesAsync();

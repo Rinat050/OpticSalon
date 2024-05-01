@@ -96,13 +96,13 @@ namespace OpticSalon.Domain.Services.Impl
             }
         }
 
-        public async Task<ResultWithData<List<OrderShort>>> GetOrdersByClient(int clientId)
+        public async Task<ResultWithData<List<OrderShortForClient>>> GetOrdersByClient(int clientId)
         {
             try
             {
                 var res = await _orderRepository.GetOrdersByClient(clientId);
 
-                return new ResultWithData<List<OrderShort>>()
+                return new ResultWithData<List<OrderShortForClient>>()
                 {
                     Success = true,
                     Data = res
@@ -110,7 +110,29 @@ namespace OpticSalon.Domain.Services.Impl
             }
             catch
             {
-                return new ResultWithData<List<OrderShort>>()
+                return new ResultWithData<List<OrderShortForClient>>()
+                {
+                    Success = false,
+                    Description = DefaultErrors.ServerError
+                };
+            }
+        }
+
+        public async Task<ResultWithData<List<OrderShortForManager>>> GetOrdersForManager()
+        {
+            try
+            {
+                var res = await _orderRepository.GetOrdersForManager();
+
+                return new ResultWithData<List<OrderShortForManager>>()
+                {
+                    Success = true,
+                    Data = res
+                };
+            }
+            catch
+            {
+                return new ResultWithData<List<OrderShortForManager>>()
                 {
                     Success = false,
                     Description = DefaultErrors.ServerError
