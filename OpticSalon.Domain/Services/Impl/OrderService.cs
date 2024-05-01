@@ -1,4 +1,5 @@
-﻿using OpticSalon.Domain.ErrorMessages;
+﻿using OpticSalon.Domain.Enums;
+using OpticSalon.Domain.ErrorMessages;
 using OpticSalon.Domain.Models;
 using OpticSalon.Domain.Repositories;
 using OpticSalon.Domain.ResultModels;
@@ -149,6 +150,15 @@ namespace OpticSalon.Domain.Services.Impl
         {
             try
             {
+                if (order.Status == OrderStatus.Issued)
+                {
+                    order.IssueDate = DateTime.Now;
+                }
+                else
+                {
+                    order.IssueDate = null;
+                }
+
                 await _orderRepository.UpdateOrder(order);
 
                 return new BaseResult()
