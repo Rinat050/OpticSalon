@@ -192,6 +192,7 @@ else
 
     private bool _isDrawerOpen;
     private bool _isLoading;
+    private bool _isManager;
     private bool _isSerachDrawerOpen;
     private bool _isSearchBarVisible;
     private bool _isClient;
@@ -200,9 +201,24 @@ else
 
     protected async override Task OnInitializedAsync()
     {
+        await SetIsManager();
         await FillFilterData();
         await FillFramesData();
         await SetSearchBar();
+    }
+
+    private async Task SetIsManager()
+    {
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+
+        if (!userIdentity.Identity.IsAuthenticated)
+        {
+            return;
+        }
+
+        var user = await UserManager.FindByEmailAsync(userIdentity.Identity?.Name);
+
+        _isManager = await UserManager.IsInRoleAsync(user, Role.Manager) || await UserManager.IsInRoleAsync(user, Role.Admin);
     }
 
     private async Task FillFilterData()
@@ -264,7 +280,8 @@ else
         _isImagesLoaded = false;
         var res = await FrameService.GetAllFrames(_filter.Type?.Id, _filter.Material?.Id,
                                 _filter.Color?.Id, _filter.Gender?.Id, _filter.Brand?.Id,
-                                _filter.IsClientPrefencesSelected ? _currentClientPreferences : null, _filter.MinCost, _filter.MaxCost);
+                                _filter.IsClientPrefencesSelected ? _currentClientPreferences : null, 
+                                _filter.MinCost, _filter.MaxCost, _isManager);
 
         if (res.Success)
         {

@@ -16,6 +16,7 @@
         public GenderDb Gender { get; set; } = null!;
         public int GenderId { get; set; }
         public string MainImageName { get; set; } = null!;
+        public bool IsActive { get; set; } = true;
         public ICollection<FrameColorDb> Colors { get; set; } = new List<FrameColorDb>();
     }
 }

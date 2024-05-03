@@ -21,7 +21,7 @@ namespace OpticSalon.Domain.Services.Impl
             {
                 var result = await _frameRepository.GetFrames(null, null,
                                                 null, null, null, null,
-                                                0, int.MaxValue);
+                                                0, int.MaxValue, false);
 
                 return new ResultWithData<List<FrameShort>>()
                 {
@@ -41,17 +41,17 @@ namespace OpticSalon.Domain.Services.Impl
 
         public async Task<ResultWithData<List<FrameShort>>> GetAllFrames(int? typeId, int? materialId, 
                                 int? colorId, int? genderId, int? brandId, ClientPreferences? clientPreferences,
-                                decimal minCost, decimal maxCost)
+                                decimal minCost, decimal maxCost, bool isForManager)
         {
             try
             {
-                var result = await _frameRepository.GetFrames(typeId, materialId,
-                                                colorId, genderId, brandId, clientPreferences, minCost, maxCost);
+                var result = await _frameRepository.GetFrames(typeId, materialId, colorId, genderId, 
+                        brandId, clientPreferences, minCost, maxCost, isForManager);
 
                 return new ResultWithData<List<FrameShort>>()
                 {
                     Success = true,
-                    Data = result
+                    Data = result   
                 };
             }
             catch
