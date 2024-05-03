@@ -8,6 +8,7 @@
         public const string SuccessRegister = "Успешная регистрация!";
         public const string DefaultError = "Произошла ошибка!";
         public const string UserWithEmailExist = "Пользователь с указанной почтой уже зарегистрирован!";
+        public const string SuccessEmailUpdate = "Адрес электронной почты успешно обновлен!";
         public const string InvalidRole = "Неопределена роль!";
     }
 }

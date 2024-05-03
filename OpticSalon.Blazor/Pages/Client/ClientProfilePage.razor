@@ -6,7 +6,9 @@
 @using OpticSalon.Blazor.Data.Credentials
 @using OpticSalon.Blazor.Middleware
 @using OpticSalon.Blazor.Shared.ClientComponents
+@using OpticSalon.Blazor.Shared.Dialogs
 @using OpticSalon.Domain.Models
+@using OpticSalon.Blazor.Middleware
 
 @attribute [Authorize(Roles = Role.Client)]
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
@@ -16,6 +18,7 @@
 @inject NavigationManager NavManager
 @inject IClientService ClientService
 @inject IOrderService OrderService
+@inject IDialogService DialogService
 
 <PageTitle>Профиль</PageTitle>
 
@@ -41,7 +44,13 @@
                     </MudAvatar>
                 <MudStack Class="ms-4" Justify="Justify.Center">
                     <MudText Color="MudBlazor.Color.Secondary" Typo="Typo.h5" Class="m-0 p-0">@_client?.Name @_client?.Surname</MudText>
-                    <MudText Color="MudBlazor.Color.Secondary" Typo="Typo.h6" Class="m-0 p-0">@_user?.Email</MudText>
+                    <MudStack AlignItems="AlignItems.Center" Row>
+                        <MudText Color="MudBlazor.Color.Secondary" Typo="Typo.h6" Class="m-0 p-0">@_user?.Email</MudText>
+                        <MudMenu Class="m-0 p-0" Icon="@Icons.Material.Filled.Settings" Color="MudBlazor.Color.Primary">
+                            <MudMenuItem OnClick="@ChangeEmailDialogShow">Изменить адрес почты</MudMenuItem>
+                            <MudMenuItem>Сменить пароль</MudMenuItem>
+                        </MudMenu>
+                    </MudStack>
                 </MudStack>
             </MudGrid>
         </MudCardHeader>
@@ -124,5 +133,23 @@
     private string GetAvatarText()
     {
         return $"{_client?.Name[0]}{_client?.Surname[0]}";
+    }
+
+    private async Task ChangeEmailDialogShow()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("CurrentEmail", _user.Email);
+
+        var dialog = await DialogService.ShowAsync<ChangeEmailDialog>("Изменение адреса почты", parameters);
+
+        var res = await dialog.Result;
+
+        if (!res.Canceled)
+        {
+            var newEmail = (string) res.Data;
+            var key = Guid.NewGuid();
+            ClientProfileMiddleware.Emails[key] = newEmail;
+            NavManager.NavigateTo($"/clientProfile?key={key}", true);
+        }
     }
 }

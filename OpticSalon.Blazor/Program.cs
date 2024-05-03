@@ -38,6 +38,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<AuthenticationMiddleware>();
+app.UseMiddleware<ClientProfileMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 

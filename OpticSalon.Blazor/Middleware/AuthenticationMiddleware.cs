@@ -10,7 +10,6 @@ namespace OpticSalon.Blazor.Middleware
         public static IDictionary<Guid, LoginCredentials> Logins { get; }
         = new ConcurrentDictionary<Guid, LoginCredentials>();
 
-
         private readonly RequestDelegate _next;
 
         public AuthenticationMiddleware(RequestDelegate next)

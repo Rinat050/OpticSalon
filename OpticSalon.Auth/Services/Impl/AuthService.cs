@@ -8,14 +8,51 @@ namespace OpticSalon.Auth.Services.Impl
     public class AuthService : IAuthService
     {
         private readonly UserManager<OpticSalonUser> _userManager;
+        private readonly SignInManager<OpticSalonUser> _signInManager;
         private readonly OpticSalonIdentityContext _context;
 
-        public AuthService(UserManager<OpticSalonUser> userManager, OpticSalonIdentityContext context)
+        public AuthService(UserManager<OpticSalonUser> userManager, 
+            SignInManager<OpticSalonUser> signInManager, OpticSalonIdentityContext context)
         {
             _userManager = userManager;
             _context = context;
+            _signInManager = signInManager;
         }
 
+        public async Task<AuthResult> ChangeUserEmail(string oldEmail, string newEmail)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(oldEmail);
+
+                if (user == null)
+                {
+                    return new AuthResult() { Success = false, Description = AuthResults.NotFounded };
+                }
+
+                var existUser = await _userManager.FindByEmailAsync(newEmail);
+
+                if (existUser != null && existUser.Id != user.Id)
+                {
+                    return new AuthResult() { Success = false, Description = AuthResults.UserWithEmailExist };
+                }
+
+                user.Email = newEmail;
+                user.UserName = newEmail;
+                var res = await _userManager.UpdateAsync(user);
+
+                if (res.Succeeded)
+                {
+                    return new AuthResult() { Success = true, Description = AuthResults.SuccessEmailUpdate };
+                }
+
+                return new AuthResult() { Success = false, Description = AuthResults.DefaultError };
+            }
+            catch
+            {
+                return new AuthResult() { Success = false, Description = AuthResults.DefaultError };
+            }
+        }
         public async Task<AuthResult> ChangeUserPassword(string login, string oldPassword, string newPassword)
         {
             try

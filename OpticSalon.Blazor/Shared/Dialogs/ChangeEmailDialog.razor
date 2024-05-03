@@ -1,0 +1,51 @@
+﻿@using OpticSalon.Auth.Managers
+@using OpticSalon.Auth.Models
+@using OpticSalon.Auth.Services
+@using OpticSalon.Blazor.Data.Credentials
+
+@inject IAuthService AuthService
+@inject ISnackbar Snackbar
+@inject OpticSalonSignInManager SignInManager
+
+<EditForm Model="_model" OnValidSubmit="@Change">
+    <DataAnnotationsValidator />
+    <MudDialog Class="p-2">
+        <DialogContent>
+            <MudGrid Spacing="1">
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_model.NewEmail" For="@(() => _model.NewEmail)"
+                                    Variant="Variant.Outlined" Label="Новый адрес почты"></MudTextField>
+                </MudItem>
+            </MudGrid>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="@Close">Отмена</MudButton>
+            <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Primary" 
+                    ButtonType="ButtonType.Submit">Изменить</MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public string CurrentEmail { get; set; }
+    private ChangeEmailCredentials _model = new ChangeEmailCredentials();
+
+    private async Task Change()
+    {
+        var result = await AuthService.ChangeUserEmail(CurrentEmail, _model.NewEmail);
+
+        if (result.Success)
+        {
+            Snackbar.Add(result.Description, Severity.Success);
+            MudDialog.Close(DialogResult.Ok(_model.NewEmail));
+        }
+        else
+        {
+            Snackbar.Add(result.Description, Severity.Warning);
+        }
+    }
+
+    private void Close() => MudDialog.Close();
+}
