@@ -42,13 +42,13 @@
                 <MudAvatar Style="width: 100px; height:100px;" Class="m-1" Color="MudBlazor.Color.Primary">
                     <MudText Class="m-5" Typo="Typo.h4">@GetAvatarText()</MudText>
                     </MudAvatar>
-                <MudStack Class="ms-4" Justify="Justify.Center">
+                <MudStack Class="ms-4" Spacing="0" Justify="Justify.Center">
                     <MudText Color="MudBlazor.Color.Secondary" Typo="Typo.h5" Class="m-0 p-0">@_client?.Name @_client?.Surname</MudText>
-                    <MudStack AlignItems="AlignItems.Center" Row>
+                    <MudStack Spacing="0" AlignItems="AlignItems.Center" Row>
                         <MudText Color="MudBlazor.Color.Secondary" Typo="Typo.h6" Class="m-0 p-0">@_user?.Email</MudText>
                         <MudMenu Class="m-0 p-0" Icon="@Icons.Material.Filled.Settings" Color="MudBlazor.Color.Primary">
                             <MudMenuItem OnClick="@ChangeEmailDialogShow">Изменить адрес почты</MudMenuItem>
-                            <MudMenuItem>Сменить пароль</MudMenuItem>
+                            <MudMenuItem OnClick="@ChangePasswordDialogShow">Сменить пароль</MudMenuItem>
                         </MudMenu>
                     </MudStack>
                 </MudStack>
@@ -151,5 +151,13 @@
             ClientProfileMiddleware.Emails[key] = newEmail;
             NavManager.NavigateTo($"/clientProfile?key={key}", true);
         }
+    }
+
+    private async Task ChangePasswordDialogShow()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("Email", _user.Email);
+
+        var dialog = await DialogService.ShowAsync<ClientChangePasswordDialog>("Изменение пароля", parameters);
     }
 }

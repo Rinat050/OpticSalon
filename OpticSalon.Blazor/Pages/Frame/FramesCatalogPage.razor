@@ -218,6 +218,11 @@ else
 
         var user = await UserManager.FindByEmailAsync(userIdentity.Identity?.Name);
 
+        if (user == null)
+        {
+            return;
+        }
+
         _isManager = await UserManager.IsInRoleAsync(user, Role.Manager) || await UserManager.IsInRoleAsync(user, Role.Admin);
     }
 
