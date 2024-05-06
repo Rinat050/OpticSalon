@@ -108,10 +108,16 @@
                         @if (_order.Status == OrderStatus.Completed)
                         {
                               <MudButton Style="min-width: 100px;" OnClick="@IssueOrder" Variant="Variant.Filled" Color="MudBlazor.Color.Primary">Выдать заказ</MudButton>
-                        }      
+                        }    
+                        
+                        @if (_order.Status == OrderStatus.Issued)
+                        {
+                              <MudIconButton Size="Size.Medium" OnClick="@CreateWarrantyRepair" Variant="Variant.Filled"
+                                Color="MudBlazor.Color.Secondary" Icon="@Icons.Material.Filled.Handyman"/>
+                        } 
                     </AuthorizeView>
                     <AuthorizeView Roles="@Role.Client">
-                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Primary">Статус заказа:</MudText>
+                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Статус заказа:</MudText>
                         <MudChip Color="@_statusColors[_order.Status]">
                             <MudText Typo="Typo.subtitle1">@_order.Status.GetDisplayName()</MudText>
                         </MudChip>
@@ -402,5 +408,22 @@
         }
 
         Snackbar.Add("Заказ выдан клиенту!", Severity.Success);
+    }
+
+    private async void CreateWarrantyRepair()
+    {
+        var parameters = new DialogParameters()
+        {
+            {"OrderId", _order.Id}
+        };
+
+        var dialog = await DialogService.ShowAsync<CreateWarrantyRepairDialog>("Оформление гарантийного ремонта", parameters);
+
+        var res = await dialog.Result;
+
+        if (!res.Canceled)
+        {
+            //
+        }
     }
 }

@@ -1,0 +1,73 @@
+﻿@using OpticSalon.Blazor.Data.Credentials
+@using OpticSalon.Domain.Models
+
+@inject IWarrantyRepairService WarrantyRepairService 
+@inject IDefectService DefectService 
+@inject ISnackbar Snackbar
+
+<EditForm Model="_model" OnValidSubmit="@CreateRepair">
+    <DataAnnotationsValidator />
+    <MudDialog>
+        <DialogContent>
+            <MudGrid Class="m-0 p-0" Spacing="1">
+                <MudItem xs="12">
+                    <MudAutocomplete Clearable T="Defect" For="@(() => _model.Defect)" Label="Дефект" @bind-Value="@_model.Defect"
+                                    SearchFunc="@SearchFilter" ToStringFunc="@_defectToStringFunc" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField T="string" @bind-Value="_model.Comment" For="@(() => _model.Comment)"
+                        Label="Комментарий" Variant="Variant.Outlined" Lines="4"></MudTextField>
+                </MudItem>
+                </MudGrid>
+        </DialogContent>
+        <DialogActions>
+            <div>
+                <MudButton OnClick="@Close">Отмена</MudButton>
+                <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Primary" ButtonType="ButtonType.Submit">Создать</MudButton>
+            </div>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public int OrderId { get; set; }
+    private CreateWarrantyRepairCredentials _model = new CreateWarrantyRepairCredentials();
+
+    private Func<Defect, string> _defectToStringFunc => x => x != null ? x.Name : "";
+
+    private async Task CreateRepair()
+    {
+        var res = await WarrantyRepairService.CreateRepair(OrderId, _model.Defect, _model.Comment);
+
+        if (!res.Success)
+        {
+            Snackbar.Add(res.Description, Severity.Warning);
+            return;
+        }
+
+        Snackbar.Add(res.Description, Severity.Info);
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Close() => MudDialog.Close();
+
+    private async Task<IEnumerable<Defect>> SearchFilter(string value)
+    {
+        var res = await DefectService.GetAllDefects();
+
+        if (!res.Success)
+        {
+            return new List<Defect>();
+        }
+
+        var defects = res.Data!;
+
+        if (string.IsNullOrEmpty(value))
+            return defects;
+
+        return defects
+            .Where(x => x.Name
+            .Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+}
