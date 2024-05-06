@@ -17,6 +17,8 @@ namespace OpticSalon.Data.Mappers.EntityMapping
         public partial ColorDb Map(Color color);
         public partial Brand Map(BrandDb brandDb);
         public partial BrandDb Map(Brand brand);
+        public partial Defect Map(DefectDb defectDb);
+        public partial DefectDb Map(Defect defect);
         public partial Gender Map(GenderDb genderDb);
         public partial GenderDb Map(Gender gender);
         public partial Purpose Map(PurposeDb purposeDb);
@@ -40,6 +42,14 @@ namespace OpticSalon.Data.Mappers.EntityMapping
         [MapperIgnoreTarget(nameof(OrderDb.LensPackage))]
         [MapperIgnoreTarget(nameof(OrderDb.Master))]
         public partial OrderDb Map(Order order);
+        [MapperIgnoreTarget(nameof(WarrantyRepairDb.Defect))]
+        [MapperIgnoreTarget(nameof(WarrantyRepairDb.Order))]
+        [MapperIgnoreTarget(nameof(WarrantyRepairDb.Master))]
+        [MapperIgnoreTarget(nameof(WarrantyRepairWorkDb.WarrantyRepair))]
+        [MapperIgnoreTarget(nameof(WarrantyRepairWorkDb.RepairWork))]
+        public partial WarrantyRepairDb Map(WarrantyRepair repair);
+        public partial WarrantyRepair Map(WarrantyRepairDb repairDb);
+        public partial WarrantyRepairForClient MapRepairForClient(WarrantyRepairDb repairDb);
         public partial OrderShortForClient MapOrderShort(OrderDb orderDb);
     }
 }

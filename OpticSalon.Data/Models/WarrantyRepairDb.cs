@@ -11,6 +11,8 @@
         public int OrderId { get; set; }
         public EmployeeDb Master { get; set; } = null!;
         public int MasterId { get; set; }
+        public int Status { get; set; }
         public string? Comment { get; set; }
+        public ICollection<WarrantyRepairWorkDb> Works { get; set; } = new List<WarrantyRepairWorkDb>();
     }
 }
