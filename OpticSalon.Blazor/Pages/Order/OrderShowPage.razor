@@ -399,7 +399,9 @@
 
         _order.Status = OrderStatus.Issued;
 
+        _isSaveBtnDisabled = true;
         var res = await OrderService.UpdateOrder(_order);
+        _isSaveBtnDisabled = false;
 
         if (!res.Success)
         {
@@ -407,7 +409,7 @@
             return;
         }
 
-        Snackbar.Add("Заказ выдан клиенту!", Severity.Success);
+        Snackbar.Add("Статус заказа обновлен!", Severity.Success);
     }
 
     private async void CreateWarrantyRepair()

@@ -1,0 +1,65 @@
+﻿@using OpticSalon.Domain.Models
+
+@inject IRepairWorkService RepairWorkService
+
+<MudDialog>
+    <DialogContent>
+        <MudTable T="RepairWork" Class="mt-5" Items="@AllRepairWorks" Filter="new Func<RepairWork,bool>(SearchTextFilter)" Hover="true" Breakpoint="Breakpoint.Sm" SelectedItemChanged="@SelectDefect">
+            <ToolBarContent>
+                <MudTextField T="string" Label="Поиск" @bind-Value="_searchText"></MudTextField>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Наименование</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Наименование">@context.Name</MudTd>
+            </RowTemplate>
+        </MudTable>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter] public List<WarrantyRepairWork> CurrentWorks { get; set; } 
+
+    public List<RepairWork> AllRepairWorks { get; set; } = null!;
+
+    private string _searchText = "";   
+
+    private void Close() => MudDialog.Close();
+
+    protected async override Task OnInitializedAsync()
+    {
+        var res = await RepairWorkService.GetAllRepairWorks();
+
+        AllRepairWorks = res.Data!;
+
+        DeleteExistWorks();
+    }
+
+    private void DeleteExistWorks()
+    {
+        foreach(var work in CurrentWorks)
+        {
+            var repairwork = AllRepairWorks.FirstOrDefault(x => x.Id == work.RepairWork.Id);
+
+            AllRepairWorks.Remove(repairwork);
+        }
+    }
+
+    private void SelectDefect(RepairWork work)
+    {
+        MudDialog.Close(DialogResult.Ok(work));
+    }
+
+    private bool SearchTextFilter(RepairWork work) => FilterFunc(work, _searchText);
+
+    private bool FilterFunc(RepairWork work, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (work.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+}

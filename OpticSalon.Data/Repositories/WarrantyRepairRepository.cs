@@ -101,6 +101,26 @@ namespace OpticSalon.Data.Repositories
         public async Task UpdateWarrantyRepair(WarrantyRepair repair)
         {
             var repairDb = Mapper.Map(repair);
+
+            foreach(var item in repairDb.Works)
+            {
+                item.RepairWork = null!;
+                item.WarrantyRepairId = repair.Id;
+            }
+
+            var worksDb = await Context.WarrantyRepairWorks
+                .Where(x => x.WarrantyRepairId == repair.Id).ToListAsync();
+
+            foreach(var workDb in worksDb)
+            {
+                var existWork = repairDb.Works.FirstOrDefault(x => x.Id == workDb.Id);
+
+                if(existWork == null)
+                {
+                    Context.WarrantyRepairWorks.Remove(workDb);
+                }
+            }
+
             repairDb.CreatedDate = DateTime.SpecifyKind(repairDb.CreatedDate, DateTimeKind.Utc);
 
             if (repairDb.IssueDate != null)

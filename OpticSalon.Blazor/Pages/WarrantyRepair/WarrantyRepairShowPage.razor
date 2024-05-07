@@ -1,0 +1,331 @@
+﻿@page "/warrantyRepair/{repairId:int}"
+
+@using OpticSalon.Auth.Models
+@using OpticSalon.Blazor.Shared.Dialogs
+@using OpticSalon.Domain.Enums
+@using OpticSalon.Domain.Extensions
+@using OpticSalon.Domain.Models
+
+@inject IWarrantyRepairService WarrantyRepairService
+@inject NavigationManager NavManager
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+@attribute [Authorize(Roles = $"{Role.Client},{Role.Master},{Role.Admin},{Role.Manager}")]
+
+<PageTitle>Гарантийный ремонт @RepairId</PageTitle>
+
+@if (_isLoading)
+{
+    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
+    return;
+}
+
+@if (_isNotFound)
+{
+    <MudAlert Class="m-2" Severity="Severity.Normal">Не найдено...</MudAlert>
+    return;
+}
+
+<MudContainer Class="d-flex align-center justify-center mud-width-full" style="min-height:90vh;">
+    <MudCard Class="p-2 m-2" Style="border-radius: 20px;" Outlined="false" Elevation="4">
+         <MudCardHeader>
+            <MudGrid>
+                <MudStack Row AlignItems="AlignItems.Center">
+                    <MudIcon Class="m-1" Icon="@Icons.Material.Filled.Handyman" Size="Size.Medium" Color="MudBlazor.Color.Secondary"></MudIcon>
+                    <MudText Typo="Typo.h6" Color="MudBlazor.Color.Secondary"><b>Гарантийный ремонт №</b></MudText>
+                    <MudText Typo="Typo.h6" Color="MudBlazor.Color.Primary"><b>@_repair.Id</b></MudText>
+                    <MudText Typo="Typo.h6" Color="MudBlazor.Color.Secondary"><b>от</b></MudText>
+                    <MudText Typo="Typo.h6" Color="MudBlazor.Color.Primary"><b>@_repair.CreatedDate.ToShortDateString()</b></MudText>
+                </MudStack>
+                <MudSpacer/>
+                <MudStack Row AlignItems="AlignItems.Center">
+                    <AuthorizeView Roles="@Role.Admin">
+                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Статус:</MudText>
+                        <MudSelect @bind-Value="_repair.Status" T="OrderStatus" Variant="Variant.Outlined">
+                            <MudSelectItem Value="@(OrderStatus.Created)">
+                                <MudChip Class="m-0" Size="Size.Small" Color="@_statusColors[OrderStatus.Created]">
+                                    <MudText Typo="Typo.subtitle1">@OrderStatus.Created.GetDisplayName()</MudText>
+                                </MudChip>
+                            </MudSelectItem>
+                            <MudSelectItem Value="@(OrderStatus.InWork)">
+                                <MudChip Class="m-0" Size="Size.Small" Color="@_statusColors[OrderStatus.InWork]">
+                                    <MudText Typo="Typo.subtitle1">@OrderStatus.InWork.GetDisplayName()</MudText>
+                                </MudChip>
+                            </MudSelectItem>
+                            <MudSelectItem Value="@(OrderStatus.Completed)">
+                                <MudChip Size="Size.Small" Class="m-0" Color="@_statusColors[OrderStatus.Completed]">
+                                    <MudText Typo="Typo.subtitle1">@OrderStatus.Completed.GetDisplayName()</MudText>
+                                </MudChip>
+                            </MudSelectItem>
+                            <MudSelectItem Value="@(OrderStatus.Issued)">
+                                <MudChip Class="m-0" Size="Size.Small" Color="@_statusColors[OrderStatus.Issued]">
+                                    <MudText Typo="Typo.subtitle1">@OrderStatus.Issued.GetDisplayName()</MudText>
+                                </MudChip>
+                            </MudSelectItem>
+                        </MudSelect>
+                        <MudIconButton Icon="@Icons.Material.Filled.Save" OnClick="@Save" Disabled="@_isSaveBtnDisabled" Style="min-width: 50px;" Color="MudBlazor.Color.Secondary"></MudIconButton>
+                    </AuthorizeView>
+                    <AuthorizeView Roles="@Role.Master">
+                        @if (_repair.Status != OrderStatus.Issued)
+                        {
+                            <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Статус:</MudText>
+                            <MudSelect @bind-Value="_repair.Status" T="OrderStatus" Variant="Variant.Outlined"
+                                ToStringFunc="@((x) => x.GetDisplayName())">
+                                <MudSelectItem Value="@(OrderStatus.Created)">
+                                    <MudChip Class="m-0" Size="Size.Small" Color="@_statusColors[OrderStatus.Created]">
+                                        <MudText Typo="Typo.subtitle1">@OrderStatus.Created.GetDisplayName()</MudText>
+                                    </MudChip>
+                                </MudSelectItem>
+                                <MudSelectItem Value="@(OrderStatus.InWork)">
+                                    <MudChip Class="m-0" Size="Size.Small" Color="@_statusColors[OrderStatus.InWork]">
+                                        <MudText Typo="Typo.subtitle1">@OrderStatus.InWork.GetDisplayName()</MudText>
+                                    </MudChip>
+                                </MudSelectItem>
+                                <MudSelectItem Value="@(OrderStatus.Completed)">
+                                    <MudChip Class="m-0" Size="Size.Small" Color="@_statusColors[OrderStatus.Completed]">
+                                        <MudText Typo="Typo.subtitle1">@OrderStatus.Completed.GetDisplayName()</MudText>
+                                    </MudChip>
+                                </MudSelectItem>
+                            </MudSelect>
+                            <MudIconButton Icon="@Icons.Material.Filled.Save" OnClick="@Save" Disabled="@_isSaveBtnDisabled" Style="min-width: 50px;" Color="MudBlazor.Color.Secondary"></MudIconButton>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Primary">Статус:</MudText>
+                            <MudChip Color="@_statusColors[_repair.Status]">
+                                <MudText Typo="Typo.subtitle1">@_repair.Status.GetDisplayName()</MudText>
+                            </MudChip>
+                        }
+                    </AuthorizeView>
+                    <AuthorizeView Roles="@Role.Manager">
+                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Статус:</MudText>
+                        <MudChip Color="@_statusColors[_repair.Status]">
+                            <MudText Typo="Typo.subtitle1">@_repair.Status.GetDisplayName()</MudText>
+                        </MudChip>
+                        @if (_repair.Status == OrderStatus.Completed)
+                        {
+                              <MudButton Style="min-width: 100px;" OnClick="@IssueOrder" Variant="Variant.Filled" Color="MudBlazor.Color.Primary">Выдать очки</MudButton>
+                        }
+                    </AuthorizeView>
+                    <AuthorizeView Roles="@Role.Client">
+                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Статус:</MudText>
+                        <MudChip Color="@_statusColors[_repair.Status]">
+                            <MudText Typo="Typo.subtitle1">@_repair.Status.GetDisplayName()</MudText>
+                        </MudChip>
+                    </AuthorizeView>
+                </MudStack>
+            </MudGrid>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid Spacing="1">
+                <MudPaper Outlined Elevation="0" Class="p-3 m-1 w-100">
+                    <MudItem xs="12">
+                        <MudChip Icon="@Icons.Material.Filled.Settings" Class="mb-2" Color="MudBlazor.Color.Primary">
+                            <MudText Typo="Typo.subtitle1">Детали ремонта</MudText>
+                        </MudChip>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudGrid Spacing="1">
+                            <MudItem xs="12">
+                                <MudStack Row AlignItems="AlignItems.Center">
+                                    <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Оформлен на основании заказа №</MudText>
+                                    <MudLink Typo="Typo.h6" Style="font-weight: 400" Class="m-0 p-0" OnClick="@(() => OpenOrderPage(_repair.OrderId))" 
+                                        Underline="Underline.Always">
+                                        @_repair?.OrderId
+                                    </MudLink>
+                                </MudStack>
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudStack Row AlignItems="AlignItems.Center">
+                                    <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Дефект:</MudText>
+                                    <MudText Typo="Typo.h6" Style="font-weight: 400">@_repair.Defect.Name</MudText>
+                                </MudStack>
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudStack Row AlignItems="AlignItems.Center">
+                                    <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Комментарий:</MudText>
+                                    <MudText Typo="Typo.h6" Style="font-weight: 400">@_repair.Comment</MudText>
+                                </MudStack>
+                            </MudItem>
+                            <AuthorizeView Roles="@($"{Role.Admin}, {Role.Manager}, {Role.Client}")">
+                                <MudItem xs="12">
+                                    <MudStack Row AlignItems="AlignItems.Start">
+                                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Мастер:</MudText>
+                                        <MudText Typo="Typo.h6" Style="font-weight: 400">@($"{_repair.Master.Surname} {_repair.Master.Name}")</MudText>
+                                    </MudStack>
+                                </MudItem>
+                                @if (_repair.Status == OrderStatus.Issued && _repair.IssueDate != null)
+                                {
+                                    <MudItem xs="12">
+                                        <MudStack Row AlignItems="AlignItems.Start">
+                                            <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Дата выдачи:</MudText>
+                                            <MudText Typo="Typo.h6" Style="font-weight: 400">@(((DateTime)_repair.IssueDate).ToShortDateString())</MudText>
+                                        </MudStack>
+                                    </MudItem>
+                                }
+                            </AuthorizeView>
+                        </MudGrid>
+                    </MudItem>
+                </MudPaper>
+                <MudItem xs="12">
+                    <MudTable Elevation="0" Outlined Class="m-0 p-0" Items="@_repair.Works">
+                        <ToolBarContent>
+                            <MudChip Icon="@Icons.Material.Filled.Construction" Class="m-0" Color="MudBlazor.Color.Primary">
+                                <MudText Typo="Typo.subtitle1">Выполненные работы</MudText>
+                            </MudChip>
+                            <MudSpacer/>
+                            <AuthorizeView Roles="@Role.Master">
+                                @if (_repair.Status == OrderStatus.InWork)
+                                {
+                                    <MudFab Class="me-4" Color="MudBlazor.Color.Primary" OnClick="@OpenRepairWorksDialog" StartIcon="@Icons.Material.Filled.Add" Size="Size.Small"></MudFab>
+                                }
+                            </AuthorizeView>
+                        </ToolBarContent>
+                        <HeaderContent>
+                            <MudTh>Наименование работы</MudTh>
+                            <AuthorizeView Roles="@Role.Master">
+                                @if (_repair.Status == OrderStatus.InWork)
+                                {
+                                    <MudTh>Удаление</MudTh>
+                                }
+                            </AuthorizeView>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Наименование работы">@context.RepairWork?.Name</MudTd>
+                            <AuthorizeView Roles="@Role.Master" Context="authContext">
+                                @if (_repair.Status == OrderStatus.InWork)
+                                {
+                                    <MudTd DataLabel="Наименование работы">
+                                        <MudIconButton Icon="@Icons.Filled.Delete" Size="Size.Medium" 
+                                        Color="MudBlazor.Color.Error" OnClick="@(() => DeleteRepairWork(context))"></MudIconButton>
+                                    </MudTd>
+                                }
+                            </AuthorizeView>
+                        </RowTemplate>
+                        <NoRecordsContent>
+                            <MudText Typo="Typo.subtitle1" Align="Align.Left" Class="ms-4">Не указано</MudText>
+                        </NoRecordsContent>
+                    </MudTable>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+</MudContainer>
+
+@code {
+    [Parameter]
+    public int RepairId { get; set; }
+    private OpticSalon.Domain.Models.WarrantyRepair _repair;
+    private bool _isLoading;
+    private bool _isNotFound;
+    private bool _isSaveBtnDisabled;
+    private Dictionary<OrderStatus, MudBlazor.Color> _statusColors = new Dictionary<OrderStatus, MudBlazor.Color>()
+    {
+        {OrderStatus.Created , MudBlazor.Color.Surface},
+        {OrderStatus.InWork , MudBlazor.Color.Warning},
+        {OrderStatus.Completed , MudBlazor.Color.Info},
+        {OrderStatus.Issued , MudBlazor.Color.Success}
+    };
+
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadOrderData();
+    }
+
+    private async Task LoadOrderData()
+    {
+        _isLoading = true;
+        var res = await WarrantyRepairService.GetRepairById(RepairId); 
+        _isLoading = false;
+
+        if (!res.Success)
+        {
+            _isNotFound = true;
+            return;
+        }
+
+        _repair = res.Data!;
+    }
+
+    private void DeleteRepairWork(WarrantyRepairWork work)
+    {
+        _repair.Works.Remove(work);
+    }
+
+    private async Task Save()
+    {
+        _isSaveBtnDisabled = true;
+        var res = await WarrantyRepairService.UpdateRepair(_repair);
+        _isSaveBtnDisabled = false;
+
+        if (!res.Success)
+        {
+            Snackbar.Add(res.Description, Severity.Warning);
+            return;
+        }
+
+        Snackbar.Add(res.Description, Severity.Info);
+        await LoadOrderData();
+    }
+
+    private async void IssueOrder()
+    {
+        var parameters = new DialogParameters
+        {
+            { "Question", "Вы точно хотите выдать очки клиенту?" }
+        };
+
+        var dialog = await DialogService.ShowAsync<QuestionDialog>("Выдача очков", parameters);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+        {
+            return;
+        }
+
+        _repair.Status = OrderStatus.Issued;
+
+        _isSaveBtnDisabled = true;
+        var res = await WarrantyRepairService.UpdateRepair(_repair);
+        _isSaveBtnDisabled = false;
+
+        if (!res.Success)
+        {
+            Snackbar.Add(res.Description, Severity.Warning);
+            return;
+        }
+
+        Snackbar.Add("Статус заказа обновлен!", Severity.Info);
+    }
+
+    private void OpenOrderPage(int id)
+    {
+        NavManager.NavigateTo($"/orderShow/{id}");
+    }
+
+    private async Task OpenRepairWorksDialog()
+    {
+        DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var parameters = new DialogParameters()
+        {
+            {"CurrentWorks", _repair.Works}
+        };
+
+
+        var dialog = await DialogService.ShowAsync<RepairWorksListDialog>("Ремонтные работы", parameters, options: maxWidth);
+
+        var res = await dialog.Result;
+
+        if (!res.Canceled)
+        {
+            var selected = (RepairWork) res.Data;
+
+            _repair.Works.Add(new WarrantyRepairWork()
+            {
+                WarrantyId = _repair.Id,
+                RepairWork = selected
+            });
+        }
+    }
+}

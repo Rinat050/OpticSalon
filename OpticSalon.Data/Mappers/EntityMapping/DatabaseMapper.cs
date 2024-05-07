@@ -19,6 +19,8 @@ namespace OpticSalon.Data.Mappers.EntityMapping
         public partial BrandDb Map(Brand brand);
         public partial Defect Map(DefectDb defectDb);
         public partial DefectDb Map(Defect defect);
+        public partial RepairWork Map(RepairWorkDb repairWorkDb);
+        public partial RepairWorkDb Map(RepairWork repairWork);
         public partial Gender Map(GenderDb genderDb);
         public partial GenderDb Map(Gender gender);
         public partial Purpose Map(PurposeDb purposeDb);

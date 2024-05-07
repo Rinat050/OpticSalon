@@ -36,6 +36,7 @@ namespace OpticSalon.Data
             services.AddScoped<IEmployeeRepository, EmployeeRepository>();
             services.AddScoped<IDefectRepository, DefectRepository>();
             services.AddScoped<IWarrantyRepairRepository, WarrantyRepairRepository>();
+            services.AddScoped<IRepairWorkRepository, RepairWorkRepository>();
 
             return services;
         }
