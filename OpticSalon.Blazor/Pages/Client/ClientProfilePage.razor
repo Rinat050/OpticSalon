@@ -19,6 +19,7 @@
 @inject IClientService ClientService
 @inject IOrderService OrderService
 @inject IDialogService DialogService
+@inject IWarrantyRepairService RepairService
 
 <PageTitle>Профиль</PageTitle>
 
@@ -56,14 +57,17 @@
         </MudCardHeader>
         <MudCardContent>
             <MudTabs PanelClass="pa-6" MinimumTabWidth="20px" Position="Position.Top">
-                <MudTabPanel Text="Личные данные">
-                    <ClientProfileDataComponent Client="_client" OnValidSubmit="@(LoadClientInfo)"></ClientProfileDataComponent>
+                <MudTabPanel Icon="@Icons.Material.Filled.AssignmentInd" Text="Личные данные">
+                    <ClientProfileDataComponent  Client="_client" OnValidSubmit="@(LoadClientInfo)"></ClientProfileDataComponent>
                 </MudTabPanel>
-                <MudTabPanel Text="Предпочтения">
+                <MudTabPanel Icon="@Icons.Material.Filled.EditNote" Text="Предпочтения">
                     <ProfileClientPreferencesComponent ClientId="_client.Id" ClientPreferences="_clientPreferences" />
                 </MudTabPanel>
-                <MudTabPanel Text="Заказы">
+                <MudTabPanel Icon="@Icons.Material.Filled.Assignment" Text="Заказы">
                     <ClientOrdersComponent Orders="_orders"></ClientOrdersComponent>
+                </MudTabPanel>
+                <MudTabPanel Icon="@Icons.Material.Filled.Construction" Text="Гарантийный ремонт">
+                    <ClientWarrantyRepairesComponent Repaires="_repaires"></ClientWarrantyRepairesComponent>
                 </MudTabPanel>
             </MudTabs>
         </MudCardContent>
@@ -75,6 +79,7 @@
     private Client _client = null!;
     private ClientPreferences _clientPreferences = null!;
     private List<OrderShortForClient> _orders = new(); 
+    private List<WarrantyRepairForClient> _repaires = new(); 
     private bool _isLoading;
 
     protected async override Task OnInitializedAsync()
@@ -102,6 +107,13 @@
         if (ordersRes.Success)
         {
             _orders = ordersRes.Data!;
+        }
+
+        var repairesRes = await RepairService.GetRepairesByClient(_client.Id);
+
+        if (repairesRes.Success)
+        {
+            _repaires = repairesRes.Data!;
         }
 
         _isLoading = false;

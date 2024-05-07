@@ -1,0 +1,107 @@
+﻿@page "/managerWarrantyRepaires"
+
+@using OpticSalon.Auth.Models
+@using OpticSalon.Domain.Enums
+@using OpticSalon.Domain.Extensions
+
+@inject IWarrantyRepairService RepairService
+@inject NavigationManager NavManager
+
+@attribute [Authorize(Roles = $"{Role.Admin}, {Role.Manager}")]
+
+<PageTitle>Гарантийный ремонт</PageTitle>
+
+@if (_isLoading)
+{
+    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
+    return;
+}
+
+@if (_repaires.Count == 0)
+{
+    <MudAlert Class="m-2" Severity="Severity.Normal">Не найдено...</MudAlert>
+    return;
+}
+
+<MudTable OnRowClick="@RepairClick" T="OpticSalon.Domain.Models.WarrantyRepairForManager" Items="_repaires" Filter="new Func<OpticSalon.Domain.Models.WarrantyRepairForManager,bool>(Filter)">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Гарантийный ремонт</MudText>
+        <MudSpacer />        
+        <MudTextField @bind-Value="_searchStr" Placeholder="Поиск" 
+            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" 
+            IconSize="Size.Medium" Class="m-2"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh><MudTableSortLabel SortBy="new Func<OpticSalon.Domain.Models.WarrantyRepairForManager, object>(x=>x.Id)">Номер ремонта</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<OpticSalon.Domain.Models.WarrantyRepairForManager, object>(x=>x.CreatedDate)">Дата создания</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<OpticSalon.Domain.Models.WarrantyRepairForManager, object>(x=>x.OrderId)">Номер заказа</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<OpticSalon.Domain.Models.WarrantyRepairForManager, object>(x=>x.Master)">Мастер</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<OpticSalon.Domain.Models.WarrantyRepairForManager, object>(x=>x.Status)">Статус</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<OpticSalon.Domain.Models.WarrantyRepairForManager, object>(x=>x.Status)">Дата выдачи</MudTableSortLabel></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Номер заказа">@context.Id</MudTd>
+        <MudTd DataLabel="Дата создания">@context.CreatedDate.ToShortDateString()</MudTd>
+        <MudTd DataLabel="Номер заказа">@context.OrderId</MudTd>
+        <MudTd DataLabel="Мастер">@context.Master</MudTd>
+        <MudTd DataLabel="Статус">
+            <MudChip Color="@_statusColors[context.Status]">@context.Status.GetDisplayName()</MudChip>
+        </MudTd>
+        <MudTd DataLabel="Дата выдачи">@(context.IssueDate == null ? "" : ((DateTime)context.IssueDate).ToShortDateString())</MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private bool _isLoading;
+    private string _searchStr = "";
+    private List<OpticSalon.Domain.Models.WarrantyRepairForManager> _repaires = new();
+    private Dictionary<OrderStatus, MudBlazor.Color> _statusColors = new Dictionary<OrderStatus, Color>()
+    {
+        {OrderStatus.Created , MudBlazor.Color.Surface},
+        {OrderStatus.InWork , MudBlazor.Color.Warning},
+        {OrderStatus.Completed , MudBlazor.Color.Info},
+        {OrderStatus.Issued , MudBlazor.Color.Success}
+    };
+
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+        var res = await RepairService.GetRepairesForManager();
+
+        if (res.Success)
+        {
+            _repaires = res.Data!;
+        }
+
+        _isLoading = false;
+    }
+
+    private bool Filter(OpticSalon.Domain.Models.WarrantyRepairForManager repair) => FilterFunc(repair, _searchStr);
+
+    private bool FilterFunc(OpticSalon.Domain.Models.WarrantyRepairForManager repair, string searchStr)
+    {
+        if (string.IsNullOrWhiteSpace(searchStr))
+            return true;
+        if (repair.Master.Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (repair.OrderId.ToString().Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (repair.Id.ToString().Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (repair.Status.GetDisplayName()!.Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (repair.CreatedDate.ToString().Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private void RepairClick(TableRowClickEventArgs<OpticSalon.Domain.Models.WarrantyRepairForManager> args)
+    {
+        NavManager.NavigateTo($"/warrantyRepair/{args.Item.Id}");
+    }
+}

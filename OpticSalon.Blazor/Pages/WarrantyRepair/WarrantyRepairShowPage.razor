@@ -183,16 +183,16 @@
                             </AuthorizeView>
                         </ToolBarContent>
                         <HeaderContent>
-                            <MudTh>Наименование работы</MudTh>
+                            <MudTh><MudText Typo="Typo.subtitle1" Style="font-weight: 500">Наименование работы</MudText></MudTh>
                             <AuthorizeView Roles="@Role.Master">
                                 @if (_repair.Status == OrderStatus.InWork)
                                 {
-                                    <MudTh>Удаление</MudTh>
+                                    <MudTh><MudText Typo="Typo.subtitle1" Style="font-weight: 500">Удаление</MudText></MudTh>
                                 }
                             </AuthorizeView>
                         </HeaderContent>
                         <RowTemplate>
-                            <MudTd DataLabel="Наименование работы">@context.RepairWork?.Name</MudTd>
+                            <MudTd DataLabel="Наименование работы"><MudText Typo="Typo.subtitle1">@context.RepairWork?.Name</MudText></MudTd>
                             <AuthorizeView Roles="@Role.Master" Context="authContext">
                                 @if (_repair.Status == OrderStatus.InWork)
                                 {
