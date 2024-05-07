@@ -1,4 +1,5 @@
-﻿using OpticSalon.Domain.Enums;
+﻿using OpticSalon.Domain.Consts;
+using OpticSalon.Domain.Enums;
 using OpticSalon.Domain.ErrorMessages;
 using OpticSalon.Domain.Models;
 using OpticSalon.Domain.Repositories;
@@ -10,6 +11,7 @@ namespace OpticSalon.Domain.Services.Impl
     public class WarrantyRepairService : IWarrantyRepairService
     {
         private readonly IWarrantyRepairRepository _repairRepository;
+        private readonly IOrderRepository _orderRepository;
         private readonly IEmployeeService _employeeService;
 
         public WarrantyRepairService(IWarrantyRepairRepository repairRepository, IEmployeeService employeeService)
@@ -22,6 +24,37 @@ namespace OpticSalon.Domain.Services.Impl
         {
             try
             {
+                var existRepaires = await _repairRepository.GetRepairesByOrder(orderId);
+
+                if (existRepaires.FirstOrDefault(x => x.Status != OrderStatus.Issued) != null)
+                {
+                    return new ResultWithData<WarrantyRepair>()
+                    {
+                        Success = false,
+                        Description = WarrantyRepairServiceMessages.AlreadyExistActiveWarrantyRepair
+                    };
+                }
+
+                var existWarrantyRepairesDaysCount = 0;
+
+                foreach(var repair in existRepaires)
+                {
+                    existWarrantyRepairesDaysCount += ((DateTime)repair.IssueDate! - repair.CreatedDate).Days;
+                }
+
+                var order = await _orderRepository.GetOrderById(orderId);
+
+                var warrantyDate = ((DateTime)order!.IssueDate!).AddDays(WarrantyRepairConsts.WarrantyRepairPeriod + existWarrantyRepairesDaysCount);
+
+                if (warrantyDate < DateTime.Now)
+                {
+                    return new ResultWithData<WarrantyRepair>()
+                    {
+                        Success = false,
+                        Description = WarrantyRepairServiceMessages.WarrantyRepairPeriodExpired
+                    };
+                }
+
                 var availableMasterRes = await _employeeService.GetMasterForOrderAsync();
 
                 if (!availableMasterRes.Success)

@@ -58,6 +58,16 @@ namespace OpticSalon.Data.Repositories
             return res;
         }
 
+        public async Task<List<WarrantyRepair>> GetRepairesByOrder(int orderId)
+        {
+            var list = await Context.WarrantyRepairs
+                .Where(x => x.OrderId == orderId)
+                .Select(x => Mapper.Map(x))
+                .ToListAsync();
+
+            return list;
+        }
+
         public async Task<WarrantyRepair?> GetWarrantyRepairById(int id)
         {
             var repairDb = await Context.WarrantyRepairs
