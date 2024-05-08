@@ -8,6 +8,7 @@
 @using OpticSalon.Domain.Models
 
 @inject IOrderService OrderService
+@inject IWarrantyRepairService RepairService
 @inject ISnackbar Snackbar
 @inject IImageLoadingService ImageLoadingService
 @inject NavigationManager NavManager
@@ -414,6 +415,14 @@
 
     private async void CreateWarrantyRepair()
     {
+        var checkRes = await RepairService.CanCreateWarrantyRepair(_order.Id);
+
+        if (!checkRes.Success)
+        {
+            Snackbar.Add(checkRes.Description, Severity.Warning);
+            return;
+        }
+
         var parameters = new DialogParameters()
         {
             {"OrderId", _order.Id}
@@ -425,7 +434,7 @@
 
         if (!res.Canceled)
         {
-            //
+            NavManager.NavigateTo($"/warrantyRepair/{(int)res.Data}");
         }
     }
 }

@@ -14,52 +14,61 @@ namespace OpticSalon.Domain.Services.Impl
         private readonly IOrderRepository _orderRepository;
         private readonly IEmployeeService _employeeService;
 
-        public WarrantyRepairService(IWarrantyRepairRepository repairRepository, IEmployeeService employeeService)
+        public WarrantyRepairService(IWarrantyRepairRepository repairRepository, IOrderRepository orderRepository, IEmployeeService employeeService)
         {
             _repairRepository = repairRepository;
             _employeeService = employeeService;
+            _orderRepository = orderRepository;
         }
 
-        public async Task<ResultWithData<WarrantyRepair>> CreateRepair(int orderId, Defect defect, string? comment)
+        public async Task<BaseResult> CanCreateWarrantyRepair(int orderId)
+        {
+            var existRepaires = await _repairRepository.GetRepairesByOrder(orderId);
+
+            if (existRepaires.FirstOrDefault(x => x.Status != OrderStatus.Issued) != null)
+            {
+                return new BaseResult()
+                {
+                    Success = false,
+                    Description = WarrantyRepairServiceMessages.AlreadyExistActiveWarrantyRepair
+                };
+            }
+
+            var existWarrantyRepairesDaysCount = 0;
+
+            foreach (var repair in existRepaires)
+            {
+                existWarrantyRepairesDaysCount += ((DateTime)repair.IssueDate! - repair.CreatedDate).Days;
+            }
+
+            var order = await _orderRepository.GetOrderById(orderId);
+
+            var warrantyDate = ((DateTime)order!.IssueDate!).AddDays(WarrantyRepairConsts.WarrantyRepairPeriod + existWarrantyRepairesDaysCount);
+
+            if (warrantyDate < DateTime.Now)
+            {
+                return new BaseResult()
+                {
+                    Success = false,
+                    Description = WarrantyRepairServiceMessages.WarrantyRepairPeriodExpired
+                };
+            }
+
+            return new BaseResult()
+            {
+                Success = true
+            };
+        }
+
+        public async Task<ResultWithData<int>> CreateRepair(int orderId, Defect defect, string? comment)
         {
             try
             {
-                var existRepaires = await _repairRepository.GetRepairesByOrder(orderId);
-
-                if (existRepaires.FirstOrDefault(x => x.Status != OrderStatus.Issued) != null)
-                {
-                    return new ResultWithData<WarrantyRepair>()
-                    {
-                        Success = false,
-                        Description = WarrantyRepairServiceMessages.AlreadyExistActiveWarrantyRepair
-                    };
-                }
-
-                var existWarrantyRepairesDaysCount = 0;
-
-                foreach(var repair in existRepaires)
-                {
-                    existWarrantyRepairesDaysCount += ((DateTime)repair.IssueDate! - repair.CreatedDate).Days;
-                }
-
-                var order = await _orderRepository.GetOrderById(orderId);
-
-                var warrantyDate = ((DateTime)order!.IssueDate!).AddDays(WarrantyRepairConsts.WarrantyRepairPeriod + existWarrantyRepairesDaysCount);
-
-                if (warrantyDate < DateTime.Now)
-                {
-                    return new ResultWithData<WarrantyRepair>()
-                    {
-                        Success = false,
-                        Description = WarrantyRepairServiceMessages.WarrantyRepairPeriodExpired
-                    };
-                }
-
                 var availableMasterRes = await _employeeService.GetMasterForOrderAsync();
 
                 if (!availableMasterRes.Success)
                 {
-                    return new ResultWithData<WarrantyRepair>()
+                    return new ResultWithData<int>()
                     {
                         Success = false,
                         Description = availableMasterRes.Description
@@ -78,16 +87,17 @@ namespace OpticSalon.Domain.Services.Impl
 
                 var createdRepairId = await _repairRepository.AddWarrantyRepair(newRepair);
 
-                return new ResultWithData<WarrantyRepair>()
+                return new ResultWithData<int>()
                 {
                     Success = true,
                     Description = $"Гарантийный ремонт успешно оформлен! " +
-                    $"Для выполнения ремонта назначен мастер {availableMasterRes.Data!.Surname} {availableMasterRes.Data!.Name}"
+                    $"Для выполнения ремонта назначен мастер {availableMasterRes.Data!.Surname} {availableMasterRes.Data!.Name}",
+                    Data = createdRepairId
                 };
             }
             catch
             {
-                return new ResultWithData<WarrantyRepair>()
+                return new ResultWithData<int>()
                 {
                     Success = false,
                     Description = DefaultErrors.ServerError

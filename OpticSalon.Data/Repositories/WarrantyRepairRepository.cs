@@ -61,6 +61,8 @@ namespace OpticSalon.Data.Repositories
         public async Task<List<WarrantyRepair>> GetRepairesByOrder(int orderId)
         {
             var list = await Context.WarrantyRepairs
+                .Include(x => x.Defect)
+                .Include(x => x.Master)
                 .Where(x => x.OrderId == orderId)
                 .Select(x => Mapper.Map(x))
                 .ToListAsync();

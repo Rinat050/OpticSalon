@@ -47,7 +47,7 @@
         }
 
         Snackbar.Add(res.Description, Severity.Info);
-        MudDialog.Close(DialogResult.Ok(true));
+        MudDialog.Close(DialogResult.Ok(res.Data!));
     }
 
     private void Close() => MudDialog.Close();
