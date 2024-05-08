@@ -70,23 +70,23 @@
                         <MudIconButton Icon="@Icons.Material.Filled.Save" OnClick="@Save" Disabled="@_isSaveBtnDisabled" Style="min-width: 50px;" Color="MudBlazor.Color.Secondary"></MudIconButton>
                     </AuthorizeView>
                     <AuthorizeView Roles="@Role.Master">
-                        @if (_order.Status != OrderStatus.Issued && _order.Status != OrderStatus.Completed)
+                        @if (_order.Status != OrderStatus.Issued)
                         {
                             <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Статус заказа:</MudText>
                             <MudSelect @bind-Value="_order.Status" T="OrderStatus" Variant="Variant.Outlined"
                                 ToStringFunc="@((x) => x.GetDisplayName())">
                                 <MudSelectItem Value="@(OrderStatus.Created)">
-                                    <MudChip Size="Size.Small" Color="@_statusColors[OrderStatus.Created]">
+                                    <MudChip Class="m-0" Size="Size.Small" Color="@_statusColors[OrderStatus.Created]">
                                         <MudText Typo="Typo.subtitle1">@OrderStatus.Created.GetDisplayName()</MudText>
                                     </MudChip>
                                 </MudSelectItem>
                                 <MudSelectItem Value="@(OrderStatus.InWork)">
-                                    <MudChip Size="Size.Small" Color="@_statusColors[OrderStatus.InWork]">
+                                    <MudChip Class="m-0" Size="Size.Small" Color="@_statusColors[OrderStatus.InWork]">
                                         <MudText Typo="Typo.subtitle1">@OrderStatus.InWork.GetDisplayName()</MudText>
                                     </MudChip>
                                 </MudSelectItem>
                                 <MudSelectItem Value="@(OrderStatus.Completed)">
-                                    <MudChip Size="Size.Small" Color="@_statusColors[OrderStatus.Completed]">
+                                    <MudChip Class="m-0" Size="Size.Small" Color="@_statusColors[OrderStatus.Completed]">
                                         <MudText Typo="Typo.subtitle1">@OrderStatus.Completed.GetDisplayName()</MudText>
                                     </MudChip>
                                 </MudSelectItem>
@@ -376,6 +376,8 @@
         }
 
         Snackbar.Add(res.Description, Severity.Warning);
+        await LoadOrderData();
+        await InvokeAsync(StateHasChanged);
     }
 
     private void OpenFramePage(int id)
@@ -410,7 +412,9 @@
             return;
         }
 
-        Snackbar.Add("Статус заказа обновлен!", Severity.Success);
+        Snackbar.Add("Статус заказа обновлен!", Severity.Info);
+        await LoadOrderData();
+        await InvokeAsync(StateHasChanged);
     }
 
     private async void CreateWarrantyRepair()

@@ -267,6 +267,7 @@
 
         Snackbar.Add(res.Description, Severity.Info);
         await LoadOrderData();
+        await InvokeAsync(StateHasChanged);
     }
 
     private async void IssueOrder()
@@ -297,6 +298,8 @@
         }
 
         Snackbar.Add("Статус заказа обновлен!", Severity.Info);
+        await LoadOrderData();
+        await InvokeAsync(StateHasChanged);
     }
 
     private void OpenOrderPage(int id)

@@ -12,15 +12,17 @@ namespace OpticSalon.Domain.Services.Impl
     {
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IOrderRepository _orderRepository;
+        private readonly IWarrantyRepairRepository _repairRepository;
         private readonly IAuthService _authService;
         private readonly IUserService _userService;
 
-        public EmployeeService(IEmployeeRepository employeeRepository, 
+        public EmployeeService(IEmployeeRepository employeeRepository, IWarrantyRepairRepository repairRepository,
                 IAuthService authService, IOrderRepository orderRepository, IUserService userService)
         {
             _employeeRepository = employeeRepository;
             _authService = authService;
             _orderRepository = orderRepository;
+            _repairRepository = repairRepository;
             _userService = userService;
         }
 
@@ -87,6 +89,22 @@ namespace OpticSalon.Domain.Services.Impl
             try
             {
                 var mastersOrdersCount = await _orderRepository.GetMastersActiveOrdersCount();
+                var mastersRepairesCount = await _repairRepository.GetMastersActiveRepairesCount();
+
+                foreach(var masterRepair in mastersRepairesCount)
+                {
+                    var masterOrder = mastersOrdersCount.FirstOrDefault(x => x.MasterId == masterRepair.MasterId);
+
+                    if (masterOrder != null)
+                    {
+                        masterOrder.Count += masterRepair.Count;
+                    }
+                    else
+                    {
+                        mastersOrdersCount.Add(masterRepair);
+                    }
+                }
+
                 var allMastersRes = await _userService.GetEmployeesUserByRoleAsync(Role.Master);
 
                 if (!allMastersRes.Success)
@@ -149,6 +167,9 @@ namespace OpticSalon.Domain.Services.Impl
             try
             {
                 var manufactureOrders = await _orderRepository.GetMasterOrders(masterId);
+                var warrantyRepairOrders = await _repairRepository.GetMasterRepaires(masterId);
+
+                manufactureOrders.AddRange(warrantyRepairOrders);
 
                 var orderedList = manufactureOrders.OrderByDescending(x => x.CreatedDate).ToList();
 
