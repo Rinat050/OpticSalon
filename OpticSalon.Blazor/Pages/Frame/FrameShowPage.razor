@@ -1,5 +1,6 @@
 ﻿@page "/frameShow/{frameId:int}"
 @using MudBlazor.Utilities
+@using OpticSalon.Auth.Models
 @using OpticSalon.Domain.Models
 @using OpticSalon.Blazor.Services
 @inject IFrameService FrameService
@@ -90,29 +91,114 @@
                     </MudGrid>
                 </MudItem>
                 <MudItem xs="12" sm="6" md="4">
-                    <MudGrid>
-                        <MudItem xs="12">
-                           <MudContainer Class="p-0">
-                                <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Доступные цвета:</MudText>
-                                @foreach(var color in _frame.Colors)
+                    <AuthorizeView Context="AuthorizeContext">
+                        <NotAuthorized>
+                            <MudGrid>
+                                <MudItem xs="12">
+                                   <MudContainer Class="p-0">
+                                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Выберите цвет:</MudText>
+                                        @foreach(var color in _frame.Colors)
+                                        {
+                                            <MudFab Size="Size.Small" Class="m-1" style="@($"background-color: {color.Color.Value};")" 
+                                                OnClick="@(() => ColorSelect(color.Color))"></MudFab>
+                                        }
+                                    </MudContainer>
+                                </MudItem>
+                                @if (_selectedColor != null)
                                 {
-                                    <MudFab Size="Size.Small" Class="m-1" style="@($"background-color: {color.Color.Value};")" 
-                                        OnClick="@(() => ColorSelect(color.Color))"></MudFab>
+                                    <MudItem xs="12">
+                                        <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Выбранный цвет:</MudText>
+                                        <MudFab Size="Size.Medium" style="@($"background-color: {_selectedColor.Value};")"></MudFab>
+                                    </MudItem>
                                 }
-                            </MudContainer>
-                        </MudItem>
-                        @if (_selectedColor != null)
-                        {
-                            <MudItem xs="12">
-                                <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Выбранный цвет:</MudText>
-                                <MudFab Size="Size.Medium" style="@($"background-color: {_selectedColor.Value};")"></MudFab>
-                            </MudItem>
-                        }
-                        <MudItem xs="12">
-                            <MudButton FullWidth Variant="Variant.Filled" OnClick="CreateOrder"
-                                Color="MudBlazor.Color.Primary" Disabled="@(_selectedColor == null)" Class="mt-2">Оформить заказ</MudButton>
-                        </MudItem>
-                    </MudGrid>
+                                <MudItem xs="12">
+                                    <MudButton FullWidth Variant="Variant.Filled" OnClick="CreateOrder"
+                                        Color="MudBlazor.Color.Primary" Disabled="@(_selectedColor == null)" Class="mt-2">Оформить заказ</MudButton>
+                                </MudItem>
+                            </MudGrid>
+                        </NotAuthorized>
+                        <Authorized>
+                            <AuthorizeView Roles="@Role.Manager">
+                                <MudGrid>
+                                    <MudItem xs="12">
+                                       <MudContainer Class="p-0">
+                                            <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Выберите цвет:</MudText>
+                                            @foreach(var color in _frame.Colors)
+                                            {
+                                                <MudFab Size="Size.Small" Class="m-1" style="@($"background-color: {color.Color.Value};")" 
+                                                    OnClick="@(() => ColorSelect(color.Color))"></MudFab>
+                                            }
+                                        </MudContainer>
+                                    </MudItem>
+                                    @if (_selectedColor != null)
+                                    {
+                                        <MudItem xs="12">
+                                            <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Выбранный цвет:</MudText>
+                                            <MudFab Size="Size.Medium" style="@($"background-color: {_selectedColor.Value};")"></MudFab>
+                                        </MudItem>
+                                    }
+                                    <MudItem xs="12">
+                                        <MudButton FullWidth Variant="Variant.Filled" OnClick="CreateOrder"
+                                            Color="MudBlazor.Color.Primary" Disabled="@(_selectedColor == null)" Class="mt-2">Оформить заказ</MudButton>
+                                    </MudItem>
+                                </MudGrid>
+                            </AuthorizeView>
+                            <AuthorizeView Roles="@Role.Client">
+                                <MudGrid>
+                                    <MudItem xs="12">
+                                       <MudContainer Class="p-0">
+                                            <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Выберите цвет:</MudText>
+                                            @foreach(var color in _frame.Colors)
+                                            {
+                                                <MudFab Size="Size.Small" Class="m-1" style="@($"background-color: {color.Color.Value};")" 
+                                                    OnClick="@(() => ColorSelect(color.Color))"></MudFab>
+                                            }
+                                        </MudContainer>
+                                    </MudItem>
+                                    @if (_selectedColor != null)
+                                    {
+                                        <MudItem xs="12">
+                                            <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Выбранный цвет:</MudText>
+                                            <MudFab Size="Size.Medium" style="@($"background-color: {_selectedColor.Value};")"></MudFab>
+                                        </MudItem>
+                                    }
+                                    <MudItem xs="12">
+                                        <MudButton FullWidth Variant="Variant.Filled" OnClick="CreateOrder"
+                                            Color="MudBlazor.Color.Primary" Disabled="@(_selectedColor == null)" Class="mt-2">Оформить заказ</MudButton>
+                                    </MudItem>
+                                </MudGrid>
+                            </AuthorizeView>
+                            <AuthorizeView Roles="@Role.Admin">
+                                <MudGrid>
+                                    <MudItem xs="12">
+                                       <MudContainer Class="p-0">
+                                            <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Доступные цвета:</MudText>
+                                            @foreach(var color in _frame.Colors)
+                                            {
+                                                <MudFab Size="Size.Small" Class="m-1" style="@($"background-color: {color.Color.Value};")"></MudFab>
+                                            }
+                                        </MudContainer>
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudButton FullWidth Variant="Variant.Filled" Color="MudBlazor.Color.Primary" Class="mt-2">Редактировать</MudButton>
+                                    </MudItem>
+                                </MudGrid>
+                            </AuthorizeView>
+                            <AuthorizeView Roles="@Role.Master">
+                                <MudGrid>
+                                    <MudItem xs="12">
+                                       <MudContainer Class="p-0">
+                                            <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Доступные цвета:</MudText>
+                                            @foreach(var color in _frame.Colors)
+                                            {
+                                                <MudFab Size="Size.Small" Class="m-1" style="@($"background-color: {color.Color.Value};")"></MudFab>
+                                            }
+                                        </MudContainer>
+                                    </MudItem>
+                                </MudGrid>
+                            </AuthorizeView>
+                        </Authorized>
+                    </AuthorizeView>
                 </MudItem>
             </MudGrid>
         </MudCardContent>
