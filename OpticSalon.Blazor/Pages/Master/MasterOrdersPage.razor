@@ -1,12 +1,19 @@
 ﻿@page "/masterOrders"
 
 @using OpticSalon.Auth.Models
+@using OpticSalon.Blazor.Shared.Dialogs
 @using OpticSalon.Domain.Enums
 @using OpticSalon.Domain.Extensions
 @using OpticSalon.Domain.Models
+@using OpticSalon.Domain.ResultModels
 
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
 @inject IEmployeeService EmployeeService
+@inject IOrderService OrderService
+@inject IWarrantyRepairService RepairService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavManager
 
 @attribute [Authorize(Roles = Role.Master)]
 
@@ -81,10 +88,10 @@
         </MudItem>
     </ChildContent>
     <ItemRenderer>
-		<MudPaper Elevation="25" Class="pa-4 rounded-lg my-3">
-            <MudText Typo="Typo.body1"><MudIcon Size="Size.Small" Class="ma-2" Icon="@Icons.Material.Filled.Assignment"/>
-                Заказ №@context.OrderID</MudText>
-            <MudText Typo="Typo.body1">Тип: @context.OrderType.GetDisplayName()</MudText>
+		<MudPaper onclick="@(() => ShowOrder(context))" Elevation="25" Class="pa-4 rounded-lg my-3">
+            <MudText Typo="Typo.body1" Class="mb-1">
+                <MudIcon Size="Size.Small" Class="m-0" Icon="@GetListItemIcon(context.OrderType)"/> @GetListItemTitle(context)
+            </MudText>
             <MudText Typo="Typo.body1">Дата создания: @context.CreatedDate.ToShortDateString()</MudText>
         </MudPaper>
 	</ItemRenderer>
@@ -139,7 +146,7 @@
         }
     }
 
-    private void ItemUpdated(MudItemDropInfo<MasterOrder> dropItem)
+    private async Task ItemUpdated(MudItemDropInfo<MasterOrder> dropItem)
     {
         var dropStatus = dropItem.DropzoneIdentifier.GetValueFromName<OrderStatus>();
 
@@ -148,7 +155,75 @@
             return;
         }
 
+        var parameters = new DialogParameters
+        {
+            { "Question", "Вы точно желаете поменять статус заказа?" }
+        };
+
+        var dialog = await DialogService.ShowAsync<QuestionDialog>("Изменение статуса", parameters);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+        {
+            return;
+        }
+
+        if (dropItem.Item.OrderType == OrderType.ManufactureOrder)
+        {
+            var orderRes = await OrderService.GetOrderById(dropItem.Item.OrderID);
+
+            if (!orderRes.Success)
+            {
+                Snackbar.Add("Произошла ошибка...", Severity.Warning);
+                return;
+            }
+
+            var order = orderRes.Data!;
+            order.Status = dropStatus;
+
+            var updateResult = await OrderService.UpdateOrder(order);
+
+            if (!updateResult.Success)
+            {
+                Snackbar.Add("Произошла ошибка...", Severity.Warning);
+                return;
+            }
+        }
+        else
+        {
+            var repairRes = await RepairService.GetRepairById(dropItem.Item.OrderID);
+
+            if (!repairRes.Success)
+            {
+                Snackbar.Add("Произошла ошибка...", Severity.Warning);
+                return;
+            }
+
+            var repair = repairRes.Data!;
+            repair.Status = dropStatus;
+
+            var updateResult = await RepairService.UpdateRepair(repair);
+
+            if (!updateResult.Success)
+            {
+                Snackbar.Add("Произошла ошибка...", Severity.Warning);
+                return;
+            }
+        }
+
         dropItem.Item.OrderStatus = dropStatus;
+    }
+
+    private void ShowOrder(MasterOrder order)
+    {
+        if (order.OrderType == OrderType.ManufactureOrder)
+        {
+            NavManager.NavigateTo($"/orderShow/{order.OrderID}");
+        }
+        else
+        {
+            NavManager.NavigateTo($"/warrantyRepair/{order.OrderID}");
+        }
     }
 
     private void SearchTextChanged(string text)
@@ -169,5 +244,19 @@
         _filterOrders = _allOrders
                 .Where(x => x.OrderID.ToString().ToLower().Contains(_search)
                 || x.OrderType.GetDisplayName()!.ToLower().Contains(_search)).ToList();
+    }
+
+    private string GetListItemIcon(OrderType type)
+    {
+        if (type == OrderType.ManufactureOrder) return Icons.Material.Filled.Assignment;
+
+        return Icons.Material.Filled.Construction;
+    }
+
+    private string GetListItemTitle(MasterOrder order)
+    {
+        if (order.OrderType == OrderType.ManufactureOrder) return $"Заказ №{order.OrderID}";
+
+        return $"Гарантийный ремонт №{order.OrderID}";
     }
 }

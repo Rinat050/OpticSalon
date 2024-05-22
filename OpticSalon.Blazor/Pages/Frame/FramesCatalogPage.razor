@@ -41,8 +41,17 @@
             <MudIconButton Icon="@Icons.Material.Filled.Search" Color="MudBlazor.Color.Primary" Size="Size.Medium"
                         OnClick="@ChangeSearchDrawer"></MudIconButton>
         }
-        <MudButton Disabled="_isLoading" Style="min-width: 100px;" OnClick="ChangeDrawer"
+
+        @if (_isFilterBtnShort)
+        {
+            <MudIconButton Disabled="_isLoading" Style="min-width: 40px;" OnClick="ChangeDrawer" Icon="@Icons.Material.Filled.FilterAlt"
+                   Variant="Variant.Filled" Color="MudBlazor.Color.Primary"></MudIconButton>
+        }
+        else
+        {
+            <MudButton Disabled="_isLoading" Style="min-width: 100px;" OnClick="ChangeDrawer"
                    Variant="Variant.Filled" Color="MudBlazor.Color.Primary">Фильтр</MudButton>
+        }
     </MudStack>
 </MudPaper>
 
@@ -195,6 +204,7 @@ else
     private bool _isManager;
     private bool _isSerachDrawerOpen;
     private bool _isSearchBarVisible;
+    private bool _isFilterBtnShort;
     private bool _isClient;
     private bool _isImagesLoaded;
     private List<MudColor> _pickerColors { get; set; } = new();
@@ -205,6 +215,7 @@ else
         await FillFilterData();
         await FillFramesData();
         await SetSearchBar();
+        await SetFilterBtnSize();
     }
 
     private async Task SetIsManager()
@@ -279,6 +290,21 @@ else
         await InvokeAsync(StateHasChanged);
     }
 
+    private async Task SetFilterBtnSize()
+    {
+        var dimensions = await BrowserService.GetDimensions();
+
+        if (dimensions.Width < DeviceConsts.MobileDeviceWidth)
+        {
+            _isFilterBtnShort = true;
+            return;
+        }
+
+        _isFilterBtnShort = false;
+
+        await InvokeAsync(StateHasChanged);
+    }
+
     private async Task FillFramesData()
     {
         _isLoading = true;
@@ -324,7 +350,7 @@ else
     {
         var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
 
-        if (!userIdentity.Identity.IsAuthenticated)
+        if (!userIdentity.Identity!.IsAuthenticated)
         {
             return;
         }

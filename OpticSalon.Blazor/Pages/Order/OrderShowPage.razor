@@ -365,6 +365,19 @@
 
     private async Task Save()
     {
+        var parameters = new DialogParameters
+        {
+            { "Question", "Вы точно желаете поменять статус заказа?" }
+        };
+
+        var dialog = await DialogService.ShowAsync<QuestionDialog>("Изменение статуса", parameters);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+        {
+            return;
+        }
+
         _isSaveBtnDisabled = true;
         var res = await OrderService.UpdateOrder(_order);
         _isSaveBtnDisabled = false;

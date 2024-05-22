@@ -2,6 +2,6 @@
 {
     public static class OrderServiceMessages
     {
-        public const string SuccessUpdate = "Данные успешно обновлены!";
+        public const string SuccessUpdate = "Статус заказа успешно обновлен!";
     }
 }

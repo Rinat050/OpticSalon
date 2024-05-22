@@ -255,6 +255,19 @@
 
     private async Task Save()
     {
+        var parameters = new DialogParameters
+        {
+            { "Question", "Вы точно желаете обновить данные?" }
+        };
+
+        var dialog = await DialogService.ShowAsync<QuestionDialog>("Обновление данных", parameters);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+        {
+            return;
+        }
+
         _isSaveBtnDisabled = true;
         var res = await WarrantyRepairService.UpdateRepair(_repair);
         _isSaveBtnDisabled = false;

@@ -8,15 +8,10 @@ namespace OpticSalon.Auth.Services.Impl
     public class AuthService : IAuthService
     {
         private readonly UserManager<OpticSalonUser> _userManager;
-        private readonly SignInManager<OpticSalonUser> _signInManager;
-        private readonly OpticSalonIdentityContext _context;
 
-        public AuthService(UserManager<OpticSalonUser> userManager, 
-            SignInManager<OpticSalonUser> signInManager, OpticSalonIdentityContext context)
+        public AuthService(UserManager<OpticSalonUser> userManager)
         {
             _userManager = userManager;
-            _context = context;
-            _signInManager = signInManager;
         }
 
         public async Task<AuthResult> ChangeUserEmail(string oldEmail, string newEmail)
@@ -53,6 +48,7 @@ namespace OpticSalon.Auth.Services.Impl
                 return new AuthResult() { Success = false, Description = AuthResults.DefaultError };
             }
         }
+
         public async Task<AuthResult> ChangeUserPassword(string login, string oldPassword, string newPassword)
         {
             try
