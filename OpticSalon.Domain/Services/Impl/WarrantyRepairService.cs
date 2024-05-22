@@ -180,6 +180,20 @@ namespace OpticSalon.Domain.Services.Impl
             }
         }
 
+        public async Task<bool> IsClientRepair(int clientId, int repairId)
+        {
+            try
+            {
+                var res = await _repairRepository.IsClientRepair(clientId, repairId);
+
+                return res;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public async Task<BaseResult> UpdateRepair(WarrantyRepair repair)
         {
             try

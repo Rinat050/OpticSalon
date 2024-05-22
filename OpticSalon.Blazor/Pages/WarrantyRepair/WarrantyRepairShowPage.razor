@@ -10,6 +10,7 @@
 @inject NavigationManager NavManager
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 
 @attribute [Authorize(Roles = $"{Role.Client},{Role.Master},{Role.Admin},{Role.Manager}")]
 
@@ -24,6 +25,12 @@
 @if (_isNotFound)
 {
     <MudAlert Class="m-2" Severity="Severity.Normal">Не найдено...</MudAlert>
+    return;
+}
+
+@if (_isNotAvailable)
+{
+    <MudAlert Class="m-2" Severity="Severity.Warning">Нет доступа</MudAlert>
     return;
 }
 
@@ -219,6 +226,7 @@
     private OpticSalon.Domain.Models.WarrantyRepair _repair;
     private bool _isLoading;
     private bool _isNotFound;
+    private bool _isNotAvailable;
     private bool _isSaveBtnDisabled;
     private Dictionary<OrderStatus, MudBlazor.Color> _statusColors = new Dictionary<OrderStatus, MudBlazor.Color>()
     {
@@ -231,6 +239,7 @@
     protected async override Task OnInitializedAsync()
     {
         await LoadOrderData();
+        await SetIsNotAvailable();
     }
 
     private async Task LoadOrderData()
@@ -343,5 +352,29 @@
                 RepairWork = selected
             });
         }
+    }
+
+    private async Task SetIsNotAvailable()
+    {
+        if (_repair == null)
+        {
+            return;
+        }
+
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+
+        if (userIdentity is null)
+        {
+            return;
+        }
+
+        if (!userIdentity.IsInRole(Role.Client))
+        {
+            return;
+        }
+
+        var clientId = int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.ClientId).Value);
+
+        _isNotAvailable = !(await WarrantyRepairService.IsClientRepair(clientId, _repair.Id));
     }
 }

@@ -11,6 +11,6 @@ namespace OpticSalon.Domain.Services
         public decimal GetMaxFrameCost();
         public Task<ResultWithData<List<FrameShort>>> GetAllFrames(int? typeId, int? materialId, int? colorId, 
                                                     int? genderId, int? brandId, ClientPreferences? clientPreferences,
-                                                    decimal minCost, decimal maxCost, bool isForManager);
+                                                    decimal minCost, decimal maxCost, bool isForAdmin);
     }
 }

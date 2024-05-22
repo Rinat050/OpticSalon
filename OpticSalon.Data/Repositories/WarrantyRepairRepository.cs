@@ -110,6 +110,15 @@ namespace OpticSalon.Data.Repositories
             return repaires;
         }
 
+        public async Task<bool> IsClientRepair(int clientId, int repairId)
+        {
+            var res = await Context.WarrantyRepairs
+                        .Include(x => x.Order)
+                        .FirstOrDefaultAsync(x => x.Id == repairId && x.Order.ClientId == clientId);
+
+            return res != null;
+        }
+
         public async Task UpdateWarrantyRepair(WarrantyRepair repair)
         {
             var repairDb = Mapper.Map(repair);

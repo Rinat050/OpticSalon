@@ -6,7 +6,7 @@ namespace OpticSalon.Domain.Repositories
     {
         public Task<List<FrameShort>> GetFrames(int? typeId, int? materialId, int? colorId,
                                             int? genderId, int? brandId, ClientPreferences? clientPreferences,
-                                            decimal minCost, decimal maxCost, bool isForManager);
+                                            decimal minCost, decimal maxCost, bool isForAdmin);
         public Task<Frame?> GetFrameById(int id);
         public decimal GetMinFrameCost();
         public decimal GetMaxFrameCost();

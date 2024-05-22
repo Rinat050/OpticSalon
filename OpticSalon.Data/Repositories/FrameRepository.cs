@@ -26,7 +26,7 @@ namespace OpticSalon.Data.Repositories
 
         public async Task<List<FrameShort>> GetFrames(int? typeId, int? materialId, int? colorId, 
                                             int? genderId, int? brandId, ClientPreferences? clientPreferences,
-                                            decimal minCost, decimal maxCost, bool isForManager)
+                                            decimal minCost, decimal maxCost, bool isForAdmin)
         {
             Predicate<FrameDb> _type = x => true;
             Predicate<FrameDb> _material = x => true;
@@ -37,7 +37,7 @@ namespace OpticSalon.Data.Repositories
             Predicate<FrameDb> _preferences = x => true;
             Predicate<FrameDb> _allFrames = x => x.IsActive;
 
-            if (isForManager)
+            if (isForAdmin)
                 _allFrames = x => true;
 
             if (typeId != null)

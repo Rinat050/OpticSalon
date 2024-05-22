@@ -5,6 +5,7 @@ namespace OpticSalon.Domain.Repositories
     public interface IWarrantyRepairRepository
     {
         public Task<int> AddWarrantyRepair(WarrantyRepair repair);
+        public Task<bool> IsClientRepair(int clientId, int repairId);
         public Task UpdateWarrantyRepair(WarrantyRepair repair);
         public Task<WarrantyRepair?> GetWarrantyRepairById(int id);
         public Task<List<WarrantyRepairForClient>> GetWarrantyRepairsByClient(int clientId);

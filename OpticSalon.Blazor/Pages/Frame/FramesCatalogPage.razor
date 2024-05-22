@@ -201,7 +201,7 @@ else
 
     private bool _isDrawerOpen;
     private bool _isLoading;
-    private bool _isManager;
+    private bool _isAdmin;
     private bool _isSerachDrawerOpen;
     private bool _isSearchBarVisible;
     private bool _isFilterBtnShort;
@@ -211,14 +211,14 @@ else
 
     protected async override Task OnInitializedAsync()
     {
-        await SetIsManager();
+        await SetIsAdmin();
         await FillFilterData();
         await FillFramesData();
         await SetSearchBar();
         await SetFilterBtnSize();
     }
 
-    private async Task SetIsManager()
+    private async Task SetIsAdmin()
     {
         var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
 
@@ -234,7 +234,7 @@ else
             return;
         }
 
-        _isManager = await UserManager.IsInRoleAsync(user, Role.Manager) || await UserManager.IsInRoleAsync(user, Role.Admin);
+        _isAdmin = await UserManager.IsInRoleAsync(user, Role.Admin);
     }
 
     private async Task FillFilterData()
@@ -312,7 +312,7 @@ else
         var res = await FrameService.GetAllFrames(_filter.Type?.Id, _filter.Material?.Id,
                                 _filter.Color?.Id, _filter.Gender?.Id, _filter.Brand?.Id,
                                 _filter.IsClientPrefencesSelected ? _currentClientPreferences : null, 
-                                _filter.MinCost, _filter.MaxCost, _isManager);
+                                _filter.MinCost, _filter.MaxCost, _isAdmin);
 
         if (res.Success)
         {

@@ -41,12 +41,12 @@ namespace OpticSalon.Domain.Services.Impl
 
         public async Task<ResultWithData<List<FrameShort>>> GetAllFrames(int? typeId, int? materialId, 
                                 int? colorId, int? genderId, int? brandId, ClientPreferences? clientPreferences,
-                                decimal minCost, decimal maxCost, bool isForManager)
+                                decimal minCost, decimal maxCost, bool isForAdmin)
         {
             try
             {
                 var result = await _frameRepository.GetFrames(typeId, materialId, colorId, genderId, 
-                        brandId, clientPreferences, minCost, maxCost, isForManager);
+                        brandId, clientPreferences, minCost, maxCost, isForAdmin);
 
                 return new ResultWithData<List<FrameShort>>()
                 {

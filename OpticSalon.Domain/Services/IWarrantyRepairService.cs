@@ -12,5 +12,6 @@ namespace OpticSalon.Domain.Services
         public Task<ResultWithData<WarrantyRepair>> GetRepairById(int id);
         public Task<BaseResult> UpdateRepair(WarrantyRepair repair);
         public Task<BaseResult> CanCreateWarrantyRepair(int orderId);
+        public Task<bool> IsClientRepair(int clientId, int repairId);
     }
 }
