@@ -22,26 +22,43 @@
         <AuthorizeView Context="AuthorizeContext">
             <Authorized>
                 <AuthorizeView Roles="@Role.Manager">
-                    <MudTooltip Text="Выход">
-                        <MudIconButton Href="/logout" Size="Size.Medium" Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
+                    <MudTooltip Text="Заказы">
+                        <MudIconButton Href="/managerOrders" Size="Size.Medium" Icon="@Icons.Material.Filled.Assignment" Color="Color.Inherit" />
+                    </MudTooltip>
+                    <MudTooltip Text="Гарантийный ремонт">
+                        <MudIconButton Href="/managerWarrantyRepaires" Size="Size.Medium" Icon="@Icons.Material.Filled.Handyman" Color="Color.Inherit" />
+                    </MudTooltip>
+                    <MudTooltip Text="Клиенты">
+                        <MudIconButton Href="/clients" Size="Size.Medium" Icon="@Icons.Material.Filled.People" Color="Color.Inherit" />
                     </MudTooltip>
                 </AuthorizeView>
                 <AuthorizeView Roles="@Role.Client">
                     <MudTooltip Text="Профиль">
                         <MudIconButton Href="/clientProfile" Size="Size.Medium" Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" />
                     </MudTooltip>
-                    <MudTooltip Text="Выход">
-                        <MudIconButton Href="/logout" Size="Size.Medium" Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
-                    </MudTooltip>
                 </AuthorizeView>
                 <AuthorizeView Roles="@Role.Admin">
+                    <MudTooltip Text="Заказы">
+                        <MudIconButton Href="/managerOrders" Size="Size.Medium" Icon="@Icons.Material.Filled.Assignment" Color="Color.Inherit" />
+                    </MudTooltip>
+                    <MudTooltip Text="Гарантийный ремонт">
+                        <MudIconButton Href="/managerWarrantyRepaires" Size="Size.Medium" Icon="@Icons.Material.Filled.Handyman" Color="Color.Inherit" />
+                    </MudTooltip>
                     <MudTooltip Text="Сотрудники">
                         <MudIconButton Href="/employees" Size="Size.Medium" Icon="@Icons.Material.Filled.People" Color="Color.Inherit" />
                     </MudTooltip>
-                    <MudTooltip Text="Выход">
-                        <MudIconButton Href="/logout" Size="Size.Medium" Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
+                    <MudTooltip Text="Пакеты линз">
+                        <MudIconButton Href="/lensPackages" Size="Size.Medium" Icon="@Icons.Material.Outlined.Lens" Color="Color.Inherit" />
                     </MudTooltip>
                 </AuthorizeView>
+                <AuthorizeView Roles="@Role.Master">
+                    <MudTooltip Text="Заказы">
+                        <MudIconButton Href="/masterOrders" Size="Size.Medium" Icon="@Icons.Material.Filled.Assignment" Color="Color.Inherit" />
+                    </MudTooltip>
+                </AuthorizeView>
+                <MudTooltip Text="Выход">
+                    <MudIconButton Href="/logout" Size="Size.Medium" Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
+                </MudTooltip>
             </Authorized>
             <NotAuthorized>
                 <MudTooltip Text="Войти">
