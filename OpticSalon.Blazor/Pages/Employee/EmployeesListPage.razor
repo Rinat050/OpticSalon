@@ -23,7 +23,7 @@
     return;
 }
 
-<MudTable T="OpticSalon.Domain.Models.Employee" Items="_employees" Filter="new Func<OpticSalon.Domain.Models.Employee,bool>(Filter)">
+<MudTable @ref="@_table" T="OpticSalon.Domain.Models.Employee" Items="_employees" Filter="new Func<OpticSalon.Domain.Models.Employee,bool>(Filter)">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Список сотрудников</MudText>
         <MudSpacer />        
@@ -44,11 +44,18 @@
         <MudTd DataLabel="Номер телефона">@context.PhoneNumber</MudTd>
         <MudTd DataLabel="Адрес">@context.Address</MudTd>
     </RowTemplate>
+    <PagerContent>
+        <div class="d-flex flex-column align-center">
+            <MudPagination  SelectedChanged="PageChanged" Count="@((_table.GetFilteredItemsCount() + _table.RowsPerPage - 1) / _table.RowsPerPage)" Class="pa-4"/>
+            <MudTablePager HorizontalAlignment="HorizontalAlignment.Center" PageSizeOptions="new int[]{10, 25, 50, 100}" HidePagination="true" InfoFormat="{first_item}-{last_item} из {all_items}" RowsPerPageString="Отображать строк:"/>
+        </div>  
+    </PagerContent>
 </MudTable>
 
 @code {
     private bool _isLoading;
     private string _searchStr = "";
+    private MudTable<OpticSalon.Domain.Models.Employee> _table;
     private List<OpticSalon.Domain.Models.Employee> _employees = new();
 
     protected async override Task OnInitializedAsync()
@@ -99,5 +106,10 @@
         if ($"{employee.Surname} {employee.Name}".Contains(searchStr))
             return true;
         return false;
+    }
+
+    private void PageChanged(int i)
+    {
+        _table.NavigateTo(i - 1);
     }
 }

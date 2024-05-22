@@ -23,7 +23,7 @@
     return;
 }
 
-<MudTable OnRowClick="@RepairClick" T="OpticSalon.Domain.Models.WarrantyRepairForManager" Items="_repaires" Filter="new Func<OpticSalon.Domain.Models.WarrantyRepairForManager,bool>(Filter)">
+<MudTable @ref="@_table" OnRowClick="@RepairClick" T="OpticSalon.Domain.Models.WarrantyRepairForManager" Items="_repaires" Filter="new Func<OpticSalon.Domain.Models.WarrantyRepairForManager,bool>(Filter)">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Гарантийный ремонт</MudText>
         <MudSpacer />        
@@ -49,12 +49,19 @@
         </MudTd>
         <MudTd DataLabel="Дата выдачи">@(context.IssueDate == null ? "" : ((DateTime)context.IssueDate).ToShortDateString())</MudTd>
     </RowTemplate>
+    <PagerContent>
+        <div class="d-flex flex-column align-center">
+            <MudPagination  SelectedChanged="PageChanged" Count="@((_table.GetFilteredItemsCount() + _table.RowsPerPage - 1) / _table.RowsPerPage)" Class="pa-4"/>
+            <MudTablePager HorizontalAlignment="HorizontalAlignment.Center" PageSizeOptions="new int[]{10, 25, 50, 100}" HidePagination="true" InfoFormat="{first_item}-{last_item} из {all_items}" RowsPerPageString="Отображать строк:"/>
+        </div>  
+    </PagerContent>
 </MudTable>
 
 @code {
     private bool _isLoading;
     private string _searchStr = "";
     private List<OpticSalon.Domain.Models.WarrantyRepairForManager> _repaires = new();
+    private MudTable<OpticSalon.Domain.Models.WarrantyRepairForManager> _table;
     private Dictionary<OrderStatus, MudBlazor.Color> _statusColors = new Dictionary<OrderStatus, Color>()
     {
         {OrderStatus.Created , MudBlazor.Color.Surface},
@@ -103,5 +110,10 @@
     private void RepairClick(TableRowClickEventArgs<OpticSalon.Domain.Models.WarrantyRepairForManager> args)
     {
         NavManager.NavigateTo($"/warrantyRepair/{args.Item.Id}");
+    }
+
+    private void PageChanged(int i)
+    {
+        _table.NavigateTo(i - 1);
     }
 }
