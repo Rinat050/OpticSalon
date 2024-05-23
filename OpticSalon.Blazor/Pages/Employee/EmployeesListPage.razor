@@ -27,7 +27,7 @@
     <ToolBarContent>
         <MudText Typo="Typo.h6">Список сотрудников</MudText>
         <MudSpacer />        
-        <MudTextField @bind-Value="_searchStr" Variant="Variant.Outlined" Placeholder="Поиск" 
+        <MudTextField @bind-Value="_searchStr" Placeholder="Поиск" 
             Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" 
             IconSize="Size.Medium" Class="m-2"></MudTextField>
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@OpenCreateEmployeeDialog">Новый сотрудник</MudButton>
@@ -37,12 +37,17 @@
         <MudTh><MudTableSortLabel SortBy="new Func<OpticSalon.Domain.Models.Employee, object>(x=>x.Name)">Имя</MudTableSortLabel></MudTh>
         <MudTh><MudTableSortLabel SortBy="new Func<OpticSalon.Domain.Models.Employee, object>(x=>x.PhoneNumber)">Номер телефона</MudTableSortLabel></MudTh>
         <MudTh><MudTableSortLabel SortBy="new Func<OpticSalon.Domain.Models.Employee, object>(x=>x.Address)">Адрес</MudTableSortLabel></MudTh>
+        <MudTh>Редактирование</MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Фамилия">@context.Surname</MudTd>
         <MudTd DataLabel="Имя">@context.Name</MudTd>
         <MudTd DataLabel="Номер телефона">@context.PhoneNumber</MudTd>
         <MudTd DataLabel="Адрес">@context.Address</MudTd>
+        <MudTd DataLabel="Редактирование">
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Medium"
+                        OnClick="@(async () => await OpenEditEmployeeDialog(context))"></MudIconButton>
+        </MudTd>
     </RowTemplate>
     <PagerContent>
         <div class="d-flex flex-column align-center">
@@ -111,5 +116,20 @@
     private void PageChanged(int i)
     {
         _table.NavigateTo(i - 1);
+    }
+
+    private async Task OpenEditEmployeeDialog(OpticSalon.Domain.Models.Employee employee)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("Employee", employee);
+
+        var dialog = await DialogService.ShowAsync<EditEmployeeDialog>("Изменение данных сотрудника", parameters);
+
+        var res = await dialog.Result;
+
+        if (!res.Canceled)
+        {
+            await LoadData();
+        }
     }
 }

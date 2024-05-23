@@ -1,0 +1,140 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using OpticSalon.Auth.Models
+@using OpticSalon.Blazor.Data.Credentials
+@using OpticSalon.Domain.Models
+@using OpticSalon.Domain.ResultModels
+
+@inject IEmployeeService EmployeeService
+@inject UserManager<OpticSalonUser> UserManager
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<EditForm Model="Employee" OnValidSubmit="@Save">
+    <DataAnnotationsValidator />
+    <MudDialog Class="p-2">
+        <DialogContent>
+            <MudGrid Spacing="1">
+                <MudItem xs="12">
+                    <MudGrid Spacing="0" Class="m-0 p-0">
+                        <MudItem xs="12">
+                            <MudStack Spacing="0" AlignItems="AlignItems.Center" Row>
+                                <MudText Color="MudBlazor.Color.Secondary" Typo="Typo.h6" Class="m-0 p-0">@_user?.Email</MudText>
+                                <MudMenu Class="m-0 p-0" Icon="@Icons.Material.Filled.Settings" Color="MudBlazor.Color.Primary">
+                                    <MudMenuItem OnClick="@ChangeEmailDialogShow">Изменить адрес почты</MudMenuItem>
+                                    <MudMenuItem OnClick="@ChangePasswordDialogShow">Сменить пароль</MudMenuItem>
+                                    <MudMenuItem OnClick="@ChangeRoleDialogShow">Изменить роль</MudMenuItem>
+                                </MudMenu>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudStack Spacing="0" AlignItems="AlignItems.Center" Row>
+                                <MudText Color="MudBlazor.Color.Secondary" Typo="Typo.subtitle1" Class="m-0 p-0">Роль: @_userRole</MudText>
+                                @if (_userRole == Role.Master)
+                                {
+                                    <MudCheckBox @bind-Checked="Employee.IsActive" Label="Активен" Color="MudBlazor.Color.Primary"></MudCheckBox>
+                                }
+                            </MudStack>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Employee.Surname" For="@(() => Employee.Surname)"
+                                    Variant="Variant.Outlined" Label="Фамилия"></MudTextField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Employee.Name" For="@(() => Employee.Name)"
+                                    Variant="Variant.Outlined" Label="Имя"></MudTextField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Employee.PhoneNumber" For="@(() => Employee.PhoneNumber)"
+                                    Variant="Variant.Outlined" InputType="InputType.Telephone" Label="Телефон"
+                                    Mask="@(new PatternMask("+0 (000) 000 00-00"))"></MudTextField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Employee.Address" For="@(() => Employee.Address)"
+                                    Variant="Variant.Outlined" Label="Адрес"></MudTextField>
+                </MudItem>
+            </MudGrid>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="@Close">Отмена</MudButton>
+            <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Primary" 
+                    ButtonType="ButtonType.Submit">Сохранить</MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public Employee Employee { get; set; }
+    private OpticSalonUser _user = new();
+    private string _userRole = "";
+
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadUserInfo();
+    }
+
+    private void Close() => MudDialog.Close();
+
+    private async Task Save()
+    {        
+        var result = await EmployeeService.UpdateEmployee(Employee);
+
+        if (result.Success)
+        {
+            Snackbar.Add(result.Description, Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            Snackbar.Add(result.Description, Severity.Error);
+        }
+    }
+
+    private async Task LoadUserInfo()
+    {
+        var users = await UserManager.GetUsersForClaimAsync(new System.Security.Claims.Claim(UserClaims.EmployeeId, Employee.Id.ToString()));
+        _user = users.First();
+        var roles = await UserManager.GetRolesAsync(_user);
+        _userRole = roles.FirstOrDefault();
+    }
+
+    private async Task ChangeEmailDialogShow()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("CurrentEmail", _user.Email);
+
+        var dialog = await DialogService.ShowAsync<ChangeEmailDialog>("Изменение адреса почты", parameters);
+
+        var res = await dialog.Result;
+
+        if (!res.Canceled)
+        {
+            await LoadUserInfo();
+        }
+    }
+
+    private async Task ChangePasswordDialogShow()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("Email", _user.Email);
+
+        var dialog = await DialogService.ShowAsync<EmployeeChangePasswordDialog>("Изменение пароля", parameters);
+    }
+
+    private async Task ChangeRoleDialogShow()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("Email", _user.Email);
+
+        var dialog = await DialogService.ShowAsync<ChangeRoleDialog>("Изменение роли сотрудника", parameters);
+
+        var res = await dialog.Result;
+
+        if (!res.Canceled)
+        {
+            await LoadUserInfo();
+        }
+    }
+}

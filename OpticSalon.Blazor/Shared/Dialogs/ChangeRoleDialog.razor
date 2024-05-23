@@ -1,0 +1,55 @@
+﻿@using OpticSalon.Auth.Managers
+@using OpticSalon.Auth.Models
+@using OpticSalon.Auth.Services
+@using OpticSalon.Blazor.Data.Credentials
+
+@inject IAuthService AuthService
+@inject ISnackbar Snackbar
+
+<EditForm Model="_model" OnValidSubmit="@Change">
+    <DataAnnotationsValidator />
+    <MudDialog Class="p-2">
+        <DialogContent>
+            <MudGrid Spacing="1">
+                <MudItem xs="12">
+                    <MudSelect For="(() => _model.NewRole)" @bind-Value="_model.NewRole" T="string" 
+                        Label="Выберите роль" AnchorOrigin="Origin.BottomCenter" Variant="Variant.Outlined"> 
+                        @foreach (string role in Role.GetEmployeeRoles())
+                        {
+                            <MudSelectItem Value="role"></MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="@Close">Отмена</MudButton>
+            <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Primary" 
+                    ButtonType="ButtonType.Submit">Изменить</MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public string Email { get; set; }
+    private ChangeRoleCredentials _model = new ChangeRoleCredentials();
+
+    private async Task Change()
+    {
+        var result = await AuthService.ChangeUserRole(Email, _model.NewRole);
+
+        if (result.Success)
+        {
+            Snackbar.Add(result.Description, Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            Snackbar.Add(result.Description, Severity.Warning);
+        }
+    }
+
+    private void Close() => MudDialog.Close();
+}
+

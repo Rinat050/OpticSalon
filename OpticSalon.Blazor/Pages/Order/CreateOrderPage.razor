@@ -150,7 +150,15 @@
             return;
         }
 
-        Snackbar.Add(res.Description, Severity.Warning);
+        if (_isClient)
+        {
+            Snackbar.Add("Не удалось оформить заказ!", Severity.Warning);
+        }
+        else
+        {
+            Snackbar.Add(res.Description, Severity.Warning);
+        }
+
     }
 
     protected async override Task OnInitializedAsync()

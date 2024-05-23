@@ -8,5 +8,6 @@ namespace OpticSalon.Domain.Repositories
         public Task<List<Employee>> GetAllEmployeesAsync();
         public Task DeleteEmployeeAsync(Employee employee);
         public Task<Employee?> GetEmployeeByIdAsync(int id);
+        public Task UpdateEmployee(Employee employee);
     }
 }

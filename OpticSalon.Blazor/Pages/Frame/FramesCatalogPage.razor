@@ -357,6 +357,11 @@ else
 
         var user = await UserManager.FindByEmailAsync(userIdentity.Identity?.Name);
 
+        if (user == null)
+        {
+            return;
+        }
+
         _isClient = await UserManager.IsInRoleAsync(user, Role.Client);
 
         if (!_isClient)

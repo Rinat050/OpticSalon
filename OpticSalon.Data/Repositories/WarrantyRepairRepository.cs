@@ -46,8 +46,10 @@ namespace OpticSalon.Data.Repositories
         public async Task<List<MasterOrdersCount>> GetMastersActiveRepairesCount()
         {
             var res = await Context.WarrantyRepairs
+                .Include(x => x.Master)
                 .Where(x => (OrderStatus)x.Status != OrderStatus.Issued
-                        && (OrderStatus)x.Status != OrderStatus.Completed)
+                        && (OrderStatus)x.Status != OrderStatus.Completed
+                        && x.Master.IsActive)
                 .GroupBy(x => x.MasterId).Select(x => new MasterOrdersCount()
                 {
                     MasterId = x.Key,

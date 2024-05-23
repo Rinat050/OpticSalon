@@ -77,6 +77,59 @@ namespace OpticSalon.Auth.Services.Impl
             }
         }
 
+        public async Task<AuthResult> ChangeUserPassword(string login, string newPassword)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(login);
+
+                if (user == null)
+                {
+                    return new AuthResult() { Success = false, Description = AuthResults.NotFounded };
+                }
+
+                await _userManager.RemovePasswordAsync(user);
+                await _userManager.AddPasswordAsync(user, newPassword);
+
+                return new AuthResult() { Success = true, Description = AuthResults.SuccessPasswordUpdate };
+            }
+            catch
+            {
+                return new AuthResult() { Success = false, Description = AuthResults.DefaultError };
+            }
+        }
+
+        public async Task<AuthResult> ChangeUserRole(string login, string newRole)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(login);
+
+                if (user == null)
+                {
+                    return new AuthResult() { Success = false, Description = AuthResults.NotFounded };
+                }
+
+                var roles = await _userManager.GetRolesAsync(user);
+
+                if (roles.Count == 0)
+                {
+                    return new AuthResult() { Success = false, Description = AuthResults.InvalidRole };
+                }
+
+                var userRole = roles.FirstOrDefault();
+
+                await _userManager.RemoveFromRoleAsync(user, userRole);
+                await _userManager.AddToRoleAsync(user, newRole);
+
+                return new AuthResult() { Success = true, Description = AuthResults.SuccessRoleUpdate };
+            }
+            catch
+            {
+                return new AuthResult() { Success = false, Description = AuthResults.DefaultError };
+            }
+        }
+
         public async Task<AuthResult> RegisterUser(string login, string password, string role, int createdEntityId)
         {
             try

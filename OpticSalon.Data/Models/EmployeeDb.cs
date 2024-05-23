@@ -7,5 +7,6 @@
         public string Surname { get; set; } = null!;
         public string PhoneNumber { get; set; } = null!;
         public string Address { get; set; } = null!;
+        public bool IsActive { get; set; }
     }
 }

@@ -38,5 +38,14 @@ namespace OpticSalon.Data.Repositories
             var result = await Context.Employees.FirstOrDefaultAsync(x => x.Id == id);
             return result == null ? null : Mapper.Map(result);
         }
+
+        public async Task UpdateEmployee(Employee employee)
+        {
+            var employeeDb = Mapper.Map(employee);
+            Context.Employees.Update(employeeDb);
+            await Context.SaveChangesAsync();
+
+            Context.ChangeTracker.Clear();
+        }
     }
 }

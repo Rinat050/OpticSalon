@@ -2,6 +2,6 @@
 {
     public static class EmployeeServiceMessages
     {
-        public const string MasterNotFounded = "Мастера не найдены!";
+        public const string MasterNotFounded = "Не удалось назначить мастера!";
     }
 }

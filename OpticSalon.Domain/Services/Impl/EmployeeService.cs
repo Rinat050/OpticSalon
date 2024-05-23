@@ -39,6 +39,11 @@ namespace OpticSalon.Domain.Services.Impl
                     Address = address
                 };
 
+                if (role == Role.Master)
+                {
+                    newEmployee.IsActive = true;
+                }
+
                 var createdEmployee = await _employeeRepository.AddEmployeeAsync(newEmployee);
 
                 var registerRes = await _authService.RegisterUser(login, password, role, createdEmployee.Id);
@@ -134,12 +139,26 @@ namespace OpticSalon.Domain.Services.Impl
                     {
                         var res = await _employeeRepository.GetEmployeeByIdAsync(masterId);
 
+                        if (!res.IsActive)
+                        {
+                            continue;
+                        }
+
                         return new ResultWithData<Employee>()
                         {
                             Success = true,
                             Data = res
                         };
                     }
+                }
+
+                if (mastersOrdersCount.Count == 0)
+                {
+                    return new ResultWithData<Employee>()
+                    {
+                        Success = false,
+                        Description = ErrorMessages.EmployeeServiceMessages.MasterNotFounded
+                    };
                 }
 
                 var minCount = mastersOrdersCount.Min(x => x.Count);
@@ -182,6 +201,28 @@ namespace OpticSalon.Domain.Services.Impl
             catch
             {
                 return new ResultWithData<List<MasterOrder>>() { Success = false, Description = DefaultErrors.ServerError };
+            }
+        }
+
+        public async Task<BaseResult> UpdateEmployee(Employee employee)
+        {
+            try
+            {
+                await _employeeRepository.UpdateEmployee(employee);
+
+                return new BaseResult()
+                {
+                    Success = true,
+                    Description = SuccessMessages.EmployeeServiceMessages.SuccessUpdated
+                };
+            }
+            catch
+            {
+                return new BaseResult()
+                {
+                    Success = false,
+                    Description = DefaultErrors.ServerError
+                };
             }
         }
     }
