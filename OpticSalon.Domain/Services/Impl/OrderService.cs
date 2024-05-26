@@ -1,4 +1,5 @@
-﻿using OpticSalon.Domain.Enums;
+﻿using OpticSalon.Auth.Services;
+using OpticSalon.Domain.Enums;
 using OpticSalon.Domain.ErrorMessages;
 using OpticSalon.Domain.Models;
 using OpticSalon.Domain.Repositories;
@@ -11,11 +12,16 @@ namespace OpticSalon.Domain.Services.Impl
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IEmployeeService _employeeService;
+        private readonly IEmailService _emailService;
+        private readonly IUserService _userService;
 
-        public OrderService(IOrderRepository orderRepository, IEmployeeService employeeService)
+        public OrderService(IOrderRepository orderRepository, IEmployeeService employeeService, 
+            IEmailService emailService, IUserService userService)
         {
             _orderRepository = orderRepository;
             _employeeService = employeeService;
+            _emailService = emailService;
+            _userService = userService;
         }
 
         public async Task<ResultWithData<Order>> CreateOrder(Recipe recipe, Frame frame, Color frameColor,
@@ -160,6 +166,18 @@ namespace OpticSalon.Domain.Services.Impl
                 }
 
                 await _orderRepository.UpdateOrder(order);
+
+                if (order.Status == OrderStatus.Completed)
+                {
+                    var emailRes = await _userService.GetClientEmailAsync(order.Client.Id);
+
+                    if (emailRes.Success)
+                    {
+                        await _emailService.SendEmailAsync(emailRes.Data, "Заказ готов", 
+                            $"Ваш заказ № {order.Id} выполнен и готов к выдаче. " +
+                            "Для его получения назовите менеджеру номер заказа.");
+                    }
+                }
 
                 return new BaseResult()
                 {

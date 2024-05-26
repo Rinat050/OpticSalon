@@ -1,4 +1,5 @@
-﻿using OpticSalon.Domain.Consts;
+﻿using OpticSalon.Auth.Services;
+using OpticSalon.Domain.Consts;
 using OpticSalon.Domain.Enums;
 using OpticSalon.Domain.ErrorMessages;
 using OpticSalon.Domain.Models;
@@ -13,12 +14,17 @@ namespace OpticSalon.Domain.Services.Impl
         private readonly IWarrantyRepairRepository _repairRepository;
         private readonly IOrderRepository _orderRepository;
         private readonly IEmployeeService _employeeService;
+        private readonly IEmailService _emailService;
+        private readonly IUserService _userService;
 
-        public WarrantyRepairService(IWarrantyRepairRepository repairRepository, IOrderRepository orderRepository, IEmployeeService employeeService)
+        public WarrantyRepairService(IWarrantyRepairRepository repairRepository, IOrderRepository orderRepository, 
+            IEmployeeService employeeService, IEmailService emailService, IUserService userService)
         {
             _repairRepository = repairRepository;
             _employeeService = employeeService;
             _orderRepository = orderRepository;
+            _emailService = emailService;
+            _userService = userService;
         }
 
         public async Task<BaseResult> CanCreateWarrantyRepair(int orderId)
@@ -217,6 +223,20 @@ namespace OpticSalon.Domain.Services.Impl
                 }
 
                 await _repairRepository.UpdateWarrantyRepair(repair);
+
+                if (repair.Status == OrderStatus.Completed)
+                {
+                    var order = await _orderRepository.GetOrderById(repair.OrderId);
+
+                    var emailRes = await _userService.GetClientEmailAsync(order!.Client.Id);
+
+                    if (emailRes.Success)
+                    {
+                        await _emailService.SendEmailAsync(emailRes.Data, "Ремонт выполнен",
+                            $"Гарантийный ремонт № {repair.Id} выполнен. " +
+                            "Для получения очков назовите менеджеру номер ремонта.");
+                    }
+                }
 
                 return new BaseResult()
                 {

@@ -42,5 +42,39 @@ namespace OpticSalon.Auth.Services.Impl
                 };
             }
         }
+
+        public async Task<DataResult<string>> GetClientEmailAsync(int clientId)
+        {
+            try
+            {
+                var res = await _context.UserClaims
+                    .FirstOrDefaultAsync(x => x.ClaimValue == $"{clientId}" && x.ClaimType == UserClaims.ClientId);
+
+                if (res == null)
+                {
+                    return new DataResult<string>()
+                    {
+                        Success = false,
+                        Description = AuthResults.NotFounded
+                    };
+                }
+
+                var user = await _userManager.FindByIdAsync(res!.UserId.ToString());
+
+                return new DataResult<string>()
+                {
+                    Success = true,
+                    Data = user.UserName
+                };
+            }
+            catch
+            {
+                return new DataResult<string>()
+                {
+                    Success = false,
+                    Description = AuthResults.DefaultError
+                };
+            }
+        }
     }
 }
