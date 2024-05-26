@@ -8,7 +8,10 @@ namespace OpticSalon.Domain.Repositories
                                             int? genderId, int? brandId, ClientPreferences? clientPreferences,
                                             decimal minCost, decimal maxCost, bool isForAdmin);
         public Task<Frame?> GetFrameById(int id);
+        public Task<Frame?> GetFrameByModelAndBrand(string model, int brandId);
         public decimal GetMinFrameCost();
         public decimal GetMaxFrameCost();
+        public Task<Frame> AddFrame(Frame frame);
+        public Task UpdateFrame(Frame frame);
     }
 }

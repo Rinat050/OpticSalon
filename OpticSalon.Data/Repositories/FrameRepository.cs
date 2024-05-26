@@ -11,6 +11,31 @@ namespace OpticSalon.Data.Repositories
         {
         }
 
+        public async Task<Frame> AddFrame(Frame frame)
+        {
+            var frameDb = Mapper.MapFrame(frame);
+
+            frameDb.IsActive = true;
+
+            foreach (var item in frameDb.Colors)
+            {
+                item.Color = null!;
+            }
+
+            await Context.Frames.AddAsync(frameDb);
+            await Context.SaveChangesAsync();
+            Context.Entry(frameDb).State = EntityState.Detached;
+            Context.ChangeTracker.Clear();
+
+            var addedFrame = await GetFrameByModelAndBrand(frame.Model, frame.Brand.Id);
+
+            addedFrame!.MainImageName = $"{addedFrame.Id}-{addedFrame.MainImageName}";
+
+            await UpdateFrame(addedFrame);
+
+            return addedFrame;
+        }
+
         public async Task<Frame?> GetFrameById(int id)
         {
             var frame = await Context.Frames.Include(x => x.Gender)
@@ -21,6 +46,19 @@ namespace OpticSalon.Data.Repositories
                                       .Include(x => x.Sizes)
                                       .Include(x => x.Type)
                                       .FirstOrDefaultAsync(x => x.Id == id);
+            return frame is null ? null : Mapper.MapFrame(frame);
+        }
+
+        public async Task<Frame?> GetFrameByModelAndBrand(string model, int brandId)
+        {
+            var frame = await Context.Frames.Include(x => x.Gender)
+                                     .Include(x => x.Brand)
+                                     .Include(x => x.Material)
+                                     .Include(x => x.Colors)
+                                     .ThenInclude(x => x.Color)
+                                     .Include(x => x.Sizes)
+                                     .Include(x => x.Type)
+                                     .FirstOrDefaultAsync(x => x.BrandId == brandId && model.ToLower() == x.Model.ToLower());
             return frame is null ? null : Mapper.MapFrame(frame);
         }
 
@@ -87,6 +125,35 @@ namespace OpticSalon.Data.Repositories
         {
             var res = Context.Frames.Min(x => x.Cost);
             return res;
+        }
+
+        public async Task UpdateFrame(Frame frame)
+        {
+            var frameDb = Mapper.MapFrame(frame);
+
+            foreach (var item in frameDb.Colors)
+            {
+                item.Color = null!;
+                item.FrameId = frame.Id;
+            }
+
+            var existColorsDb = await Context.FrameColors
+                .Where(x => x.FrameId == frameDb.Id).ToListAsync();
+
+            foreach (var colorDb in existColorsDb)
+            {
+                var existColor = frameDb.Colors.FirstOrDefault(x => x.Id == colorDb.Id);
+
+                if (existColor == null)
+                {
+                    Context.FrameColors.Remove(colorDb);
+                }
+            }
+
+            Context.Frames.Update(frameDb);
+            await Context.SaveChangesAsync();
+
+            Context.ChangeTracker.Clear();
         }
     }
 }

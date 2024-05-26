@@ -76,8 +76,10 @@ namespace OpticSalon.MinIO
 
             var putObjectArgs = new PutObjectArgs()
                 .WithBucket(bucketName)
+                .WithObject(fileName)
                 .WithStreamData(fileStream)
-                .WithFileName(fileName);
+                .WithObjectSize(fileStream.Length);
+
 
             await _client.PutObjectAsync(putObjectArgs).ConfigureAwait(false);
         }

@@ -6,6 +6,7 @@
 @using OpticSalon.Blazor.Data.Consts
 @using OpticSalon.Blazor.Data.Credentials
 @using OpticSalon.Blazor.Services
+@using OpticSalon.Blazor.Shared.Dialogs
 @using OpticSalon.Domain.Models
 
 @inject UserManager<OpticSalonUser> UserManager
@@ -19,6 +20,7 @@
 @inject IClientService ClientService
 @inject IImageLoadingService ImageLoadingService
 @inject NavigationManager NavManager
+@inject IDialogService DialogService
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Каталог</PageTitle>
@@ -186,6 +188,10 @@ else
         </MudGrid>
     </MudDrawerContainer>
 </MudDrawer>
+
+<AuthorizeView Roles="@Role.Admin">
+    <MudFab OnClick="@OpenAddFrameDialog" style="position: fixed; bottom: 20px; right: 20px;" Color="MudBlazor.Color.Primary" Icon="@Icons.Material.Filled.Add"></MudFab>
+</AuthorizeView>
 
 @code {
     private List<FrameShort> _allFrames = new();
@@ -419,5 +425,21 @@ else
     private void ShowFrame(int frameId)
     {
         NavManager.NavigateTo($"/frameShow/{frameId}");
+    }
+
+    private async Task OpenAddFrameDialog()
+    {
+        var parameters = new DialogParameters();
+        var options = new DialogOptions { FullWidth = true, MaxWidth = MaxWidth.Large };
+        parameters.Add("IsNew", true);
+
+        var dialog = await DialogService.ShowAsync<EditFrameDialog>("Добавление оправы", parameters, options: options);
+
+        var res = await dialog.Result;
+
+        if (!res.Canceled)
+        {
+            NavManager.NavigateTo($"/");
+        }
     }
 }

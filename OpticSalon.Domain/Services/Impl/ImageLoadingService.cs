@@ -81,6 +81,7 @@ namespace OpticSalon.Domain.Services.Impl
         {
             try
             {
+                var im = await _fileStorage.GetFileStream(ImageStorageConsts.FrameImagesBucket, "BULGET1776.jpg");
                 await _fileStorage.UploadFile(ImageStorageConsts.FrameImagesBucket, fileName, fileStream);
 
                 return new BaseResult()

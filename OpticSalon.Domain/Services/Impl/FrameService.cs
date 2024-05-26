@@ -15,6 +15,49 @@ namespace OpticSalon.Domain.Services.Impl
             _frameRepository = frameRepository;
         }
 
+        public async Task<ResultWithData<Frame>> CreateFrame(Frame frame)
+        {
+            try
+            {
+                var existFrame = await _frameRepository.GetFrameByModelAndBrand(frame.Model, frame.Brand.Id);
+
+                if (existFrame != null)
+                {
+                    return new ResultWithData<Frame>()
+                    {
+                        Success = false,
+                        Description = FrameServiceMessages.FrameWithThisModelAndBrandExist
+                    };
+                }
+
+                if (frame.Colors.Count == 0)
+                {
+                    return new ResultWithData<Frame>()
+                    {
+                        Success = false,
+                        Description = FrameServiceMessages.ColorsNotFounded
+                    };
+                }
+
+                var result = await _frameRepository.AddFrame(frame);
+
+                return new ResultWithData<Frame>()
+                {
+                    Success = true,
+                    Data = result,
+                    Description = FrameServiceMessages.SuccessCreate
+                };
+            }
+            catch
+            {
+                return new ResultWithData<Frame>()
+                {
+                    Success = false,
+                    Description = DefaultErrors.ServerError
+                };
+            }
+        }
+
         public async Task<ResultWithData<List<FrameShort>>> GetAllFrames()
         {
             try
@@ -116,6 +159,48 @@ namespace OpticSalon.Domain.Services.Impl
             catch
             {
                 return 0;
+            }
+        }
+
+        public async Task<BaseResult> UpdateFrame(Frame frame)
+        {
+            try
+            {
+                var existFrame = await _frameRepository.GetFrameByModelAndBrand(frame.Model, frame.Brand.Id);
+
+                if (existFrame != null && existFrame.Id != frame.Id)
+                {
+                    return new BaseResult()
+                    {
+                        Success = false,
+                        Description = FrameServiceMessages.FrameWithThisModelAndBrandExist
+                    };
+                }
+
+                if (frame.Colors.Count == 0)
+                {
+                    return new BaseResult()
+                    {
+                        Success = false,
+                        Description = FrameServiceMessages.ColorsNotFounded
+                    };
+                }
+
+                await _frameRepository.UpdateFrame(frame);
+
+                return new BaseResult()
+                {
+                    Success = true,
+                    Description = FrameServiceMessages.SuccessUpdate
+                };
+            }
+            catch
+            {
+                return new BaseResult()
+                {
+                    Success = false,
+                    Description = DefaultErrors.ServerError
+                };
             }
         }
     }

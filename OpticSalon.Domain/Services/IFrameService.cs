@@ -5,6 +5,8 @@ namespace OpticSalon.Domain.Services
 {
     public interface IFrameService
     {
+        public Task<ResultWithData<Frame>> CreateFrame(Frame frame);
+        public Task<BaseResult> UpdateFrame(Frame frame);
         public Task<ResultWithData<List<FrameShort>>> GetAllFrames();
         public Task<ResultWithData<Frame>> GetFrameById(int id);
         public decimal GetMinFrameCost();

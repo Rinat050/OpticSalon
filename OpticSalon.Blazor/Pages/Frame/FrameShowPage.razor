@@ -1,12 +1,16 @@
 ﻿@page "/frameShow/{frameId:int}"
+
 @using MudBlazor.Utilities
 @using OpticSalon.Auth.Models
+@using OpticSalon.Blazor.Shared.Dialogs
 @using OpticSalon.Domain.Models
 @using OpticSalon.Blazor.Services
+
 @inject IFrameService FrameService
 @inject IImageLoadingService ImageLoadingService
 @inject BrowserService BrowserService
 @inject IJSRuntime JS
+@inject IDialogService DialogService
 @inject NavigationManager NavManager
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 
@@ -180,7 +184,7 @@
                                         </MudContainer>
                                     </MudItem>
                                     <MudItem xs="12">
-                                        <MudButton FullWidth Variant="Variant.Filled" Color="MudBlazor.Color.Primary" Class="mt-2">Редактировать</MudButton>
+                                        <MudButton FullWidth Variant="Variant.Filled" Color="MudBlazor.Color.Primary" OnClick="(async () => await OpenEditDialog(_frame))" Class="mt-2">Редактировать</MudButton>
                                     </MudItem>
                                 </MudGrid>
                             </AuthorizeView>
@@ -258,5 +262,21 @@
         }
 
         NavManager.NavigateTo($"/createOrder/{_frame.Id}/{_selectedColor.Id}");
+    }
+
+    private async Task OpenEditDialog(Frame frame)
+    {
+        var parameters = new DialogParameters();
+        var options = new DialogOptions { FullWidth = true, MaxWidth = MaxWidth.Large };
+        parameters.Add("Frame", frame);
+
+        var dialog = await DialogService.ShowAsync<EditFrameDialog>("Изменение оправы", parameters, options: options);
+
+        var res = await dialog.Result;
+
+        if (!res.Canceled)
+        {
+            NavManager.NavigateTo($"/frameShow/{_frame.Id}");
+        }
     }
 }

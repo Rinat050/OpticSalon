@@ -12,7 +12,7 @@ namespace OpticSalon.Domain.Models
         MaxLength(500, ErrorMessage = "Максимум 500 символов!")]
         public string Description { get; set; } = null!;
         [Required(ErrorMessage = "Обязательное поле!")]
-        [Range(1, int.MaxValue, ErrorMessage = "Стоимость должен быть больше 0!")]
+        [Range(1, int.MaxValue, ErrorMessage = "Стоимость должна быть больше 0!")]
         public decimal Cost { get; set; }
         public bool IsDeleted { get; set; }
     }

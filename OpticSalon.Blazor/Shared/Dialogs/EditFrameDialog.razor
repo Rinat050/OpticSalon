@@ -1,0 +1,316 @@
+﻿@using OpticSalon.Domain.FilterData
+@using OpticSalon.Domain.Models
+@using OpticSalon.Domain.ResultModels
+
+@inject ISnackbar Snackbar
+@inject IFrameService FrameService
+@inject IFrameTypeService FrameTypeService
+@inject IFrameMaterialService FrameMaterialService
+@inject IBrandService BrandService
+@inject IDialogService DialogService
+@inject IGenderService GenderService
+@inject IImageLoadingService ImageLoadingService
+@inject IJSRuntime JsRuntime
+
+<EditForm Model="Frame" Context="editContext" OnValidSubmit="@Save">
+    <DataAnnotationsValidator />
+    <MudDialog Class="p-2">
+        <DialogContent>
+            <MudGrid Justify="Justify.SpaceAround" Spacing="3">
+                <MudItem xs="12" sm="8" md="4">
+                    <div style="display:flex; justify-content:center; margin-bottom: 20px;">
+                        <MudImage id="frame-image" Src="@GetImageSrc(Frame.MainImageName)" Elevation="2" Style="min-width:150px; width: 85%;" Alt="" />
+                    </div>
+                    <div style="display:flex; justify-content:center;">
+                        <MudFileUpload FilesChanged="UploadFile" Accept=".jpeg, .jpg" T="IBrowserFile">
+                            <ButtonTemplate>
+                                <MudFab HtmlTag="label"
+                                        Color="MudBlazor.Color.Primary"
+                                        Icon="@Icons.Material.Filled.Image"
+                                        Label="Выбрать изображение"
+                                        for="@context"/>
+                            </ButtonTemplate>   
+                        </MudFileUpload>
+                    </div>
+                </MudItem>  
+                <MudItem xs="12" sm="6" md="4">
+                    <MudGrid Spacing="1">
+                        <MudItem xs="12">
+                           <MudSelect T="Brand" @bind-Value="Frame.Brand" Variant="Variant.Outlined"
+                                       Label="Бренд" ToStringFunc="@((x) => x?.Name)" For="@(() => Frame.Brand)">
+                                @foreach (var brand in _frameBrands)
+                                {
+                                    <MudSelectItem Value="@(brand)" />
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudTextField @bind-Value="Frame.Model" For="@(() => Frame.Model)"
+                                    Variant="Variant.Outlined" Label="Модель"></MudTextField>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudSelect T="FrameType" @bind-Value="Frame.Type" Variant="Variant.Outlined"
+                                       Label="Тип оправы" ToStringFunc="@((x) => x?.Name)" For="@(() => Frame.Type)">
+                                @foreach (var type in _frameTypes)
+                                {
+                                    <MudSelectItem Value="@(type)" />
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudSelect T="FrameMaterial" @bind-Value="Frame.Material" Variant="Variant.Outlined"
+                                       Label="Материал оправы" ToStringFunc="@((x) => x?.Name)" For="@(() => Frame.Material)">
+                                @foreach (var material in _frameMaterials)
+                                {
+                                    <MudSelectItem Value="@(material)" />
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudSelect T="Gender" @bind-Value="Frame.Gender" Variant="Variant.Outlined"
+                                   Label="Пол" ToStringFunc="@((x) => x?.Name)" For="@(() => Frame.Gender)">
+                                @foreach (var gender in _genders)
+                                {
+                                    <MudSelectItem Value="@(gender)" />
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudNumericField @bind-Value="Frame.Cost" Min="0" For="@(() => Frame.Cost)"
+                                    Variant="Variant.Outlined" Label="Стоимость"></MudNumericField>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="4">
+                    <MudGrid>
+                        <MudItem xs="12">
+                            <MudGrid Spacing="1">
+                                <MudItem xs="12">
+                                    <MudText Typo="Typo.h6" Color="MudBlazor.Color.Secondary">Размеры</MudText>
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudSelect T="int" @bind-Value="Frame.Sizes.LensWidth" Variant="Variant.Outlined" 
+                                        Label="Ширина линзы" For="@(() => Frame.Sizes.LensWidth)">
+                                       @foreach(var size in FrameSizesFilter.GetLensWidthRange())
+                                       {
+                                            <MudSelectItem Value="@(size)" />
+                                       }
+                                   </MudSelect>
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudSelect T="int" @bind-Value="Frame.Sizes.DistanceBetweenLens" Variant="Variant.Outlined" 
+                                        Label="Ширина моста" For="@(() => Frame.Sizes.DistanceBetweenLens)">
+                                       @foreach(var size in FrameSizesFilter.GetDistanceBetweenLensRange())
+                                       {
+                                            <MudSelectItem Value="@(size)" />
+                                       }
+                                   </MudSelect>
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudSelect T="int" @bind-Value="Frame.Sizes.TempleLenght" Variant="Variant.Outlined" 
+                                        Label="Длина заушника" For="@(() => Frame.Sizes.TempleLenght)">
+                                       @foreach(var size in FrameSizesFilter.GetTempleLenghtRange())
+                                       {
+                                            <MudSelectItem Value="@(size)" />
+                                       }
+                                   </MudSelect>
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudContainer Class="p-0">
+                                <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Доступные цвета:</MudText>
+                                @foreach(var color in Frame.Colors)
+                                {
+                                    <MudFab Size="Size.Small" Class="m-1" IconColor="MudBlazor.Color.Error" StartIcon="@Icons.Material.Filled.Delete" 
+                                        style="@($"background-color: {color.Color.Value};")" OnClick="(() => DeleteColor(color))"></MudFab>
+                                }
+                                <MudFab Size="Size.Small" Class="m-1" OnClick="(async () => await AddColor())" Color="MudBlazor.Color.Primary" StartIcon="@Icons.Material.Filled.Add"></MudFab>
+                            </MudContainer>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+            </MudGrid>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="@Close">Отмена</MudButton>
+            <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Primary" 
+                    ButtonType="ButtonType.Submit">Сохранить</MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public Frame Frame { get; set; } = new() {Sizes = new FrameSizes()};
+    [Parameter] public bool IsNew { get; set; }
+
+    private List<FrameMaterial> _frameMaterials = new();
+    private List<FrameType> _frameTypes = new();
+    private List<Brand> _frameBrands = new();
+    private List<Gender> _genders = new();
+
+    private IBrowserFile _image;
+    private long maxFileSize = 1024 * 1024 * 10;
+
+    private void Close() => MudDialog.Close();
+
+    protected async override Task OnInitializedAsync()
+    {
+        await FillData();
+
+        if (IsNew)
+        {
+            Frame.Sizes.LensWidth = FrameSizesFilter.GetLensWidthRange().FirstOrDefault();
+            Frame.Sizes.DistanceBetweenLens = FrameSizesFilter.GetDistanceBetweenLensRange().FirstOrDefault();
+            Frame.Sizes.TempleLenght = FrameSizesFilter.GetTempleLenghtRange().FirstOrDefault();
+        }
+    }
+
+    private async Task Save()
+    {
+        if (IsNew)
+        {
+            if (_image == null)
+            {
+                Snackbar.Add("Выберите изображение оправы!", Severity.Warning);
+                return;
+            }
+
+            string fileExtension = System.IO.Path.GetExtension(_image.Name);
+
+            Frame.MainImageName = $"{Frame.Brand.Name}{Frame.Model}{fileExtension}";
+
+            var result = await FrameService.CreateFrame(Frame);
+
+            if (!result.Success)
+            {
+                Snackbar.Add(result.Description, Severity.Warning);
+                return;
+            }
+
+            var uploadRes = await UploadFrameImage(result.Data!.MainImageName);
+
+            if (!uploadRes)
+            {
+                Snackbar.Add("Не удалось добавить оправу!", Severity.Warning);
+                return;
+            }
+
+            Snackbar.Add(result.Description, Severity.Success);
+        }
+        else
+        {
+            var result = await FrameService.UpdateFrame(Frame);
+
+            if (!result.Success)
+            {
+                Snackbar.Add(result.Description, Severity.Warning);
+                return;
+            }
+
+            if (_image != null)
+            {
+                var uploadRes = await UploadFrameImage(Frame.MainImageName);
+
+                if (!uploadRes)
+                {
+                    Snackbar.Add("Не удалось добавить оправу!", Severity.Warning);
+                    return;
+                }
+            }
+
+            Snackbar.Add(result.Description, Severity.Success);
+        }   
+        
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private string GetImageSrc(string name)
+    {
+        return $"https://localhost:7087/getImage?name={name}";
+    }
+
+    private async Task<bool> UploadFrameImage(string fileName)
+    {
+        var memoryStream = new MemoryStream();
+
+        await _image.OpenReadStream(maxAllowedSize: maxFileSize).CopyToAsync(memoryStream);
+
+        memoryStream.Position = 0;
+
+        var res = await ImageLoadingService.UploadFrameImageAsync(memoryStream, fileName);
+
+        return res.Success;
+    }
+
+    private async Task FillData()
+    {
+        var frameTypeResult = await FrameTypeService.GetAllFrameTypes();
+
+        if (frameTypeResult.Success)
+            _frameTypes = frameTypeResult.Data!;
+
+        var frameMaterialResult = await FrameMaterialService.GetAllFrameMaterials();
+
+        if (frameMaterialResult.Success)
+            _frameMaterials = frameMaterialResult.Data!;
+
+        var brandResult = await BrandService.GetAllBrands();
+
+        if (brandResult.Success)
+            _frameBrands = brandResult.Data!;
+
+        var genderResult = await GenderService.GetAllGenders();
+
+        if (genderResult.Success)
+            _genders = genderResult.Data!;
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void DeleteColor(FrameColor color)
+    {
+        Frame.Colors.Remove(color);
+    }
+
+    private async Task AddColor()
+    {
+        var selectedColors = Frame.Colors.Select(x => x.Color).ToList();
+
+        var parameters = new DialogParameters();
+        parameters.Add("SelectedColors", selectedColors);
+        var options = new DialogOptions { FullWidth = true, MaxWidth = MaxWidth.ExtraSmall};
+        var dialog = await DialogService.ShowAsync<AddFrameColorDialog>("Добавление цвета", parameters, options: options);
+
+        var res = await dialog.Result;
+
+        if (!res.Canceled)
+        {
+            var color = (OpticSalon.Domain.Models.Color)res.Data!;
+
+            Frame.Colors.Add(new FrameColor() { FrameId = Frame.Id, Color = color });
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task UploadFile(IBrowserFile file)
+    {
+        _image = file;
+
+        try
+        {
+            var stream = _image.OpenReadStream(maxAllowedSize: maxFileSize);
+            var dotnetImageStream = new DotNetStreamReference(stream);
+            var res = await JsRuntime.InvokeAsync<bool>("getById", "frame-image");
+            if (res)
+            {
+                await JsRuntime.InvokeVoidAsync("setImage", "frame-image", dotnetImageStream);
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Произошла ошибка...", Severity.Warning);
+        }
+    }
+}

@@ -1,0 +1,52 @@
+﻿@using MudBlazor.Utilities
+
+@inject IFrameColorService FrameColorService
+
+<MudDialog Class="p-2">
+    <DialogContent>
+        <MudColorPicker PickerVariant="PickerVariant.Static" ValueChanged="@ColorChanged" ColorPickerView="ColorPickerView.Palette" Palette="_pickerColors" />
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public List<OpticSalon.Domain.Models.Color> SelectedColors { get; set; } = new();
+
+    private List<MudColor> _pickerColors { get; set; } = new();
+    private List<OpticSalon.Domain.Models.Color> _frameColors = new();
+
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadColors();
+    }
+
+    private async Task LoadColors()
+    {
+        var frameColorsResult = await FrameColorService.GetAllFrameColors();
+
+        if (frameColorsResult.Success)
+        {
+            _frameColors = frameColorsResult.Data!;
+            DeleteSelectedColors();
+            _frameColors.ForEach(x => _pickerColors.Add(new MudColor(x.Value)));
+        }
+    }
+
+    private void ColorChanged(MudColor mudColor)
+    {
+        var color = mudColor.Value.Substring(0, mudColor.Value.Length - 2);
+
+        var frameColor = _frameColors.FirstOrDefault(x => x.Value.ToLower() == color)!;
+
+        MudDialog.Close(DialogResult.Ok(frameColor));
+    }
+
+    private void DeleteSelectedColors()
+    {
+        foreach(var color in SelectedColors)
+        {
+            var currentColor = _frameColors.FirstOrDefault(x => x.Id == color.Id);
+            _frameColors.Remove(currentColor);
+        }
+    }
+}
