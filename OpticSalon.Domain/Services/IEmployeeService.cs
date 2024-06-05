@@ -8,7 +8,7 @@ namespace OpticSalon.Domain.Services
         public Task<ResultWithData<Employee>> CreateEmployeeAsync(string login, string password, string name,
                                                 string surname, string phoneNumber, string address, string role);
         public Task<ResultWithData<List<Employee>>> GetAllEmployeesAsync();
-        public Task<ResultWithData<List<MasterOrder>>> GetMasterOrdersAsync(int masterId);
+        public Task<ResultWithData<List<MasterOrder>>> GetMasterOrdersAsync(int masterId, DateTime from, DateTime to);
         public Task<ResultWithData<Employee>> GetMasterForOrderAsync();
         public Task<BaseResult> UpdateEmployee(Employee employee);
     }

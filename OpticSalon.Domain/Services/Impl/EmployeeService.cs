@@ -181,12 +181,12 @@ namespace OpticSalon.Domain.Services.Impl
             }
         }
 
-        public async Task<ResultWithData<List<MasterOrder>>> GetMasterOrdersAsync(int masterId)
+        public async Task<ResultWithData<List<MasterOrder>>> GetMasterOrdersAsync(int masterId, DateTime from, DateTime to)
         {
             try
             {
-                var manufactureOrders = await _orderRepository.GetMasterOrders(masterId);
-                var warrantyRepairOrders = await _repairRepository.GetMasterRepaires(masterId);
+                var manufactureOrders = await _orderRepository.GetMasterOrders(masterId, from, to);
+                var warrantyRepairOrders = await _repairRepository.GetMasterRepaires(masterId, from, to);
 
                 manufactureOrders.AddRange(warrantyRepairOrders);
 

@@ -10,7 +10,7 @@ namespace OpticSalon.Domain.Repositories
         public Task<WarrantyRepair?> GetWarrantyRepairById(int id);
         public Task<List<WarrantyRepairForClient>> GetWarrantyRepairsByClient(int clientId);
         public Task<List<WarrantyRepairForManager>> GetWarrantyRepairsForManager();
-        public Task<List<MasterOrder>> GetMasterRepaires(int masterId);
+        public Task<List<MasterOrder>> GetMasterRepaires(int masterId, DateTime from, DateTime to);
         public Task<List<WarrantyRepair>> GetRepairesByOrder(int orderId);
         public Task<List<MasterOrdersCount>> GetMastersActiveRepairesCount();
     }

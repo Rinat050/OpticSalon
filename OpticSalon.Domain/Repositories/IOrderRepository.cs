@@ -9,7 +9,7 @@ namespace OpticSalon.Domain.Repositories
         public Task<Order?> GetOrderById(int id);
         public Task<List<OrderShortForClient>> GetOrdersByClient(int clientId);
         public Task<List<OrderShortForManager>> GetOrdersForManager();
-        public Task<List<MasterOrder>> GetMasterOrders(int masterId);
+        public Task<List<MasterOrder>> GetMasterOrders(int masterId, DateTime from, DateTime to);
         public Task<List<MasterOrdersCount>> GetMastersActiveOrdersCount();
     }
 }

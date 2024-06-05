@@ -30,9 +30,13 @@ namespace OpticSalon.Data.Repositories
             return orderDb.Id;
         }
 
-        public async Task<List<MasterOrder>> GetMasterOrders(int masterId)
+        public async Task<List<MasterOrder>> GetMasterOrders(int masterId, DateTime from, DateTime to)
         {
-            var res = await Context.Orders.Where(x => x.MasterId == masterId)
+            var start = DateTime.SpecifyKind(from, DateTimeKind.Utc);
+            var end = DateTime.SpecifyKind(to, DateTimeKind.Utc);
+
+            var res = await Context.Orders.Where(x => x.MasterId == masterId 
+                && x.CreatedDate.Date >= start.Date && x.CreatedDate.Date <= end.Date)
                 .Select(x => new MasterOrder()
                 {
                     CreatedDate = x.CreatedDate,
