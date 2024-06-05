@@ -88,6 +88,7 @@ namespace OpticSalon.Data.Repositories
             var repaires = await Context.WarrantyRepairs
                         .Include(x => x.Order)
                         .Where(r => r.Order.ClientId == clientId)
+                        .OrderByDescending(r => r.CreatedDate)
                         .Select(r => Mapper.MapRepairForClient(r))
                         .ToListAsync();
 
@@ -107,6 +108,7 @@ namespace OpticSalon.Data.Repositories
                             IssueDate = r.IssueDate,
                             Status = (OrderStatus)r.Status
                         })
+                        .OrderByDescending(r => r.CreatedDate)
                         .ToListAsync();
 
             return repaires;

@@ -85,6 +85,7 @@ namespace OpticSalon.Data.Repositories
         {
             var orders = await Context.Orders
                         .Where(o => o.ClientId == clientId)
+                        .OrderByDescending(o => o.CreatedDate)
                         .Select(o => Mapper.MapOrderShort(o))
                         .ToListAsync();
 
@@ -105,6 +106,7 @@ namespace OpticSalon.Data.Repositories
                             IssueDate = o.IssueDate,
                             Status = (OrderStatus) o.Status
                         })
+                        .OrderByDescending(o => o.CreatedDate)
                         .ToListAsync();
 
             return orders;

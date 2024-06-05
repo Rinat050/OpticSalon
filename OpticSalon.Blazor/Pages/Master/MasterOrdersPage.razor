@@ -1,6 +1,8 @@
 ﻿@page "/masterOrders"
 
 @using OpticSalon.Auth.Models
+@using OpticSalon.Blazor.Data.Consts
+@using OpticSalon.Blazor.Services
 @using OpticSalon.Blazor.Shared.Dialogs
 @using OpticSalon.Domain.Enums
 @using OpticSalon.Domain.Extensions
@@ -14,6 +16,7 @@
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject NavigationManager NavManager
+@inject BrowserService BrowserService
 
 @attribute [Authorize(Roles = Role.Master)]
 
@@ -40,11 +43,11 @@
 
 <MudDropContainer T="MasterOrder" @ref="_dropContainer" ItemDropped="ItemUpdated" Items="@_filterOrders" Style="min-height:78vh;"
     ItemsSelector="@((item,column) => item.OrderStatus.GetDisplayName() == column)" 
-    Class="d-flex flex-rotop-row flex-wrap m-1 ">
+    Class="d-flex flex-rotop-row flex-wrap m-1">
     <ChildContent>
         <MudItem xs="12" sm="6" md="3">
             <MudDropZone T="MasterOrder" Identifier="@OrderStatus.Created.GetDisplayName()" 
-                Class="mud-height-full rounded-lg mud-alert-text-error pa-3 ma-3">
+                Class="mud-height-full rounded-lg mud-alert-text-error pa-3 ma-3 border-1">
                 <MudGrid>
                     <MudIcon Size="Size.Small" Class="ma-2" Icon="@Icons.Material.Filled.Create"></MudIcon>
                     <MudText Typo="Typo.button" Class="ma-2">@OrderStatus.Created.GetDisplayName()</MudText>
@@ -55,7 +58,7 @@
         </MudItem>
         <MudItem xs="12" sm="6" md="3">
             <MudDropZone T="MasterOrder" Identifier="@OrderStatus.InWork.GetDisplayName()" 
-                Class="mud-height-full rounded-lg mud-alert-text-warning pa-3 ma-3">
+                Class="mud-height-full rounded-lg mud-alert-text-warning pa-3 ma-3 border-1">
                 <MudGrid>
                     <MudIcon Size="Size.Small" Class="ma-2" Icon="@Icons.Material.Filled.AccessTime"></MudIcon>
                     <MudText Typo="Typo.button" Class="ma-2">@OrderStatus.InWork.GetDisplayName()</MudText>
@@ -66,7 +69,7 @@
         </MudItem>
         <MudItem xs="12" sm="6" md="3">
             <MudDropZone T="MasterOrder" Identifier="@OrderStatus.Completed.GetDisplayName()" 
-                Class="mud-height-full rounded-lg mud-alert-text-info pa-3 ma-3">
+                Class="mud-height-full rounded-lg mud-alert-text-info pa-3 ma-3 border-1">
                <MudGrid>
                     <MudIcon Size="Size.Small" Class="ma-2" Icon="@Icons.Material.Filled.CardTravel"></MudIcon>
                     <MudText Typo="Typo.button" Class="ma-2">@OrderStatus.Completed.GetDisplayName()</MudText>
@@ -76,15 +79,19 @@
             </MudDropZone>
         </MudItem>
         <MudItem xs="12" sm="6" md="3">
-            <MudDropZone T="MasterOrder" Identifier="@OrderStatus.Issued.GetDisplayName()"
-                Class="mud-height-full rounded-lg mud-alert-text-success pa-3 ma-3">
-                <MudGrid>
-                    <MudIcon Size="Size.Small" Class="ma-2" Icon="@Icons.Material.Filled.CheckBox"></MudIcon>
-                    <MudText Typo="Typo.button" Class="ma-2">@OrderStatus.Issued.GetDisplayName()</MudText>
-                    <MudSpacer/>
-                    <MudText Typo="Typo.button" Class="ma-2">@GetOrdersCountByStatus(OrderStatus.Issued)</MudText>
-                </MudGrid>
-            </MudDropZone>
+            <MudCard Class="mud-height-full rounded-lg ma-3">
+                <MudCardHeader>
+                    <MudText Typo="Typo.h5" Color="MudBlazor.Color.Secondary">Статистика по заказам</MudText>
+                </MudCardHeader>
+                <MudCardContent Class="d-flex align-center justify-center">
+                    <MudChart ChartType="ChartType.Donut" Width="@(_isSmallDevice ? "200px" : "300px")" Height="@(_isSmallDevice ? "200px" : "300px")" InputData="@_data" InputLabels="@_labels">
+	                    <CustomGraphics>
+		                    <text class="donut-inner-text" x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="Helvetica" font-size="3">Всего</text>
+		                    <text class="donut-inner-text" x="50%" y="57%" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="Helvetica" font-size="5">@_data.Sum().ToString()</text>
+	                    </CustomGraphics>
+                    </MudChart>
+                </MudCardContent>
+            </MudCard>
         </MudItem>
     </ChildContent>
     <ItemRenderer>
@@ -105,8 +112,13 @@
     private List<MasterOrder> _allOrders = new();
     private List<MasterOrder> _filterOrders = new();
 
+    public double[] _data => GetChartData();
+    public string[] _labels = new string[0];
+    private bool _isSmallDevice;
+
     protected async override Task OnInitializedAsync()
     {
+        await SetDevice();
         _isLoading = true;
         await LoadMasterInfo();
         await LoadMasterOrders();
@@ -258,5 +270,34 @@
         if (order.OrderType == OrderType.ManufactureOrder) return $"Заказ №{order.OrderID}";
 
         return $"Гарантийный ремонт №{order.OrderID}";
+    }
+
+    private async Task SetDevice()
+    {
+        var dimensions = await BrowserService.GetDimensions();
+
+        if (dimensions.Width < DeviceConsts.SmallDeviceWidth)
+        {
+            _isSmallDevice = true;
+            return;
+        }
+    }
+
+    private double[] GetChartData()
+    {
+        List<double> result = new();
+        List<string> labels = new();
+
+        foreach(var status in Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>())
+        {
+            var count = _allOrders.Where(x => x.OrderStatus == status).Count();
+
+            labels.Add(status.GetDisplayName() + $" - {count}");
+            result.Add(Convert.ToDouble(count));
+        }
+
+        _labels = labels.ToArray();
+
+        return result.ToArray();
     }
 }

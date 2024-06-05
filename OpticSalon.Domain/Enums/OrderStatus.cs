@@ -6,7 +6,7 @@ namespace OpticSalon.Domain.Enums
     {
         [Display(Name = "Создан")] Created = 1,
         [Display(Name = "В работе")] InWork = 2,
-        [Display(Name = "Выполнен")] Completed = 3,
+        [Display(Name = "Готов")] Completed = 3,
         [Display(Name = "Выдан")] Issued = 4
     }
 }
