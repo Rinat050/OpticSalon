@@ -1,0 +1,164 @@
+﻿@page "/clientReport"
+
+@using OpticSalon.Auth.Models
+@using OpticSalon.Domain.Models.Report
+@using Radzen.Blazor
+
+@inject IReportService ReportService
+@inject ISnackbar Snackbar
+
+@attribute [Authorize(Roles = Role.Admin)]
+
+<style>
+    .mud-table-cell-custom-group {
+        font-weight: 500;
+    }
+</style>
+
+<PageTitle>Отчет</PageTitle>
+
+@if (_loading)
+{
+    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
+    return;
+}
+
+<MudPaper Class="m-2 p-3" Elevation="3">
+    <MudGrid Spacing="1">
+        <MudItem xs="12">
+            <MudGrid>
+                <MudText Typo="Typo.h6" Class="fw-bold m-2" Color="Color.Secondary">Отчет по клиентам</MudText>
+                <MudSpacer/>
+                <MudDateRangePicker @ref="_picker" MaxDate="DateTime.Now" @bind-DateRange="_period" Margin="Margin.Dense" DateFormat="dd MMMM, yyyy" TitleDateFormat="MMMM dd" Class="me-2" Label="Период:" Elevation="12" Rounded="true">
+                    <PickerActions>
+                        <MudButton Color="Color.Primary" OnClick="@(async () => await LoadReport())">Выбрать</MudButton>
+                    </PickerActions>
+                </MudDateRangePicker>
+            </MudGrid>
+        </MudItem>
+        @if (_report.Count != 0)
+        {
+            <MudItem xs="12">
+                <MudGrid Class="d-flex align-center m-0 p-0 justify-center w-100">
+                    <RadzenChart>
+                        <RadzenPieSeries Fills="@_colors" Data="@_chartData" Title="Клиенты" CategoryProperty="Category" ValueProperty="Value">
+                            <RadzenSeriesDataLabels Visible="false" />
+                        </RadzenPieSeries>
+                    </RadzenChart>
+                </MudGrid>
+            </MudItem>
+        }
+        <MudItem xs="12">
+            <MudTable Items="@_report" GroupBy="@_groupDefinition" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="2">
+                <ColGroup>
+                    @if (_groupDefinition.Expandable)
+                    {
+                        <col style="width: 60px;" />
+                    }
+                </ColGroup>
+                <HeaderContent>
+                    <MudTh><strong>Фамилия, имя</strong></MudTh>   
+                    <MudTh><strong>Количество заказов</strong></MudTh>
+                </HeaderContent>
+                <GroupHeaderTemplate>
+                    <MudTh Class="mud-table-cell-custom-group" colspan="2">@($"{GetGroupName((bool)context.Key)}")</MudTh>
+                </GroupHeaderTemplate>
+                <RowTemplate>
+                    <MudTd DataLabel="Фамилия, имя">@context.Client</MudTd>
+                    <MudTd DataLabel="Количество заказов">@context.OrderCount</MudTd>
+                </RowTemplate>
+                <FooterContent>
+                    <MudTd><strong>Итого:</strong></MudTd>
+                    <MudTd><strong>@_totalCount</strong></MudTd>
+                </FooterContent>
+                <NoRecordsContent>
+                    <MudText Typo="Typo.subtitle1" Align="Align.Left" Class="ms-4">За выбранный период заказов нет...</MudText>
+                </NoRecordsContent>
+            </MudTable>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@code {
+    private bool _loading = false;
+    private MudDateRangePicker _picker = null!;
+    private List<ClientReportItem> _report = new();
+    private DateRange _period = new DateRange()
+    {
+        Start = DateTime.Now.AddDays(-DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month)),
+        End = DateTime.Now
+    };
+    private int _totalCount => _report.Sum(x => x.OrderCount);
+    private List<string> _colors = new()
+    {
+        "#115f9a",
+        "#48b5c4"
+    };
+    private List<DataItem> _chartData = new();
+    private TableGroupDefinition<ClientReportItem> _groupDefinition = new()
+    {
+        Indentation = false,
+        Expandable = true,
+        Selector = (e) => e.IsNew
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = true;
+        await GetReport();
+        _loading = false;
+    }
+
+    private void FillChart()
+    {
+        var newClients = _report.Where(x => x.IsNew).ToList();
+        var oldClients = _report.Where(x => !x.IsNew).ToList();
+
+        _chartData.Clear();
+
+        _chartData.Add(new DataItem()
+        {
+            Category = "Новые",
+            Value = newClients.Count()
+        });
+
+        _chartData.Add(new DataItem()
+        {
+            Category = "Постоянные",
+            Value = oldClients.Count()
+        });
+    }
+
+    private async Task LoadReport()
+    {
+        _picker.Close();
+        await GetReport();
+        StateHasChanged();
+    }
+
+    private async Task GetReport()
+    {
+        var res = await ReportService
+                    .GetClientReport(_period.Start ?? DateTime.Now, _period.End ?? DateTime.Now);
+
+        if (res.Success)
+        {
+            _report = res.Data!;
+            FillChart();
+            return;
+        }
+
+        Snackbar.Add("Не удалось загрузить отчет!", Severity.Warning);
+    }
+
+    private string GetGroupName(bool isNew)
+    {
+        return isNew ? "Новые" : "Постоянные";
+    }
+
+    private class DataItem
+    {
+        public string Category { get; set; } = "";
+        public double Value { get; set; }
+    }
+}

@@ -1,4 +1,5 @@
 ﻿using OpticSalon.Domain.Models;
+using OpticSalon.Domain.Models.Report;
 
 namespace OpticSalon.Domain.Repositories
 {
@@ -12,5 +13,6 @@ namespace OpticSalon.Domain.Repositories
         public Task UpdateClient(Client client);
         public Task UpdateClientPreferences(ClientPreferences preferences);
         public Task DeleteClient(Client client);
+        public Task<List<ClientReportItem>> GetReport(DateTime start, DateTime end);
     }
 }

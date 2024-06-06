@@ -9,11 +9,36 @@ namespace OpticSalon.Domain.Services.Impl
     {
         private ILensPackagesRepository _lensPackagesRepository;
         private IEmployeeRepository _employeeRepository;
+        private IClientRepository _clientRepository;
 
-        public ReportService(IEmployeeRepository employeeRepository, ILensPackagesRepository lensPackagesRepository)
+        public ReportService(IEmployeeRepository employeeRepository, ILensPackagesRepository lensPackagesRepository,
+                        IClientRepository clientRepository)
         {
             _employeeRepository = employeeRepository;
             _lensPackagesRepository = lensPackagesRepository;
+            _clientRepository = clientRepository;
+        }
+
+        public async Task<ResultWithData<List<ClientReportItem>>> GetClientReport(DateTime start, DateTime end)
+        {
+            try
+            {
+                var result = await _clientRepository.GetReport(start, end);
+
+                return new ResultWithData<List<ClientReportItem>>()
+                {
+                    Success = true,
+                    Data = result
+                };
+            }
+            catch
+            {
+                return new ResultWithData<List<ClientReportItem>>()
+                {
+                    Success = false,
+                    Description = DefaultErrors.ServerError
+                };
+            }
         }
 
         public async Task<ResultWithData<List<EmployeeReportItem>>> GetEmployeeReport(DateTime start, DateTime end)

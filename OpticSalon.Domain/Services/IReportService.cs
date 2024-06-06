@@ -7,5 +7,6 @@ namespace OpticSalon.Domain.Services
     {
         public Task<ResultWithData<List<LensPackagesReportItem>>> GetLensPackagesReport(DateTime start, DateTime end);
         public Task<ResultWithData<List<EmployeeReportItem>>> GetEmployeeReport(DateTime start, DateTime end);
+        public Task<ResultWithData<List<ClientReportItem>>> GetClientReport(DateTime start, DateTime end);
     }
 }
