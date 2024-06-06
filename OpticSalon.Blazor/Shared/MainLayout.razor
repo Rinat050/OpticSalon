@@ -1,9 +1,11 @@
 ﻿@using OpticSalon.Auth.Models
+@using Radzen.Blazor
 @inherits LayoutComponentBase
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Главная страница</PageTitle>
 
+<RadzenComponents/>
 <MudThemeProvider Theme="_theme" DefaultScrollbar="false" />
 <MudDialogProvider FullWidth="true"
                    CloseButton="true"

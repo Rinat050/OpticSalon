@@ -1,0 +1,107 @@
+﻿@page "/lensPackagesReport"
+
+@using OpticSalon.Auth.Models
+@using OpticSalon.Domain.Models.Report
+@using Radzen.Blazor
+
+@inject IReportService ReportService
+@inject ISnackbar Snackbar
+
+@attribute [Authorize(Roles = Role.Admin)]
+
+<PageTitle>Отчет</PageTitle>
+
+@if (_loading)
+{
+    <MudProgressLinear Color="MudBlazor.Color.Info" Indeterminate="true" Class="m-1" />
+    return;
+}
+
+<MudPaper Class="m-2 p-3" Elevation="3">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudGrid>
+                <MudText Typo="Typo.h6" Class="fw-bold m-2" Color="Color.Secondary">Отчет по продаже пакетов линз</MudText>
+                <MudSpacer/>
+                <MudDateRangePicker @ref="_picker" MaxDate="DateTime.Now" @bind-DateRange="_period" Margin="Margin.Dense" DateFormat="dd MMMM, yyyy" TitleDateFormat="MMMM dd" Class="me-2" Label="Период:" Elevation="12" Rounded="true">
+                    <PickerActions>
+                        <MudButton Color="Color.Primary" OnClick="@(async () => await LoadReport())">Выбрать</MudButton>
+                    </PickerActions>
+                </MudDateRangePicker>
+            </MudGrid>
+        </MudItem>
+        @if (_report.Count != 0)
+        {
+            <MudItem xs="12">
+                <MudGrid Class="d-flex align-center justify-center w-100">
+                    <RadzenChart style="height: 400px; width: 70%;">
+                        <RadzenColumnSeries Data="@_report" CategoryProperty="PackageName" Fill="rgba(0,140,240,.95)" Title="Количество" ValueProperty="Count">
+                            <RadzenSeriesDataLabels Visible="false"/>
+                            <RadzenColumnOptions Radius="5" Width="100"/>
+                        </RadzenColumnSeries>
+                        <RadzenBarOptions Radius="1" />
+                    </RadzenChart>
+                </MudGrid>
+            </MudItem>
+        }
+        <MudItem xs="12">
+            <MudTable Items="@_report" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="2">
+                <HeaderContent>
+                    <MudTh><strong>Название</strong></MudTh>   
+                    <MudTh><strong>Количество</strong></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Название">@context.PackageName</MudTd>
+                    <MudTd DataLabel="Количество">@context.Count</MudTd>
+                </RowTemplate>
+                <FooterContent>
+                    <MudTd><strong>Итого:</strong></MudTd>
+                    <MudTd><strong>@_totalCount</strong></MudTd>
+                </FooterContent>
+                <NoRecordsContent>
+                    <MudText Typo="Typo.subtitle1" Align="Align.Left" Class="ms-4">Заказов нет...</MudText>
+                </NoRecordsContent>
+            </MudTable>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+    @code {
+    private bool _loading = false;
+    private MudDateRangePicker _picker = null!;
+    private List<LensPackagesReportItem> _report = new();
+    private DateRange _period = new DateRange()
+    {
+        Start = DateTime.Now.AddDays(-DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month)),
+        End = DateTime.Now
+    };
+    private int _totalCount => _report.Sum(x => x.Count);
+
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = true;
+        await GetReport();
+        _loading = false;
+    }
+
+    private async Task LoadReport()
+    {
+        _picker.Close();
+        await GetReport();
+        StateHasChanged();
+    }
+
+    private async Task GetReport()
+    {
+        var res = await ReportService
+                    .GetLensPackagesReport(_period.Start ?? DateTime.Now, _period.End ?? DateTime.Now);
+
+        if (res.Success)
+        {
+            _report = res.Data!;
+            return;
+        }
+
+        Snackbar.Add("Не удалось загрузить отчет!", Severity.Warning);
+    }
+}

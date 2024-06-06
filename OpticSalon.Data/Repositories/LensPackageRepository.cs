@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using OpticSalon.Domain.Enums;
 using OpticSalon.Domain.Models;
+using OpticSalon.Domain.Models.Report;
 using OpticSalon.Domain.Repositories;
 
 namespace OpticSalon.Data.Repositories
@@ -36,6 +38,25 @@ namespace OpticSalon.Data.Repositories
                 .FirstOrDefaultAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
 
             return result != null ? Mapper.Map(result) : null;
+        }
+
+        public async Task<List<LensPackagesReportItem>> GetReport(DateTime start, DateTime end)
+        {
+            var startDate = DateTime.SpecifyKind(start, DateTimeKind.Utc);
+            var endDate = DateTime.SpecifyKind(end, DateTimeKind.Utc);
+
+            var result = await Context.Orders
+                .Where(x => x.CreatedDate.Date >= startDate.Date && x.CreatedDate.Date <= endDate.Date)
+                .Include(x => x.LensPackage)
+                .GroupBy(x => x.LensPackage.Name)
+                .Select(x => new LensPackagesReportItem()
+                {
+                    PackageName = x.Key,
+                    Count = x.Count()
+                })
+                .ToListAsync();
+
+            return result;
         }
 
         public async Task UpdateLensPackage(LensPackage lensPackage)

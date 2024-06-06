@@ -10,6 +10,7 @@ using OpticSalon.Blazor.Services;
 using OpticSalon.Data;
 using OpticSalon.Domain;
 using OpticSalon.MinIO;
+using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,7 @@ builder.Services
     .AddFileStorage(builder.Configuration)
     .AddScoped<AuthenticationStateProvider, OpticSalon.Blazor.AuthProvider.AuthenticationStateProvider>()
     .AddMudServices();
+builder.Services.AddRadzenComponents();
 
 var app = builder.Build();
 
