@@ -16,5 +16,6 @@ namespace OpticSalon.Domain.Models
         public Color FrameColor { get; set; } = null!;
         public Employee Master { get; set; } = null!;
         public OrderStatus Status { get; set; }
+        public decimal TotalCost { get; set; }
     }
 }

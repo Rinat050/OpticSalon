@@ -51,7 +51,8 @@ namespace OpticSalon.Domain.Services.Impl
                     Client = client,
                     CreatedDate = DateTime.Now,
                     Master = availableMasterRes.Data!,
-                    Status = Enums.OrderStatus.Created
+                    Status = Enums.OrderStatus.Created,
+                    TotalCost = frame.Cost + lens.Cost
                 };
 
                 var createdOrderId = await _orderRepository.AddOrder(newOrder);

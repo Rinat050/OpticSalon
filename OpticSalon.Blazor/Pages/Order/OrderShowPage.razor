@@ -284,7 +284,7 @@
                                         <MudItem xs="12">
                                             <MudStack Row AlignItems="AlignItems.Start">
                                                 <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Итоговая стоимость:</MudText>
-                                                <MudText Typo="Typo.h6" Style="font-weight: 400">@(_order.Frame.Cost + _order.LensPackage.Cost) руб.</MudText>
+                                                <MudText Typo="Typo.h6" Style="font-weight: 400">@_order.TotalCost руб.</MudText>
                                             </MudStack>
                                         </MudItem>
                                         @if (_order.Status == OrderStatus.Issued && _order.IssueDate != null)

@@ -59,7 +59,7 @@
                 <MudItem xs="12">
                     <MudStack Row AlignItems="AlignItems.Center">
                         <MudText Typo="Typo.h6" Style="font-weight: 600" Color="MudBlazor.Color.Secondary">Итоговая стоимость:</MudText>
-                        <MudText Typo="Typo.h6" Style="font-weight: 400">@(OrderService.GetOrderTotalCost(Order)) руб.</MudText>
+                        <MudText Typo="Typo.h6" Style="font-weight: 400">@Order.TotalCost руб.</MudText>
                     </MudStack>
                 </MudItem>
             </MudGrid>

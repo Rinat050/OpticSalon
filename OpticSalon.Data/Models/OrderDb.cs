@@ -19,6 +19,7 @@
         public int MasterId { get; set; }
         public int Status { get; set; }
         public string? Comment { get; set; }
+        public decimal TotalCost { get; set; }
         public DateTime? IssueDate { get; set; }
     }
 }
